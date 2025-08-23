@@ -1,0 +1,86 @@
+package server
+
+import (
+	"context"
+	"fmt"
+	"log"
+	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
+
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
+	"go.mongodb.org/mongo-driver/v2/mongo"
+)
+
+type Server struct {
+	addr string
+	echo *echo.Echo
+	db   *mongo.Client
+}
+
+func New(addr string, db *mongo.Client) *Server {
+	return &Server{
+		addr: addr,
+		echo: echo.New(),
+		db:   db,
+	}
+}
+
+func (s *Server) Run() error {
+
+	s.echo.Use(middleware.Logger())
+	s.echo.Use(middleware.Recover())
+
+	s.echo.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins: []string{"*"},
+		AllowMethods: []string{
+			http.MethodGet,
+			http.MethodPost,
+			http.MethodPut,
+			http.MethodPatch,
+			http.MethodDelete,
+			http.MethodOptions,
+		},
+		AllowHeaders: []string{
+			echo.HeaderOrigin,
+			echo.HeaderContentType,
+			echo.HeaderAccept,
+			echo.HeaderAuthorization,
+			echo.HeaderCookie,
+		},
+		AllowCredentials: true,
+	}))
+
+	s.echo.Static("/static", "public")
+
+	srv := &http.Server{
+		Addr: s.addr,
+	}
+
+	go func() {
+		if err := s.echo.StartServer(srv); err != nil {
+			log.Fatalf("failed to start the auth server %v", err)
+		}
+	}()
+
+	quit := make(chan os.Signal, 1)
+
+	signal.Notify(quit, os.Interrupt, syscall.SIGINT)
+
+	s.bootstrap()
+
+	for _, route := range s.echo.Routes() {
+		fmt.Printf("%s \t %s\n", route.Method, route.Path)
+	}
+
+	<-quit
+
+	log.Println("auth service has gracefully shutdown")
+	ctx, shutdown := context.WithTimeout(context.Background(), 5*time.Second)
+	defer shutdown()
+
+	return s.echo.Shutdown(ctx)
+}
