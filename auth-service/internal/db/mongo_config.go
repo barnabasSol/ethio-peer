@@ -30,7 +30,7 @@ func ConfigProp(client *mongo.Client) {
 
 	emailIndex := mongo.IndexModel{
 		Keys:    bson.D{{Key: "email", Value: 1}},
-		Options: options.Index().SetUnique(true).SetSparse(true), // sparse allows missing email
+		Options: options.Index().SetUnique(true).SetSparse(true),
 	}
 	if name, err := collection.Indexes().CreateOne(ctx, emailIndex); err != nil {
 		log.Fatalf("Failed to create email index: %v", err)

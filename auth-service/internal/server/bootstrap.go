@@ -7,6 +7,7 @@ import (
 )
 
 func (s *Server) bootstrap() error {
+
 	auth_group := s.echo.Group("auth")
 
 	token_gen, err := jwt.NewTokenGenerator()

@@ -1,4 +1,6 @@
 package login
 
-type Repository struct {
+type Repository interface {
+	GetUser()
+
 }
