@@ -6,11 +6,12 @@ import (
 	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
-const TokenCollection = "tokens"
+const TokenCollection = "refresh_tokens"
 
-type Tokens struct {
-	Id        bson.ObjectID `bson:"_id,omitempty"`
-	UserId    bson.ObjectID `bson:"user_id"`
-	CreatedAt time.Time     `bson:"created_at"`
-	UpdatedAt time.Time     `bson:"updated_at"`
+type RefreshToken struct {
+	Id           bson.ObjectID `bson:"_id,omitempty"`
+	UserId       bson.ObjectID `bson:"user_id"`
+	RefreshToken string        `bson:"refresh_token"`
+	CreatedAt    time.Time     `bson:"created_at"`
+	UpdatedAt    time.Time     `bson:"updated_at"`
 }

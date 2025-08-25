@@ -18,11 +18,13 @@ func InitRabbitMQ() (*RabbitMQ, error) {
 		return nil, err
 	}
 	ch, err := conn.Channel()
+
 	if err != nil {
 		return nil, err
 	}
 
 	err = NewNotificationExchange(ch)
+
 	if err != nil {
 		return nil, err
 	}
@@ -31,4 +33,17 @@ func InitRabbitMQ() (*RabbitMQ, error) {
 		conn: conn,
 		ch:   ch,
 	}, nil
+}
+
+func (r *RabbitMQ) Publish(msg Message) error {
+	return r.ch.Publish(
+		msg.Exchange,
+		msg.Topic,
+		false,
+		false,
+		amqp.Publishing{
+			ContentType: "application/json",
+			Body:        msg.Data,
+		},
+	)
 }

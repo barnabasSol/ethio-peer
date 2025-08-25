@@ -2,7 +2,9 @@ package signup
 
 import (
 	"context"
+	broker "ep-auth-service/internal/broker/rabbitmq"
 	"ep-auth-service/internal/features/jwt"
+	"ep-auth-service/internal/features/otp"
 	"ep-auth-service/internal/features/shared"
 	"ep-auth-service/internal/models"
 	"time"
@@ -21,17 +23,23 @@ type Service interface {
 }
 
 type service struct {
+	otp_manager   *otp.OTPManager
 	repo          Repository
+	broker        *broker.RabbitMQ
 	token_service jwt.Generator
 }
 
 func NewService(
 	repo Repository,
+	broker *broker.RabbitMQ,
 	ts jwt.Generator,
+	otp_manager *otp.OTPManager,
 ) Service {
 	return &service{
 		token_service: ts,
+		broker:        broker,
 		repo:          repo,
+		otp_manager:   otp_manager,
 	}
 }
 
@@ -63,6 +71,16 @@ func (s *service) SignUpUser(
 		UpdatedAt:              time.Now().UTC(),
 	}
 
+	token, err := s.token_service.GenerateAccessToken(user_model)
+	if err != nil {
+		return nil, err
+	}
+
+	refresh, err := s.token_service.GenerateRefreshToken(32)
+	if err != nil {
+		return nil, err
+	}
+
 	id, err := s.repo.Insert(ctx, user_model)
 
 	if err != nil {
@@ -71,13 +89,7 @@ func (s *service) SignUpUser(
 
 	user_model.Id = id
 
-	token, err := s.token_service.GenerateAccessToken(user_model)
-	if err != nil {
-		return nil, err
-	}
-
-	refresh, err := s.token_service.GenerateRefreshToken(32)
-	if err != nil {
+	if err := s.repo.InsertRefreshToken(ctx, user_model.Id, refresh); err != nil {
 		return nil, err
 	}
 

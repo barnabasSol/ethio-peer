@@ -1,11 +1,9 @@
 package login
 
-import "errors"
-
 type LoginRequest struct {
 	Username       *string `json:"username,omitempty"`
-	Email          *string `json:"email,omitempty"`
 	InstituteEmail *string `json:"institute_email,omitempty"`
+	Email          *string `json:"email,omitempty"`
 	Password       string  `json:"password"`
 }
 
@@ -21,11 +19,8 @@ func (r *LoginRequest) Validate() error {
 		count++
 	}
 
-	if count == 0 {
-		return errors.New("no credential provided, one must be provided")
-	}
-	if count > 1 {
-		return errors.New("only one credential must be provided")
+	if count == 0 || count > 1 {
+		return ErrInvalidCredential
 	}
 	return nil
 }

@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	broker "ep-auth-service/internal/broker/rabbitmq"
 	"fmt"
 	"log"
 	"net/http"
@@ -16,16 +17,22 @@ import (
 )
 
 type Server struct {
-	addr string
-	echo *echo.Echo
-	db   *mongo.Client
+	addr   string
+	echo   *echo.Echo
+	db     *mongo.Client
+	broker *broker.RabbitMQ
 }
 
-func New(addr string, db *mongo.Client) *Server {
+func New(
+	addr string,
+	db *mongo.Client,
+	broker *broker.RabbitMQ,
+) *Server {
 	return &Server{
-		addr: addr,
-		echo: echo.New(),
-		db:   db,
+		addr:   addr,
+		echo:   echo.New(),
+		db:     db,
+		broker: broker,
 	}
 }
 
@@ -57,7 +64,9 @@ func (s *Server) Run() error {
 	s.echo.Static("/static", "public")
 
 	srv := &http.Server{
-		Addr: s.addr,
+		Addr:         s.addr,
+		ReadTimeout:  10 * time.Second,
+		WriteTimeout: 15 * time.Second,
 	}
 
 	go func() {

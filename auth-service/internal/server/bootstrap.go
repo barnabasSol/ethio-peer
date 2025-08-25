@@ -1,7 +1,10 @@
 package server
 
 import (
+	"context"
 	"ep-auth-service/internal/features/jwt"
+	"ep-auth-service/internal/features/login"
+	"ep-auth-service/internal/features/otp"
 	"ep-auth-service/internal/features/signup"
 	"log"
 )
@@ -17,11 +20,25 @@ func (s *Server) bootstrap() error {
 		return err
 	}
 
+	otp_manager := otp.NewOTPManager(context.Background())
+
 	signup_repo := signup.NewRepository(s.db)
-
-	signup_service := signup.NewService(signup_repo, token_gen)
-
+	signup_service := signup.NewService(
+		signup_repo,
+		s.broker,
+		token_gen,
+		otp_manager,
+	)
 	signup.InitHandler(signup_service, auth_group)
+
+	login_repo := login.NewRepository(s.db)
+	login_service := login.NewService(
+		login_repo,
+		s.broker,
+		token_gen,
+		otp_manager,
+	)
+	login.InitHandler(login_service, auth_group)
 
 	return nil
 }
