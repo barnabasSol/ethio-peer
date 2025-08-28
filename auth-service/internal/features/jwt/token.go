@@ -5,6 +5,7 @@ import (
 	"crypto/rsa"
 	"encoding/base64"
 	"ep-auth-service/internal/models"
+	"log"
 	"os"
 	"strconv"
 	"time"
@@ -25,12 +26,14 @@ type generator struct {
 func NewTokenGenerator() (Generator, error) {
 	pk_pem, err := ReadPrivateKey()
 	if err != nil {
+		log.Println(err)
 		return nil, err
 	}
 
 	privKey, err := jwt.ParseRSAPrivateKeyFromPEM(pk_pem)
 
 	if err != nil {
+		log.Println(err)
 		return nil, err
 	}
 
@@ -67,7 +70,6 @@ func (g generator) GenerateAccessToken(user models.User) (string, error) {
 	if err != nil {
 		return "", err
 	}
-
 	return signed, nil
 }
 

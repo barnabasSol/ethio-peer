@@ -6,11 +6,11 @@ RUN go mod download
 
 COPY . .
 
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -o auth_service ./cmd/api
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -o mailing_service ./cmd/api
 
 FROM alpine:latest
 WORKDIR /root/
 
-COPY --from=builder /app/auth_service .
+COPY --from=builder /app/mailing_service .
 
 CMD ["./mailing_service"]

@@ -41,8 +41,14 @@ func (s *Server) Run() error {
 	s.echo.Use(middleware.Logger())
 	s.echo.Use(middleware.Recover())
 
+	s.echo.GET("/health", func(c echo.Context) error {
+		return c.String(http.StatusOK, "OK")
+	})
 	s.echo.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins: []string{"*"},
+		AllowOrigins: []string{
+			"http://localhost:5173",
+			"http://localhost:5138",
+		},
 		AllowMethods: []string{
 			http.MethodGet,
 			http.MethodPost,

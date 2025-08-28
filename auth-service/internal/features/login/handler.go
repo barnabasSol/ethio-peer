@@ -1,6 +1,7 @@
 package login
 
 import (
+	"ep-auth-service/internal/features/shared"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -21,6 +22,7 @@ func InitHandler(s Service, group *echo.Group) *Handler {
 }
 
 func (h *Handler) Login(ctx echo.Context) error {
+	with_cookie := ctx.QueryParam("with_cookie")
 	var req LoginRequest
 	if err := ctx.Bind(&req); err != nil {
 		return ctx.JSON(
@@ -47,6 +49,16 @@ func (h *Handler) Login(ctx echo.Context) error {
 		return ctx.JSON(
 			http.StatusInternalServerError,
 			map[string]string{"error": "unexpected error"},
+		)
+	}
+	if with_cookie != "" && with_cookie == "true" {
+		atc := shared.SetCookie("access_token", result.Data.AccessToken, 15)
+		rtc := shared.SetCookie("refresh_token", result.Data.RefreshToken, 60*24*5)
+		ctx.SetCookie(atc)
+		ctx.SetCookie(rtc)
+		return ctx.JSON(
+			http.StatusOK,
+			map[string]string{"message": "login successful"},
 		)
 	}
 
