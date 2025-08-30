@@ -56,7 +56,10 @@ func (g generator) GenerateAccessToken(user models.User) (string, error) {
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Duration(expiry) * time.Minute)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 			Issuer:    "ep.barney-host.site",
-			Audience:  []string{"ep-web.barney-host.site"},
+			Audience: []string{
+				"https://ep-web.barney-host.site",
+				"http://localhost:5173",
+			},
 		},
 		Roles:    user.Roles,
 		Username: user.Username,

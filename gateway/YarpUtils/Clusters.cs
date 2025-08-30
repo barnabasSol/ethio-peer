@@ -1,6 +1,6 @@
 using Yarp.ReverseProxy.Configuration;
 
-namespace gateway;
+namespace gateway.YarpUtils;
 
 public static class Clusters
 {

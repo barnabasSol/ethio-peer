@@ -29,7 +29,10 @@ func ConfigProp(client *mongo.Client) {
 	}
 
 	emailIndex := mongo.IndexModel{
-		Keys:    bson.D{{Key: "email", Value: 1}},
+		Keys: bson.D{{
+			Key:   "email",
+			Value: 1,
+		}},
 		Options: options.Index().SetUnique(true).SetSparse(true),
 	}
 	if name, err := collection.Indexes().CreateOne(ctx, emailIndex); err != nil {

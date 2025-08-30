@@ -1,4 +1,4 @@
-namespace gateway;
+namespace gateway.Service;
 
 public static class JwkClient
 {

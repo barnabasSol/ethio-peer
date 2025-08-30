@@ -1,8 +1,10 @@
 package mail
 
 import (
+	"bytes"
 	broker "ep-mailing-service/internal/broker/rabbitmq"
 	"fmt"
+	"text/template"
 
 	"resty.dev/v3"
 )
@@ -24,7 +26,7 @@ func NewService(apiHost, apiToken, senderEmail string) *Service {
 	}
 }
 func (s *Service) sendEmail(toEmail, subject, textBody, htmlBody string) error {
-	payload := map[string]interface{}{
+	payload := map[string]any{
 		"from": map[string]string{
 			"email": s.senderEmail,
 		},
@@ -53,18 +55,68 @@ func (s *Service) sendEmail(toEmail, subject, textBody, htmlBody string) error {
 }
 
 func (s *Service) SendOTP(otpPayload broker.OtpPayload) error {
+	const tpl = `
+		<html>
+			<body>
+			  <h1>Your OTP Code</h1>
+			  <p>Your OTP code is: <b>{{.OTP}}</b></p>
+			  <p>Thank you.</p>
+			</body>
+		</html>
+`
+
+	t, err := template.New("otp").Parse(tpl)
+	if err != nil {
+		return err
+	}
+
+	var buf bytes.Buffer
+	if err := t.Execute(&buf, otpPayload); err != nil {
+		return err
+	}
+
 	subject := "Your OTP Code"
+
 	textBody := fmt.Sprintf("Hello,\n\nYour OTP code is: %s\n\nThank you.", otpPayload.OTP)
-	htmlBody := fmt.Sprintf(
-		"<html><body><h1>Your OTP Code</h1><p>Your OTP code is: <b>%s</b></p><p>Thank you.</p></body></html>",
-		otpPayload.OTP,
-	)
+	htmlBody := buf.String()
+
 	return s.sendEmail(otpPayload.Email, subject, textBody, htmlBody)
 }
 
 func (s *Service) SendWelcome(welcomePayload broker.WelcomePayload) error {
 	subject := "Welcome to Our Service"
-	textBody := fmt.Sprintf("Hello %s,\n\nWelcome to our service! We're glad to have you.\n\nBest regards.", welcomePayload.Name)
-	htmlBody := fmt.Sprintf("<html><body><h1>Welcome %s!</h1><p>We're glad to have you with us.</p><p>Best regards,</p></body></html>", welcomePayload.Name)
-	return s.sendEmail(welcomePayload.Email, subject, textBody, htmlBody)
+
+	const textTpl = `Hello {{.Name}},
+		Welcome to our service! We're glad to have you.
+		Best regards.
+		`
+
+	textTemplate, err := template.New("welcomeText").Parse(textTpl)
+	if err != nil {
+		return err
+	}
+	var textBuf bytes.Buffer
+	if err := textTemplate.Execute(&textBuf, welcomePayload); err != nil {
+		return err
+	}
+
+	const htmlTpl = `
+	<html>
+		<body>
+			  <h1>Welcome {{.Name}}!</h1>
+			  <p>We're glad to have you with us.</p>
+			  <p>Best regards,</p>
+		</body>
+	</html>
+`
+	htmlTemplate, err := template.New("welcomeHTML").Parse(htmlTpl)
+	if err != nil {
+		return err
+	}
+	var htmlBuf bytes.Buffer
+	if err := htmlTemplate.Execute(&htmlBuf, welcomePayload); err != nil {
+		return err
+	}
+
+	return s.sendEmail(welcomePayload.Email, subject, textBuf.String(), htmlBuf.String())
 }

@@ -12,7 +12,7 @@ func SetCookie(key, value string, exp_mins int) *http.Cookie {
 	cookie.Path = "/"
 	cookie.HttpOnly = true
 	cookie.Secure = false
-	cookie.SameSite = http.SameSiteStrictMode
+	cookie.SameSite = http.SameSiteLaxMode
 	cookie.Expires = time.Now().Add(time.Minute * time.Duration(exp_mins))
 	return cookie
 }

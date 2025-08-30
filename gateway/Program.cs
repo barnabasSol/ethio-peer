@@ -1,8 +1,8 @@
-using Consul;
-using gateway;
 using gateway.Service;
+using gateway.YarpUtils;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Yarp.ReverseProxy.Transforms;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,10 +13,10 @@ builder.Services.AddSingleton<IJwksProvider>(
 builder.Services.AddHostedService<JwksRefreshService>();
 
 builder
-    .Services.AddAuthentication(options =>
+    .Services.AddAuthentication(o =>
     {
-        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        o.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        o.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
     })
     .AddJwtBearer();
 
@@ -33,7 +33,7 @@ builder
                 ValidIssuer = "ep.barney-host.site",
 
                 ValidateAudience = true,
-                ValidAudiences = ["ep-web.barney-host.site"],
+                ValidAudiences = ["https://ep-web.barney-host.site", "http://localhost:5173"],
 
                 ValidateLifetime = true,
                 RequireExpirationTime = true,
@@ -43,6 +43,26 @@ builder
                 IssuerSigningKeyResolver = (token, securityToken, kid, validationParameters) =>
                 {
                     return jwksProvider.GetSigningKeys().Where(k => k.KeyId == kid) ?? [];
+                },
+            };
+            options.Events = new JwtBearerEvents
+            {
+                OnMessageReceived = ctx =>
+                {
+                    if (
+                        string.IsNullOrEmpty(ctx.Token)
+                        && ctx.Request.Cookies.TryGetValue("access_token", out var accessToken)
+                    )
+                    {
+                        ctx.Token = accessToken;
+                    }
+
+                    if (ctx.Request.Cookies.TryGetValue("refresh_token", out var refreshToken))
+                    {
+                        ctx.HttpContext.Items["refresh_token"] = refreshToken;
+                    }
+
+                    return Task.CompletedTask;
                 },
             };
         }
@@ -81,7 +101,11 @@ builder.Services.AddControllers();
 
 builder
     .Services.AddReverseProxy()
-    .LoadFromMemory(gateway.Routes.GetRoutes(), Clusters.GetClusters());
+    .LoadFromMemory(Routes.GetRoutes(), Clusters.GetClusters())
+    .AddTransforms(builderContext =>
+    {
+        builderContext.RequestTransforms.Add(new ClaimsTransform());
+    });
 
 var app = builder.Build();
 
@@ -92,11 +116,13 @@ if (app.Environment.IsDevelopment())
 }
 
 app.MapControllers();
+
 app.MapHealthChecks("/health");
 
-app.UseCors();
-
+app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseCors("WebOriginCorsPolicy");
 
 app.MapReverseProxy();
 

@@ -13,7 +13,7 @@ public class JwksProvider(string jwksUrl) : IJwksProvider
     private readonly HttpClient _httpClient = new();
 
     private readonly string _jwksUrl = jwksUrl;
-    private List<SecurityKey> _keys = [];
+    private HashSet<SecurityKey> _keys = [];
 
     public IReadOnlyCollection<SecurityKey> GetSigningKeys() => _keys;
 

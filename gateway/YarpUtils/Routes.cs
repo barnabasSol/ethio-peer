@@ -1,7 +1,6 @@
-using Microsoft.AspNetCore.Authorization;
 using Yarp.ReverseProxy.Configuration;
 
-namespace gateway;
+namespace gateway.YarpUtils;
 
 public static class Routes
 {
@@ -15,13 +14,7 @@ public static class Routes
                 CorsPolicy = "WebOriginCorsPolicy",
                 ClusterId = "auth-cluster",
                 Match = new RouteMatch { Path = "/auth/health/{**catch-all}" },
-                Transforms =
-                [
-                    new Dictionary<string, string>
-                    {
-                        { "PathRemovePrefix", "/auth" },
-                    },
-                ],
+                Transforms = [new Dictionary<string, string> { { "PathRemovePrefix", "/auth" } }],
                 AuthorizationPolicy = "authenticated",
             },
             new RouteConfig
@@ -42,7 +35,7 @@ public static class Routes
                 [
                     new Dictionary<string, string> { { "PathRemovePrefix", "/api/bridge" } },
                 ],
-                AuthorizationPolicy = "anonymous", 
+                AuthorizationPolicy = "anonymous",
             },
         ];
     }
