@@ -2,13 +2,12 @@ using gateway.Service;
 using gateway.YarpUtils;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-using Yarp.ReverseProxy.Transforms;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddSingleton<IJwksProvider>(
-    new JwksProvider("http://localhost:2000/static/.well-known/jwks.json")
-);
+var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>();
+
+builder.Services.AddSingleton<IJwksProvider>(new JwksProvider(jwtSettings!.JwksUri));
 
 builder.Services.AddHostedService<JwksRefreshService>();
 
@@ -25,15 +24,15 @@ builder
     .Configure<IJwksProvider>(
         (options, jwksProvider) =>
         {
-            options.RequireHttpsMetadata = false;
+            options.RequireHttpsMetadata = jwtSettings.RequireHttpsMetadata;
 
             options.TokenValidationParameters = new TokenValidationParameters
             {
                 ValidateIssuer = true,
-                ValidIssuer = "ep.barney-host.site",
+                ValidIssuer = jwtSettings.Issuer,
 
                 ValidateAudience = true,
-                ValidAudiences = ["https://ep-web.barney-host.site", "http://localhost:5173"],
+                ValidAudiences = jwtSettings.Audiences,
 
                 ValidateLifetime = true,
                 RequireExpirationTime = true,

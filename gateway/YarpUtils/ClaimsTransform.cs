@@ -11,7 +11,6 @@ public class ClaimsTransform : RequestTransform
         if (user.Identity?.IsAuthenticated != true)
             return ValueTask.CompletedTask;
 
-        // sub → NameIdentifier
         var sub = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (!string.IsNullOrEmpty(sub))
         {

@@ -6,7 +6,7 @@ import (
 )
 
 func scan(ctx context.Context, m *OTPManager) {
-	ticker := time.NewTicker(400 * time.Millisecond)
+	ticker := time.NewTicker(5 * time.Second)
 	defer ticker.Stop()
 
 	for {
@@ -20,5 +20,13 @@ func scan(ctx context.Context, m *OTPManager) {
 }
 
 func cleanup(m *OTPManager) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	now := time.Now()
+	for k, v := range m.collection {
+		if v.TTL.Before(now) {
+			delete(m.collection, k)
+		}
+	}
 
 }

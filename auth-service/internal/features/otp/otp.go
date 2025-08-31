@@ -61,7 +61,7 @@ func (m *OTPManager) Generate() (*OTP, error) {
 }
 
 func generateOTP() (string, error) {
-	const otpLength = 8
+	const otpLength = 6
 	const digits = "0123456789"
 
 	otp := make([]byte, otpLength)
@@ -72,5 +72,6 @@ func generateOTP() (string, error) {
 		}
 		otp[i] = digits[num.Int64()]
 	}
+
 	return string(otp), nil
 }
