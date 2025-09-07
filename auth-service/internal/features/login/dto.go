@@ -25,8 +25,10 @@ func (r *LoginRequest) Validate() error {
 	return nil
 }
 
-type LoginReponse struct {
-	UserId       string `json:"user_id"`
-	AccessToken  string `json:"access_token"`
-	RefreshToken string `json:"refresh_token"`
+type LoginResponse struct {
+	VerificationRequired bool    `json:"verification_required"`
+	OtpSessionId         *string `json:"otp_session_id,omitempty"`
+	UserId               *string `json:"user_id,omitempty"`
+	AccessToken          *string `json:"access_token,omitempty"`
+	RefreshToken         *string `json:"refresh_token,omitempty"`
 }

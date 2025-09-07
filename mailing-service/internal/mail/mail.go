@@ -25,6 +25,7 @@ func NewService(apiHost, apiToken, senderEmail string) *Service {
 		senderEmail: senderEmail,
 	}
 }
+
 func (s *Service) sendEmail(toEmail, subject, textBody, htmlBody string) error {
 	payload := map[string]any{
 		"from": map[string]string{
@@ -58,7 +59,6 @@ func (s *Service) SendOTP(otpPayload broker.OtpPayload) error {
 	const tpl = `
 		<html>
 			<body>
-			  <h1>Your OTP Code</h1>
 			  <p>Your OTP code is: <b>{{.OTP}}</b></p>
 			  <p>Thank you.</p>
 			</body>
@@ -75,7 +75,7 @@ func (s *Service) SendOTP(otpPayload broker.OtpPayload) error {
 		return err
 	}
 
-	subject := "Your OTP Code"
+	subject := "Your EthioPeer OTP Code"
 
 	textBody := fmt.Sprintf("Hello,\n\nYour OTP code is: %s\n\nThank you.", otpPayload.OTP)
 	htmlBody := buf.String()

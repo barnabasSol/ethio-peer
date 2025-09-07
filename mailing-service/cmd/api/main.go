@@ -50,6 +50,7 @@ func main() {
 				msg.Nack(false, false)
 				continue
 			}
+			log.Println(payload)
 			msg.Ack(false)
 		case "email.welcome":
 			var payload broker.WelcomePayload

@@ -17,14 +17,13 @@ func InitRabbitMQ() (*RabbitMQ, error) {
 	if err != nil {
 		return nil, err
 	}
-	ch, err := conn.Channel()
 
+	ch, err := conn.Channel()
 	if err != nil {
 		return nil, err
 	}
 
 	err = NewNotificationExchange(ch)
-
 	if err != nil {
 		return nil, err
 	}
