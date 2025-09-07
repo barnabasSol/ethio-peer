@@ -28,9 +28,13 @@ func (r *repository) GetUserById(
 	user_id string,
 ) (*models.User, error) {
 	user_collection := r.db.Database(db.Name).Collection(models.UserCollection)
-	filter := bson.D{{Key: "_id", Value: user_id}}
+	user_obj_id, err := bson.ObjectIDFromHex(user_id)
+	if err != nil {
+		return nil, shared.ErrUserNotFound
+	}
+	filter := bson.D{{Key: "_id", Value: user_obj_id}}
 	var user models.User
-	err := user_collection.FindOne(ctx, filter).Decode(&user)
+	err = user_collection.FindOne(ctx, filter).Decode(&user)
 	if err != nil {
 		return nil, shared.ErrUserNotFound
 	}
