@@ -60,10 +60,10 @@ func (r *repository) InsertRefreshToken(
 		UpdatedAt:    time.Now().UTC(),
 	})
 	if err != nil {
-		return err
+		return ErrFailedToAuthenticate
 	}
 	if !result.Acknowledged {
-		return err
+		return ErrFailedToAuthenticate
 	}
 	return nil
 }

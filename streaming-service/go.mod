@@ -53,6 +53,7 @@ require (
 	github.com/pion/turn/v4 v4.0.2 // indirect
 	github.com/pion/webrtc/v4 v4.1.3 // indirect
 	github.com/puzpuzpuz/xsync/v3 v3.5.1 // indirect
+	github.com/rabbitmq/amqp091-go v1.10.0
 	github.com/redis/go-redis/v9 v9.12.0 // indirect
 	github.com/stoewer/go-strcase v1.3.1 // indirect
 	github.com/twitchtv/twirp v8.1.3+incompatible // indirect

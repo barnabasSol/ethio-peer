@@ -14,6 +14,7 @@ import (
 )
 
 type OTP struct {
+	UserId    string    `json:"user_id"`
 	SessionId string    `json:"session_id"`
 	Value     string    `json:"value"`
 	TTL       time.Time `json:"ttl"`
@@ -33,7 +34,13 @@ func NewOTPManager(ctx context.Context) *OTPManager {
 	return m
 }
 
-func (m *OTPManager) Generate() (*OTP, error) {
+func (m *OTPManager) removeOTP(session_id string) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	delete(m.collection, session_id)
+}
+
+func (m *OTPManager) Generate(user_id string) (*OTP, error) {
 	exp := os.Getenv("OTP_EXP_IN_MINS")
 	expInMins, err := strconv.Atoi(exp)
 	if err != nil {
@@ -49,6 +56,7 @@ func (m *OTPManager) Generate() (*OTP, error) {
 
 	sessionID := uuid.NewString()
 	otp := OTP{
+		UserId:    user_id,
 		SessionId: sessionID,
 		Value:     value,
 		TTL:       time.Now().Add(time.Duration(expInMins) * time.Minute),

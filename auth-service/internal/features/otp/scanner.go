@@ -2,6 +2,7 @@ package otp
 
 import (
 	"context"
+	"log"
 	"time"
 )
 
@@ -20,11 +21,13 @@ func scan(ctx context.Context, m *OTPManager) {
 }
 
 func cleanup(m *OTPManager) {
+	log.Println("cleaning")
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	now := time.Now()
 	for k, v := range m.collection {
 		if v.TTL.Before(now) {
+			log.Println("cleaned")
 			delete(m.collection, k)
 		}
 	}

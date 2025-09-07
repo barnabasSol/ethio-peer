@@ -2,6 +2,7 @@ package login
 
 import (
 	"context"
+	"encoding/json"
 	broker "ep-auth-service/internal/broker/rabbitmq"
 	"ep-auth-service/internal/features/jwt"
 	"ep-auth-service/internal/features/otp"
@@ -12,7 +13,7 @@ import (
 )
 
 type Service interface {
-	LoginUser(ctx context.Context, req LoginRequest) (*shared.Response[LoginReponse], error)
+	LoginUser(ctx context.Context, req LoginRequest) (*shared.Response[LoginResponse], error)
 }
 
 type service struct {
@@ -39,16 +40,45 @@ func NewService(
 func (s *service) LoginUser(
 	ctx context.Context,
 	login LoginRequest,
-) (*shared.Response[LoginReponse], error) {
+) (*shared.Response[LoginResponse], error) {
 	user, err := s.rep.GetUser(ctx, login)
 	if err != nil {
 		return nil, err
 	}
-
 	err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(login.Password))
 
 	if err != nil {
 		return nil, ErrIncorrectPassword
+	}
+
+	if !user.InstituteEmailVerified {
+		new_otp, err := s.otp_manager.Generate(user.Id.Hex())
+		if err != nil {
+			return nil, ErrFailedToGenOTP
+		}
+		otp := broker.OtpPayload{
+			Email: user.InstituteEmail,
+			OTP:   new_otp.Value,
+		}
+
+		otp_json, err := json.Marshal(otp)
+		if err != nil {
+			return nil, ErrFailedToGenOTP
+		}
+
+		s.broker.Publish(broker.Message{
+			Exchange: "notification_exchange",
+			Topic:    "email.otp",
+			Data:     otp_json,
+		})
+
+		return &shared.Response[LoginResponse]{
+			Message: "please verify your email",
+			Data: LoginResponse{
+				VerificationRequired: true,
+				OtpSessionId:         &new_otp.SessionId,
+			},
+		}, nil
 	}
 
 	token, err := s.token_service.GenerateAccessToken(*user)
@@ -66,13 +96,14 @@ func (s *service) LoginUser(
 	if err := s.rep.InsertRefreshToken(ctx, user.Id, refresh); err != nil {
 		return nil, err
 	}
-
-	return &shared.Response[LoginReponse]{
+	id := user.Id.Hex()
+	return &shared.Response[LoginResponse]{
 		Message: "successfully logged in",
-		Data: LoginReponse{
-			UserId:       user.Id.Hex(),
-			AccessToken:  token,
-			RefreshToken: refresh,
+		Data: LoginResponse{
+			VerificationRequired: false,
+			UserId:               &id,
+			AccessToken:          &token,
+			RefreshToken:         &refresh,
 		},
 	}, nil
 

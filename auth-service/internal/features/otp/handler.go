@@ -1,4 +1,4 @@
-package login
+package otp
 
 import (
 	"ep-auth-service/internal/features/shared"
@@ -17,31 +17,35 @@ func InitHandler(s Service, group *echo.Group) *Handler {
 		group: group,
 		s:     s,
 	}
-	h.group.POST("/login", h.Login)
+	h.group.POST("/verify", h.VerifyOTP)
 	return h
 }
 
-func (h *Handler) Login(ctx echo.Context) error {
-	with_cookie := ctx.QueryParam("with_cookie")
-	var req LoginRequest
+func (h *Handler) VerifyOTP(ctx echo.Context) error {
+	var req OtpVerification
 	if err := ctx.Bind(&req); err != nil {
 		return ctx.JSON(
 			http.StatusBadRequest,
 			map[string]string{"error": "invalid request"},
 		)
 	}
-
-	if err := req.Validate(); err != nil {
+	err := req.Validate()
+	if err != nil {
 		return ctx.JSON(
-			LoginErrors[err],
+			http.StatusBadRequest,
 			map[string]string{"error": err.Error()},
 		)
 	}
-
-	result, err := h.s.LoginUser(ctx.Request().Context(), req)
+	result, err := h.s.VerifyOTP(ctx.Request().Context(), req)
 
 	if err != nil {
-		if status_code, found := LoginErrors[err]; found {
+		if status_code, found := OtpErrors[err]; found {
+			return ctx.JSON(
+				status_code,
+				map[string]string{"error": err.Error()},
+			)
+		}
+		if status_code, found := shared.Errors[err]; found {
 			return ctx.JSON(
 				status_code,
 				map[string]string{"error": err.Error()},
@@ -53,20 +57,5 @@ func (h *Handler) Login(ctx echo.Context) error {
 		)
 	}
 
-	if with_cookie != "" && with_cookie == "true" {
-		atc := shared.SetCookie("access_token", *result.Data.AccessToken, 15)
-		rtc := shared.SetCookie("refresh_token", *result.Data.RefreshToken, 60*24*7)
-		ctx.SetCookie(atc)
-		ctx.SetCookie(rtc)
-		return ctx.JSON(
-			http.StatusOK,
-			shared.Response[LoginResponse]{
-				Message: "login success",
-				Data:    result.Data,
-			},
-		)
-	}
-
 	return ctx.JSON(http.StatusOK, result)
-
 }

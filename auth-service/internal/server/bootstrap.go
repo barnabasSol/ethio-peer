@@ -10,18 +10,14 @@ import (
 )
 
 func (s *Server) bootstrap() error {
-
-	auth_group := s.echo.Group("auth")
-
+	auth_group := s.echo.Group("")
 	token_gen, err := jwt.NewTokenGenerator()
-
 	if err != nil {
 		log.Println("failed to initialize token generator")
 		return err
 	}
 
 	otp_manager := otp.NewOTPManager(context.Background())
-
 	signup_repo := signup.NewRepository(s.db)
 	signup_service := signup.NewService(
 		signup_repo,
@@ -29,8 +25,8 @@ func (s *Server) bootstrap() error {
 		token_gen,
 		otp_manager,
 	)
-	signup.InitHandler(signup_service, auth_group)
 
+	signup.InitHandler(signup_service, auth_group)
 	login_repo := login.NewRepository(s.db)
 	login_service := login.NewService(
 		login_repo,
@@ -40,5 +36,12 @@ func (s *Server) bootstrap() error {
 	)
 	login.InitHandler(login_service, auth_group)
 
+	otp_repo := otp.NewRepository(s.db)
+	otp_service := otp.NewService(
+		otp_manager,
+		otp_repo,
+		token_gen,
+	)
+	otp.InitHandler(otp_service, s.echo.Group("/otp"))
 	return nil
 }
