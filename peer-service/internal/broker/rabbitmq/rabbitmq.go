@@ -23,10 +23,6 @@ func InitRabbitMQ() (*RabbitMQ, error) {
 		return nil, err
 	}
 
-	err = NewNotificationExchange(ch)
-	if err != nil {
-		return nil, err
-	}
 	err = NewPeerExchange(ch)
 	if err != nil {
 		return nil, err

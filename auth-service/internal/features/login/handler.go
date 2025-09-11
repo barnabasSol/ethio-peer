@@ -1,7 +1,7 @@
 package login
 
 import (
-	"ep-auth-service/internal/features/shared"
+	"ep-auth-service/internal/features/common"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -54,13 +54,16 @@ func (h *Handler) Login(ctx echo.Context) error {
 	}
 
 	if with_cookie != "" && with_cookie == "true" {
-		atc := shared.SetCookie("access_token", *result.Data.AccessToken, 15)
-		rtc := shared.SetCookie("refresh_token", *result.Data.RefreshToken, 60*24*7)
-		ctx.SetCookie(atc)
-		ctx.SetCookie(rtc)
+		if result.Data.AccessToken != nil && result.Data.RefreshToken != nil {
+			atc := common.SetCookie("access_token", *result.Data.AccessToken, 15)
+			rtc := common.SetCookie("refresh_token", *result.Data.RefreshToken, 60*24*7)
+			ctx.SetCookie(atc)
+			ctx.SetCookie(rtc)
+		}
+
 		return ctx.JSON(
 			http.StatusOK,
-			shared.Response[LoginResponse]{
+			common.Response[LoginResponse]{
 				Message: "login success",
 				Data:    result.Data,
 			},

@@ -11,4 +11,5 @@ var (
 var OtpErrors = map[error]int{
 	ErrInvalidOTP:       401,
 	ErrMissingOtpFields: 400,
+	ErrIncorrectOTP:     401,
 }

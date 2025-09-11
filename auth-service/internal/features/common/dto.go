@@ -1,4 +1,4 @@
-package shared
+package common
 
 type Response[T any] struct {
 	Message string `json:"message"`
