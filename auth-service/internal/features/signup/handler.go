@@ -30,6 +30,15 @@ func (h *Handler) SignUpUser(ctx echo.Context) error {
 		)
 	}
 
+	err := req.Validate()
+
+	if err != nil {
+		return ctx.JSON(
+			http.StatusBadRequest,
+			map[string]string{"error": err.Error()},
+		)
+	}
+
 	result, err := h.s.SignUpUser(ctx.Request().Context(), req)
 	if err != nil {
 		if strings.Contains(err.Error(), "in use") {

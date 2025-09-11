@@ -4,16 +4,16 @@ import (
 	"context"
 	"encoding/json"
 	broker "ep-auth-service/internal/broker/rabbitmq"
+	"ep-auth-service/internal/features/common"
 	"ep-auth-service/internal/features/jwt"
 	"ep-auth-service/internal/features/otp"
-	"ep-auth-service/internal/features/shared"
 	"log"
 
 	"golang.org/x/crypto/bcrypt"
 )
 
 type Service interface {
-	LoginUser(ctx context.Context, req LoginRequest) (*shared.Response[LoginResponse], error)
+	LoginUser(ctx context.Context, req LoginRequest) (*common.Response[LoginResponse], error)
 }
 
 type service struct {
@@ -40,7 +40,7 @@ func NewService(
 func (s *service) LoginUser(
 	ctx context.Context,
 	login LoginRequest,
-) (*shared.Response[LoginResponse], error) {
+) (*common.Response[LoginResponse], error) {
 	user, err := s.rep.GetUser(ctx, login)
 	if err != nil {
 		return nil, err
@@ -72,7 +72,7 @@ func (s *service) LoginUser(
 			Data:     otp_json,
 		})
 
-		return &shared.Response[LoginResponse]{
+		return &common.Response[LoginResponse]{
 			Message: "please verify your email",
 			Data: LoginResponse{
 				VerificationRequired: true,
@@ -97,7 +97,7 @@ func (s *service) LoginUser(
 		return nil, err
 	}
 	id := user.Id.Hex()
-	return &shared.Response[LoginResponse]{
+	return &common.Response[LoginResponse]{
 		Message: "successfully logged in",
 		Data: LoginResponse{
 			VerificationRequired: false,

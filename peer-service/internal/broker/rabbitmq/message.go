@@ -8,16 +8,6 @@ type Message struct {
 	Data     json.RawMessage `json:"data"`
 }
 
-type OtpPayload struct {
-	Email string `json:"email"`
-	OTP   string `json:"otp"`
-}
-
-type WelcomePayload struct {
-	Email string `json:"email"`
-	Name  string `json:"name"`
-}
-
 type PeerPayload struct {
 	UserId    string     `json:"user_id"`
 	Interests []Interest `json:"interests"`

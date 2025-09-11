@@ -4,6 +4,7 @@ import (
 	"context"
 	"ep-auth-service/internal/db"
 	"ep-auth-service/internal/models"
+	"log"
 	"time"
 
 	"go.mongodb.org/mongo-driver/v2/bson"
@@ -34,6 +35,7 @@ func (r *repository) GetUser(
 	if login.Username != nil {
 		filter = bson.D{{Key: "username", Value: *login.Username}}
 	} else if login.Email != nil {
+		log.Println(login.Email)
 		filter = bson.D{{Key: "email", Value: *login.Email}}
 	} else if login.InstituteEmail != nil {
 		filter = bson.D{{Key: "institute_email", Value: *login.InstituteEmail}}

@@ -5,7 +5,7 @@ import amqp "github.com/rabbitmq/amqp091-go"
 func (r *RabbitMQ) Subscribe(que_name, binding_key string) (<-chan amqp.Delivery, error) {
 	q, err := r.ch.QueueDeclare(
 		que_name,
-		false, // durable
+		true,  // durable
 		false, // delete when unused
 		false, // exclusive
 		false, // no-wait

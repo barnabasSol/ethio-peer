@@ -1,0 +1,84 @@
+package server
+
+import (
+	"context"
+	broker "ep-peer-service/internal/broker/rabbitmq"
+	"fmt"
+	"log"
+	"net/http"
+	"os"
+	"os/signal"
+	"strings"
+	"syscall"
+	"time"
+
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
+	"go.mongodb.org/mongo-driver/v2/mongo"
+)
+
+type server struct {
+	addr   string
+	echo   *echo.Echo
+	db     *mongo.Client
+	broker *broker.RabbitMQ
+}
+
+func NewHttpServer(
+	addr string,
+	db *mongo.Client,
+	broker *broker.RabbitMQ,
+) *server {
+	return &server{
+		addr:   addr,
+		echo:   echo.New(),
+		db:     db,
+		broker: broker,
+	}
+}
+
+func (s *server) Run() error {
+
+	s.echo.Use(middleware.Logger())
+	s.echo.Use(middleware.Recover())
+
+	s.echo.GET("/health", func(c echo.Context) error {
+		log.Println("Request Headers:")
+		for name, values := range c.Request().Header {
+			for _, value := range values {
+				if strings.HasPrefix(name, "X-Claim") {
+					log.Printf("%s: %s\n", name, value)
+				}
+			}
+		}
+		return c.String(http.StatusOK, "OK")
+	})
+
+	srv := &http.Server{
+		Addr:         s.addr,
+		ReadTimeout:  10 * time.Second,
+		WriteTimeout: 15 * time.Second,
+	}
+
+	go func() {
+		if err := s.echo.StartServer(srv); err != nil {
+			log.Fatalf("failed to start the peer-server %v", err)
+		}
+	}()
+
+	quit := make(chan os.Signal, 1)
+
+	signal.Notify(quit, os.Interrupt, syscall.SIGINT)
+
+	for _, route := range s.echo.Routes() {
+		fmt.Printf("%s \t %s\n", route.Method, route.Path)
+	}
+
+	<-quit
+
+	log.Println("peer-service has gracefully shutdown")
+	ctx, shutdown := context.WithTimeout(context.Background(), 5*time.Second)
+	defer shutdown()
+
+	return s.echo.Shutdown(ctx)
+}

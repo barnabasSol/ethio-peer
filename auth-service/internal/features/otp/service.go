@@ -28,10 +28,13 @@ func NewService(
 	}
 }
 
-func (s *service) VerifyOTP(ctx context.Context, ov OtpVerification) (*OtpSuccess, error) {
+func (s *service) VerifyOTP(
+	ctx context.Context,
+	ov OtpVerification,
+) (*OtpSuccess, error) {
 	s.m.mu.RLock()
-	defer s.m.mu.RUnlock()
 	v, found := s.m.collection[ov.SessionId]
+	s.m.mu.RUnlock()
 	if !found {
 		return nil, ErrInvalidOTP
 	}
@@ -43,10 +46,14 @@ func (s *service) VerifyOTP(ctx context.Context, ov OtpVerification) (*OtpSucces
 
 	user, err := s.repo.GetUserById(ctx, v.UserId)
 	if err != nil {
+		log.Println(err)
 		return nil, err
 	}
 
+	s.repo.UpdateUser(ctx, user.Id, true, true)
+
 	token, err := s.t.GenerateAccessToken(*user)
+
 	if err != nil {
 		log.Println(err)
 		return nil, err
@@ -59,7 +66,7 @@ func (s *service) VerifyOTP(ctx context.Context, ov OtpVerification) (*OtpSucces
 	}
 	return &OtpSuccess{
 		UserId:       user.Id.Hex(),
-		AccessToken:  token,
-		RefreshToken: refresh,
+		AccessToken:  &token,
+		RefreshToken: &refresh,
 	}, nil
 }

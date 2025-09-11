@@ -6,7 +6,7 @@ type SignUpRequest struct {
 	InstituteEmail string      `json:"institute_email"`
 	Email          string      `json:"email"`
 	Password       string      `json:"password"`
-	Interests      *[]Interest `json:"interests"`
+	Interests      *[]Interest `json:"interests,omitempty"`
 	Bio            *string     `json:"bio,omitempty"`
 }
 
@@ -16,7 +16,9 @@ type Interest struct {
 }
 
 type SignUpResponse struct {
-	UserId       string `json:"user_id"`
-	AccessToken  string `json:"access_token"`
-	RefreshToken string `json:"refresh_token"`
+	VerificationRequired bool    `json:"verification_required"`
+	OtpSessionId         *string `json:"otp_session_id,omitempty"`
+	UserId               *string `json:"user_id,omitempty"`
+	AccessToken          *string `json:"access_token,omitempty"`
+	RefreshToken         *string `json:"refresh_token,omitempty"`
 }
