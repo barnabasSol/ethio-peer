@@ -7,7 +7,6 @@ var (
 	ErrInvalidCredential    = errors.New("invalid credential")
 	ErrUserDoesntExist      = errors.New("user doesnt exist")
 	ErrFailedToAuthenticate = errors.New("failed to authenticate please try again later")
-	ErrFailedToGenOTP       = errors.New("failed to generate otp")
 )
 
 var LoginErrors = map[error]int{

@@ -1,7 +1,18 @@
 package main
 
-import "log"
+import (
+	"ep-bridge-service/internal/server"
+	"log"
+	"os"
+
+	"github.com/joho/godotenv"
+)
 
 func main() {
-	log.Println("this is used for aggregation and routing with grpc")
+	godotenv.Load()
+	app_port := os.Getenv("APP_PORT")
+	s := server.New(app_port)
+	if err := s.Run(); err != nil {
+		log.Println(err)
+	}
 }

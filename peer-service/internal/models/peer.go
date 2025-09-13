@@ -1,6 +1,8 @@
 package models
 
 import (
+	"time"
+
 	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
@@ -13,4 +15,5 @@ type Peer struct {
 	OnlineStatus bool          `bson:"online_status"`
 	Bio          string        `bson:"bio"`
 	Interests    []string      `bson:"interests"`
+	UpdatedAt    time.Time     `bson:"updated_at"`
 }

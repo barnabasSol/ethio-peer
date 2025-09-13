@@ -30,12 +30,13 @@ public static class Routes
             {
                 RouteId = "bridge",
                 ClusterId = "bridge-cluster",
+                CorsPolicy = "WebOriginCorsPolicy",
                 Match = new RouteMatch { Path = "/api/bridge/{**catch-all}" },
                 Transforms =
                 [
                     new Dictionary<string, string> { { "PathRemovePrefix", "/api/bridge" } },
                 ],
-                AuthorizationPolicy = "anonymous",
+                AuthorizationPolicy = "authenticated",
             },
         ];
     }

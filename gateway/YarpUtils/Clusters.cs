@@ -26,7 +26,7 @@ public static class Clusters
                 {
                     {
                         "destination2",
-                        new DestinationConfig { Address = "http://localhost:2001" }
+                        new DestinationConfig { Address = "http://localhost:2017" }
                     },
                 },
             },

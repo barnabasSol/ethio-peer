@@ -7,7 +7,10 @@ import (
 )
 
 type Service interface {
-	VerifyOTP(ctx context.Context, ov OtpVerification) (*OtpSuccess, error)
+	VerifyOTP(
+		ctx context.Context,
+		ov OtpVerification,
+	) (*OtpSuccess, error)
 }
 
 type service struct {

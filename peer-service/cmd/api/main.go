@@ -20,7 +20,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	rmq, err := broker.InitRabbitMQ()
+	rmq, err := broker.InitRabbitMQ(mongo)
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -4,6 +4,7 @@ import (
 	broker "ep-peer-service/internal/broker/rabbitmq"
 	"ep-peer-service/internal/features/peer"
 	proto_peer "ep-peer-service/internal/genproto/peer"
+	"log"
 	"net"
 
 	"go.mongodb.org/mongo-driver/v2/mongo"
@@ -38,6 +39,6 @@ func (g *gRPCServer) Run() error {
 	ps := peer.NewService(pr)
 	ph := peer.NewGrpcHandler(ps)
 	proto_peer.RegisterPeerServiceServer(gs, ph)
-
+	log.Println("peer grpc started")
 	return gs.Serve(lis)
 }

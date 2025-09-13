@@ -54,17 +54,36 @@ func (h *Handler) Login(ctx echo.Context) error {
 	}
 
 	if with_cookie != "" && with_cookie == "true" {
-		if result.Data.AccessToken != nil && result.Data.RefreshToken != nil {
-			atc := common.SetCookie("access_token", *result.Data.AccessToken, 15)
-			rtc := common.SetCookie("refresh_token", *result.Data.RefreshToken, 60*24*7)
-			ctx.SetCookie(atc)
-			ctx.SetCookie(rtc)
+		if !result.Data.VerificationRequired {
+			if result.Data.AccessToken != nil && result.Data.RefreshToken != nil {
+				atc := common.SetCookie(
+					"access_token",
+					*result.Data.AccessToken,
+					15,
+				)
+				rtc := common.SetCookie(
+					"refresh_token",
+					*result.Data.RefreshToken,
+					60*24*7,
+				)
+				ctx.SetCookie(atc)
+				ctx.SetCookie(rtc)
+			}
+			return ctx.JSON(
+				http.StatusOK,
+				common.Response[LoginResponse]{
+					Message: result.Message,
+					Data: LoginResponse{
+						VerificationRequired: false,
+						UserId:               result.Data.UserId,
+					},
+				},
+			)
 		}
-
 		return ctx.JSON(
 			http.StatusOK,
 			common.Response[LoginResponse]{
-				Message: "login success",
+				Message: result.Message,
 				Data:    result.Data,
 			},
 		)

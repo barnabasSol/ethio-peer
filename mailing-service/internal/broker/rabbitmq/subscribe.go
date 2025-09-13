@@ -27,7 +27,7 @@ func (r *RabbitMQ) Subscribe(que_name, binding_key string) (<-chan amqp.Delivery
 
 	return r.ch.Consume(
 		q.Name,
-		"",
+		"mailing-consumer",
 		false, // auto-ack
 		false, // exclusive
 		false,

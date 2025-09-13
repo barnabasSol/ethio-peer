@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option go_package = "ep-peer-service/internal/genproto/peer";
+option go_package = "ep-bridge-service/internal/genproto/peer";
 
 service PeerService {
   rpc GetPeer(GetPeerRequest) returns (GetPeerResponse) {}

@@ -7,6 +7,7 @@ import (
 	"math/big"
 	"os"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 
@@ -41,17 +42,20 @@ func (m *OTPManager) removeOTP(session_id string) {
 }
 
 func (m *OTPManager) Generate(user_id string) (*OTP, error) {
+	if m.exists(user_id) {
+		return nil, ErrPendingOTP
+	}
 	exp := os.Getenv("OTP_EXP_IN_MINS")
 	expInMins, err := strconv.Atoi(exp)
 	if err != nil {
-		log.Fatal("Invalid OTP_EXP_IN_MINS:", err)
-		return nil, err
+		log.Println("Invalid OTP_EXP_IN_MINS:", err)
+		return nil, ErrFailedToGenOTP
 	}
 
 	value, err := generateOTP()
 
 	if err != nil {
-		return nil, err
+		return nil, ErrFailedToGenOTP
 	}
 
 	sessionID := uuid.NewString()
@@ -63,8 +67,8 @@ func (m *OTPManager) Generate(user_id string) (*OTP, error) {
 	}
 
 	m.mu.Lock()
-	defer m.mu.Unlock()
-	m.collection[sessionID] = otp
+	m.collection[sessionID+":"+user_id] = otp
+	m.mu.Unlock()
 	return &otp, nil
 }
 
@@ -82,4 +86,16 @@ func generateOTP() (string, error) {
 	}
 
 	return string(otp), nil
+}
+
+func (m *OTPManager) exists(userID string) bool {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+	for key := range m.collection {
+		parts := strings.SplitN(key, ":", 2)
+		if len(parts) == 2 && parts[1] == userID {
+			return true
+		}
+	}
+	return false
 }

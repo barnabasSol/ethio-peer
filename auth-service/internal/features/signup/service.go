@@ -88,19 +88,10 @@ func (s *service) SignUpUser(
 		Email: user.InstituteEmail,
 		OTP:   new_otp.Value,
 	}
-	var interests []broker.Interest
-	if user.Interests != nil {
-		for _, v := range *user.Interests {
-			interests = append(interests, broker.Interest{
-				Id:    v.Id,
-				Topic: v.Topic,
-			})
-		}
-	}
 
 	new_peer := broker.PeerPayload{
 		UserId:    id.Hex(),
-		Interests: interests,
+		Interests: *user.Interests,
 		Bio:       *user.Bio,
 	}
 
@@ -113,6 +104,7 @@ func (s *service) SignUpUser(
 	if err != nil {
 		return nil, errors.New("failed to generate otp")
 	}
+
 	s.broker.Publish(broker.Message{
 		Exchange: "notification_exchange",
 		Topic:    "email.otp",
@@ -124,6 +116,7 @@ func (s *service) SignUpUser(
 		Topic:    "peer.new",
 		Data:     new_peer_json,
 	})
+
 	return &common.Response[SignUpResponse]{
 		Message: "please verify your email",
 		Data: SignUpResponse{

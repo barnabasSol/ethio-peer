@@ -4,14 +4,16 @@ import (
 	"os"
 
 	amqp "github.com/rabbitmq/amqp091-go"
+	"go.mongodb.org/mongo-driver/v2/mongo"
 )
 
 type RabbitMQ struct {
+	db   *mongo.Client
 	conn *amqp.Connection
 	ch   *amqp.Channel
 }
 
-func InitRabbitMQ() (*RabbitMQ, error) {
+func InitRabbitMQ(db *mongo.Client) (*RabbitMQ, error) {
 	uri := os.Getenv("RABBITMQ_URI")
 	conn, err := amqp.Dial(uri)
 	if err != nil {
@@ -30,6 +32,7 @@ func InitRabbitMQ() (*RabbitMQ, error) {
 
 	return &RabbitMQ{
 		conn: conn,
+		db:   db,
 		ch:   ch,
 	}, nil
 }

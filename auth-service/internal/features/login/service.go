@@ -7,6 +7,7 @@ import (
 	"ep-auth-service/internal/features/common"
 	"ep-auth-service/internal/features/jwt"
 	"ep-auth-service/internal/features/otp"
+	"errors"
 	"log"
 
 	"golang.org/x/crypto/bcrypt"
@@ -45,7 +46,10 @@ func (s *service) LoginUser(
 	if err != nil {
 		return nil, err
 	}
-	err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(login.Password))
+	err = bcrypt.CompareHashAndPassword(
+		[]byte(user.PasswordHash),
+		[]byte(login.Password),
+	)
 
 	if err != nil {
 		return nil, ErrIncorrectPassword
@@ -54,7 +58,7 @@ func (s *service) LoginUser(
 	if !user.InstituteEmailVerified {
 		new_otp, err := s.otp_manager.Generate(user.Id.Hex())
 		if err != nil {
-			return nil, ErrFailedToGenOTP
+			return nil, err
 		}
 		otp := broker.OtpPayload{
 			Email: user.InstituteEmail,
@@ -63,7 +67,7 @@ func (s *service) LoginUser(
 
 		otp_json, err := json.Marshal(otp)
 		if err != nil {
-			return nil, ErrFailedToGenOTP
+			return nil, errors.New("failed to marshal otp")
 		}
 
 		s.broker.Publish(broker.Message{
