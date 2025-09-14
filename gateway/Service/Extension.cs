@@ -65,7 +65,6 @@ public static class JwtAuthenticationExtensions
                             {
                                 ctx.HttpContext.Items["refresh_token"] = refreshToken;
                             }
-
                             return Task.CompletedTask;
                         },
                     };

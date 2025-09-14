@@ -38,6 +38,18 @@ public static class Routes
                 ],
                 AuthorizationPolicy = "authenticated",
             },
+            new RouteConfig
+            {
+                RouteId = "peer",
+                ClusterId = "peer-cluster",
+                CorsPolicy = "WebOriginCorsPolicy",
+                Match = new RouteMatch { Path = "/api/peer/{**catch-all}" },
+                Transforms =
+                [
+                    new Dictionary<string, string> { { "PathRemovePrefix", "/api/peer" } },
+                ],
+                AuthorizationPolicy = "authenticated",
+            },
         ];
     }
 }

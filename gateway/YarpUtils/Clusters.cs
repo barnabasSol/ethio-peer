@@ -30,6 +30,17 @@ public static class Clusters
                     },
                 },
             },
+            new ClusterConfig
+            {
+                ClusterId = "peer-cluster",
+                Destinations = new Dictionary<string, DestinationConfig>
+                {
+                    {
+                        "destination3",
+                        new DestinationConfig { Address = "http://localhost:2013" }
+                    },
+                },
+            },
         ];
     }
 }

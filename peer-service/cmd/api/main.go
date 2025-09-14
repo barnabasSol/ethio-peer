@@ -16,6 +16,7 @@ func main() {
 	godotenv.Load()
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
+
 	mongo, err := db.NewMongoDbClient(ctx)
 	if err != nil {
 		log.Fatal(err)
@@ -26,6 +27,7 @@ func main() {
 	}
 	grpc_port := os.Getenv("GRPC_PORT")
 	gRPC := server.NewGrpcServer(grpc_port, mongo, rmq)
+
 	go gRPC.Run()
 
 	msgs, err := rmq.Subscribe("new_peer_que", "peer.*")
@@ -35,6 +37,7 @@ func main() {
 	go rmq.Listen(msgs)
 
 	http_port := os.Getenv("PORT")
+
 	srv := server.NewHttpServer(http_port, mongo, rmq)
 	if err := srv.Run(); err != nil {
 		log.Fatalf("%s", err.Error())

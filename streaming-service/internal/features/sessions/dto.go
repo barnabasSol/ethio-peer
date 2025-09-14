@@ -1,4 +1,4 @@
-package rooms
+package sessions
 
 type Create struct {
 	Name    string   `json:"name"`
@@ -6,9 +6,11 @@ type Create struct {
 	Tags    []string `json:"tags"`
 }
 
-type Room struct {
+type Session struct {
 	Name         string        `json:"name"`
 	Owner        Owner         `json:"owner"`
+	Duration     string        `json:"duration"`
+	IsLive       bool          `json:"is_live"`
 	Participants []Participant `json:"participants"`
 }
 

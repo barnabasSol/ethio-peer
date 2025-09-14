@@ -80,13 +80,6 @@ func (h *Handler) Login(ctx echo.Context) error {
 				},
 			)
 		}
-		return ctx.JSON(
-			http.StatusOK,
-			common.Response[LoginResponse]{
-				Message: result.Message,
-				Data:    result.Data,
-			},
-		)
 	}
 
 	return ctx.JSON(http.StatusOK, result)

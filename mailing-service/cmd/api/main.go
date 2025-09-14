@@ -22,7 +22,11 @@ func main() {
 	mailtrap_token := os.Getenv("TOKEN")
 	sender := os.Getenv("SENDER")
 
-	mailing_service := mail.NewService(mailtrap_host, mailtrap_token, sender)
+	mailing_service := mail.NewService(
+		mailtrap_host,
+		mailtrap_token,
+		sender,
+	)
 	rmq, err := broker.InitRabbitMQ()
 	if err != nil {
 		log.Fatal(err)

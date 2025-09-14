@@ -64,7 +64,6 @@ func (r *RabbitMQ) Listen(msgs <-chan amqp.Delivery) {
 				)
 				continue
 			}
-			log.Println(payload)
 			obj_id, err := bson.ObjectIDFromHex(payload.UserId)
 			if err != nil {
 				msg.Nack(false, false)
@@ -85,7 +84,7 @@ func (r *RabbitMQ) Listen(msgs <-chan amqp.Delivery) {
 			}
 			msg.Ack(false)
 		default:
-			log.Printf("⚠️ Unknown peer event: %s", msg.RoutingKey)
+			log.Printf("Unknown peer event: %s", msg.RoutingKey)
 		}
 	}
 }

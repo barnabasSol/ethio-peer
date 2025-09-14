@@ -4,7 +4,7 @@ import "errors"
 
 var (
 	ErrPeerNotFound  = errors.New("peer not found")
-	ErrInvalidPeerId = errors.New("peer not found")
+	ErrInvalidPeerId = errors.New("invalid peer id")
 )
 
 var Errors = map[error]int{

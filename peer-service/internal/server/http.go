@@ -3,6 +3,8 @@ package server
 import (
 	"context"
 	broker "ep-peer-service/internal/broker/rabbitmq"
+	"ep-peer-service/internal/features/common"
+	"ep-peer-service/internal/features/profile"
 	"fmt"
 	"log"
 	"net/http"
@@ -14,6 +16,8 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/minio/minio-go/v7"
+	"github.com/minio/minio-go/v7/pkg/credentials"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 )
 
@@ -69,6 +73,21 @@ func (s *server) Run() error {
 	quit := make(chan os.Signal, 1)
 
 	signal.Notify(quit, os.Interrupt, syscall.SIGINT)
+
+	cfg := common.GetMinioConfig()
+
+	minio_client, err := minio.New(cfg.URL, &minio.Options{
+		Creds:  credentials.NewStaticV4(cfg.Key, cfg.Secret, ""),
+		Secure: true,
+	})
+
+	pr := profile.NewRepository(s.db)
+	ps := profile.NewService(minio_client, pr)
+	profile.InitHandler(ps, s.echo.Group("/profile"))
+
+	if err != nil {
+		log.Fatalln(err)
+	}
 
 	for _, route := range s.echo.Routes() {
 		fmt.Printf("%s \t %s\n", route.Method, route.Path)
