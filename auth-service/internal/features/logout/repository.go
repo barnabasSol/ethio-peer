@@ -11,11 +11,11 @@ type repository struct {
 }
 
 func NewRepository(db *mongo.Client) Repository {
-	return repository{
+	return &repository{
 		db: db,
 	}
 }
 
-func (r repository) UpdateEmailVerified(user_id string) bool {
+func (r *repository) UpdateEmailVerified(user_id string) bool {
 	return true
 }

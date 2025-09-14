@@ -90,7 +90,6 @@ func (s *Service) SendWelcome(welcomePayload broker.WelcomePayload) error {
 		Welcome to our service! We're glad to have you.
 		Best regards.
 		`
-
 	textTemplate, err := template.New("welcomeText").Parse(textTpl)
 	if err != nil {
 		return err

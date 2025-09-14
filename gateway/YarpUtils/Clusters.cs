@@ -26,7 +26,18 @@ public static class Clusters
                 {
                     {
                         "destination2",
-                        new DestinationConfig { Address = "http://localhost:2001" }
+                        new DestinationConfig { Address = "http://localhost:2017" }
+                    },
+                },
+            },
+            new ClusterConfig
+            {
+                ClusterId = "peer-cluster",
+                Destinations = new Dictionary<string, DestinationConfig>
+                {
+                    {
+                        "destination3",
+                        new DestinationConfig { Address = "http://localhost:2013" }
                     },
                 },
             },

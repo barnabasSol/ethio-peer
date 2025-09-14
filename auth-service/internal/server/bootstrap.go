@@ -34,8 +34,8 @@ func (s *Server) bootstrap() error {
 		token_gen,
 		otp_manager,
 	)
-	login.InitHandler(login_service, auth_group)
 
+	login.InitHandler(login_service, auth_group)
 	otp_repo := otp.NewRepository(s.db)
 	otp_service := otp.NewService(
 		otp_manager,

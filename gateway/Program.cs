@@ -1,6 +1,7 @@
 using gateway.Service;
 using gateway.YarpUtils;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Yarp.ReverseProxy.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -60,6 +61,14 @@ builder
     });
 
 var app = builder.Build();
+app.MapGet(
+    "/proxy/config",
+    (IProxyConfigProvider configProvider) =>
+    {
+        var config = configProvider.GetConfig();
+        return Results.Json(config);
+    }
+);
 
 if (app.Environment.IsDevelopment())
 {

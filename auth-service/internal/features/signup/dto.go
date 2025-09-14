@@ -1,18 +1,13 @@
 package signup
 
 type SignUpRequest struct {
-	Name           string      `json:"name"`
-	Username       string      `json:"username"`
-	InstituteEmail string      `json:"institute_email"`
-	Email          string      `json:"email"`
-	Password       string      `json:"password"`
-	Interests      *[]Interest `json:"interests,omitempty"`
-	Bio            *string     `json:"bio,omitempty"`
-}
-
-type Interest struct {
-	Id    string `json:"id"`
-	Topic string `json:"topic"`
+	Name           string    `json:"name"`
+	Username       string    `json:"username"`
+	InstituteEmail string    `json:"institute_email"`
+	Email          string    `json:"email"`
+	Password       string    `json:"password"`
+	Interests      *[]string `json:"interests,omitempty"`
+	Bio            *string   `json:"bio,omitempty"`
 }
 
 type SignUpResponse struct {

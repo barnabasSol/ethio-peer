@@ -1,10 +1,16 @@
 package broker
 
 import (
+	"bytes"
+	"context"
 	"encoding/json"
+	"ep-peer-service/internal/db"
+	"ep-peer-service/internal/models"
 	"log"
+	"time"
 
 	amqp "github.com/rabbitmq/amqp091-go"
+	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
 func (r *RabbitMQ) Subscribe(que_name, binding_key string) (<-chan amqp.Delivery, error) {
@@ -42,21 +48,43 @@ func (r *RabbitMQ) Subscribe(que_name, binding_key string) (<-chan amqp.Delivery
 }
 
 func (r *RabbitMQ) Listen(msgs <-chan amqp.Delivery) {
-	log.Println("Mailer service is waiting for messages...")
+	log.Println("peer service is waiting for messages...")
 	for msg := range msgs {
 		log.Printf("Received [%s]: %s", msg.RoutingKey, msg.Body)
 		switch msg.RoutingKey {
 		case "peer.new":
 			var payload PeerPayload
-			if err := json.Unmarshal(msg.Body, &payload); err != nil {
-				msg.Nack(false, true)
-				log.Println("failed to unmarshall new peer payload")
+			decoder := json.NewDecoder(bytes.NewReader(msg.Body))
+			decoder.DisallowUnknownFields()
+			if err := decoder.Decode(&payload); err != nil {
+				msg.Nack(false, false)
+				log.Println(
+					"failed to unmarshall new peer payload with strict checking:",
+					err,
+				)
 				continue
 			}
-			log.Println(payload)
+			obj_id, err := bson.ObjectIDFromHex(payload.UserId)
+			if err != nil {
+				msg.Nack(false, false)
+				continue
+			}
+			collection := r.db.Database(db.Name).Collection(models.PeerCollection)
+			result, err := collection.InsertOne(context.Background(), models.Peer{
+				UserId:       obj_id,
+				OverallScore: 0,
+				OnlineStatus: false,
+				Bio:          payload.Bio,
+				Interests:    payload.Interests,
+				UpdatedAt:    time.Now().UTC(),
+			})
+			if err != nil || !result.Acknowledged {
+				msg.Nack(false, false)
+				continue
+			}
 			msg.Ack(false)
 		default:
-			log.Printf("⚠️ Unknown peer event: %s", msg.RoutingKey)
+			log.Printf("Unknown peer event: %s", msg.RoutingKey)
 		}
 	}
 }

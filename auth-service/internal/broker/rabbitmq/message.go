@@ -19,12 +19,7 @@ type WelcomePayload struct {
 }
 
 type PeerPayload struct {
-	UserId    string     `json:"user_id"`
-	Interests []Interest `json:"interests"`
-	Bio       string     `json:"bio"`
-}
-
-type Interest struct {
-	Id    string `json:"id"`
-	Topic string `json:"topic"`
+	UserId    string   `json:"user_id"`
+	Interests []string `json:"interests"`
+	Bio       string   `json:"bio"`
 }

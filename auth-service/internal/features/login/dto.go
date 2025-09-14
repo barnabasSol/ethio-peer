@@ -7,24 +7,6 @@ type LoginRequest struct {
 	Password       string  `json:"password"`
 }
 
-func (r *LoginRequest) Validate() error {
-	count := 0
-	if r.Username != nil {
-		count++
-	}
-	if r.Email != nil {
-		count++
-	}
-	if r.InstituteEmail != nil {
-		count++
-	}
-
-	if count == 0 || count > 1 {
-		return ErrInvalidCredential
-	}
-	return nil
-}
-
 type LoginResponse struct {
 	VerificationRequired bool    `json:"verification_required"`
 	OtpSessionId         *string `json:"otp_session_id,omitempty"`
