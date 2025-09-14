@@ -2,11 +2,13 @@ package signup
 
 import (
 	"context"
+	"encoding/json"
 	broker "ep-auth-service/internal/broker/rabbitmq"
+	"ep-auth-service/internal/features/common"
 	"ep-auth-service/internal/features/jwt"
 	"ep-auth-service/internal/features/otp"
-	"ep-auth-service/internal/features/shared"
 	"ep-auth-service/internal/models"
+	"errors"
 	"time"
 
 	"golang.org/x/crypto/bcrypt"
@@ -17,7 +19,7 @@ type Service interface {
 		ctx context.Context,
 		user SignUpRequest,
 	) (
-		*shared.Response[SignUpResponse],
+		*common.Response[SignUpResponse],
 		error,
 	)
 }
@@ -47,10 +49,9 @@ func (s *service) SignUpUser(
 	ctx context.Context,
 	user SignUpRequest,
 ) (
-	*shared.Response[SignUpResponse],
+	*common.Response[SignUpResponse],
 	error,
 ) {
-
 	hashed_password, err := bcrypt.GenerateFromPassword(
 		[]byte(user.Password),
 		bcrypt.DefaultCost,
@@ -71,34 +72,64 @@ func (s *service) SignUpUser(
 		UpdatedAt:              time.Now().UTC(),
 	}
 
-	token, err := s.token_service.GenerateAccessToken(user_model)
-	if err != nil {
-		return nil, err
-	}
-
-	refresh, err := s.token_service.GenerateRefreshToken(32)
-	if err != nil {
-		return nil, err
-	}
-
 	id, err := s.repo.Insert(ctx, user_model)
-
 	if err != nil {
-		return nil, err
+		return nil, ErrFailedToCreateUser
 	}
-
 	user_model.Id = id
 
-	if err := s.repo.InsertRefreshToken(ctx, user_model.Id, refresh); err != nil {
-		return nil, err
+	new_otp, err := s.otp_manager.Generate(id.Hex())
+
+	if err != nil {
+		return nil, errors.New("failed to generate otp")
 	}
 
-	return &shared.Response[SignUpResponse]{
-		Message: "user successfully created",
+	otp := broker.OtpPayload{
+		Email: user.InstituteEmail,
+		OTP:   new_otp.Value,
+	}
+	var interests []broker.Interest
+	if user.Interests != nil {
+		for _, v := range *user.Interests {
+			interests = append(interests, broker.Interest{
+				Id:    v.Id,
+				Topic: v.Topic,
+			})
+		}
+	}
+
+	new_peer := broker.PeerPayload{
+		UserId:    id.Hex(),
+		Interests: interests,
+		Bio:       *user.Bio,
+	}
+
+	otp_json, err := json.Marshal(otp)
+	if err != nil {
+		return nil, errors.New("failed to generate otp")
+	}
+
+	new_peer_json, err := json.Marshal(new_peer)
+	if err != nil {
+		return nil, errors.New("failed to generate otp")
+	}
+	s.broker.Publish(broker.Message{
+		Exchange: "notification_exchange",
+		Topic:    "email.otp",
+		Data:     otp_json,
+	})
+
+	s.broker.Publish(broker.Message{
+		Exchange: "new_peer_exchange",
+		Topic:    "peer.new",
+		Data:     new_peer_json,
+	})
+	return &common.Response[SignUpResponse]{
+		Message: "please verify your email",
 		Data: SignUpResponse{
-			UserId:       id.Hex(),
-			AccessToken:  token,
-			RefreshToken: refresh,
+			VerificationRequired: true,
+			OtpSessionId:         &new_otp.SessionId,
 		},
 	}, nil
+
 }
