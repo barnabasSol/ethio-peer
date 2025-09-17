@@ -10,7 +10,7 @@ public class RoomRepository(Context context)
     public async Task<Room> AddRoom(RoomDTO room)
     {
         var duplicateRoom = _context.Rooms.Where(r => r.SessionId.ToString() == room.SessionId.ToString()).FirstOrDefault();
-        if (room == null) throw new ArgumentNullException("Please provide a valid room");
+        if (room == null) throw new ArgumentNullException(nameof(room),"Please provide a valid room");
         else if (duplicateRoom != null) throw new ArgumentException("Room with the same SessionId already exists");
         var newRoom = new Room
         {
@@ -40,7 +40,7 @@ public class RoomRepository(Context context)
     public async Task<Room> GetRoomById(Guid id)
     {
         var room = await _context.Rooms.Where(r => r.Id == id).FirstOrDefaultAsync();
-        if (room == null) throw new ArgumentNullException("Room not found");
+        if (room == null) throw new ArgumentNullException(nameof(id),"Room not found");
         return room;
     }
 

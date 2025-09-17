@@ -26,7 +26,7 @@ public class TopicRepo
         catch
         {
             throw;
-        } 
+        }
     }
 
     public async Task<IEnumerable<Topic>> GetAllTopicsAsync()
@@ -66,7 +66,7 @@ public class TopicRepo
     public async Task<Topic> UpdateTopicAsync(Guid id, TopicDTO topicDTO)
     {
         try
-        {  
+        {
 
             var existingTopic = await _context.Topics.FindAsync(id);
             if (existingTopic == null)
@@ -74,14 +74,14 @@ public class TopicRepo
                 throw new KeyNotFoundException("Topic not found");
             }
             existingTopic.Name = topicDTO.Name ?? existingTopic.Name;
-            existingTopic.Description = topicDTO.Description ?? existingTopic.Description; 
+            existingTopic.Description = topicDTO.Description ?? existingTopic.Description;
             existingTopic.CourseCode = topicDTO.CourseCode ?? existingTopic.CourseCode;
             _context.Topics.Update(existingTopic);
             await _context.SaveChangesAsync();
             return existingTopic;
 
         }
-        catch 
+        catch
         {
             throw;
         }
@@ -97,11 +97,22 @@ public class TopicRepo
                 throw new KeyNotFoundException("Topic not found");
             }
             _context.Topics.Remove(topic);
-            await _context.SaveChangesAsync(); 
+            await _context.SaveChangesAsync();
         }
         catch
         {
             throw;
         }
+    }
+
+    public async Task<string> GetTopicNameById(Guid id)
+    {
+        String topicName = await _context.Topics.Where(t => t.TopicId == id).Select(t => t.Name).FirstAsync();
+        if (topicName == null)
+        {
+            throw new KeyNotFoundException("Topic not found");
+        }
+        return topicName;
+
     }
 }
