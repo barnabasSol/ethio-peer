@@ -10,11 +10,13 @@ public class Rabbit
 {
     private IChannel? _channel;
     private IConnection? _connection;
+    private readonly IConfiguration _configuration;
     private readonly IServiceProvider _serviceProvider;
 
-    public Rabbit(IServiceProvider serviceProvider)
+    public Rabbit(IServiceProvider serviceProvider, IConfiguration config)
     {
         _serviceProvider = serviceProvider;
+        _configuration = config;
     }
 
     public async Task Subscribe()
@@ -31,7 +33,7 @@ public class Rabbit
         // we create a non-durable, exclusive, autodelete queue with a generated name:
         QueueDeclareOk queueDeclareResult = await _channel.QueueDeclareAsync();
         string queueName = queueDeclareResult.QueueName;
-        await _channel.QueueBindAsync(queue: queueName, exchange: "s", routingKey: "session.created");
+        await _channel.QueueBindAsync(queue: queueName, exchange: "Session_Exg", routingKey: "session.created");
 
 
         var consumer = new AsyncEventingBasicConsumer(_channel);
@@ -71,6 +73,7 @@ public class Rabbit
             catch (Exception ex)
             {
                 Console.WriteLine($"Error processing message: {ex.Message}");
+                await _channel.BasicNackAsync(ea.DeliveryTag, multiple: false, requeue: false);
                 // consider negative ack or requeue if using manual acks
             }
 
@@ -85,7 +88,7 @@ public class Rabbit
 
         var factory = new ConnectionFactory
         {
-            HostName = "localhost"
+            HostName = _configuration["RabbitMQ:Host"]!,
         };
         _connection = await factory.CreateConnectionAsync();
         _channel = await _connection.CreateChannelAsync();
