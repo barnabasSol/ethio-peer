@@ -76,5 +76,11 @@ public class RoomRepository(Context context)
         return members;
     }
 
+    public async Task<Guid> GetRoomIdBySessionId(Guid sessionId)
+    {
+        var roomId =await _context.Rooms.Where(r => r.SessionId == sessionId).Select(r => r.Id).FirstOrDefaultAsync(); 
+      if (roomId == Guid.Empty) throw new ArgumentNullException(nameof(sessionId), "Room not found for the given sessionId");
+        return roomId;
 
+    }
 }

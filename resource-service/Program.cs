@@ -20,6 +20,7 @@ builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSignalR();
+builder.Services.AddGrpc();
 Console.WriteLine("Minio endpoint: " + builder.Configuration["Minio:Endpoint"]);
 // Add CORS
 builder.Services.AddCors(options =>
@@ -47,7 +48,7 @@ var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 var rabbit = app.Services.GetRequiredService<Rabbit>();
-await rabbit.Subscribe();
+await rabbit.InitiateConsuming();
 app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
@@ -59,7 +60,7 @@ app.MapHub<RoomHub>("/roomHub");
 app.UseCors("AllowVueClient");
 
 // app.UseHttpsRedirection();
-
+app.MapGrpcService<PostsServiceImpl>();
 app.MapControllers();
 app.Lifetime.ApplicationStopping.Register(() =>
 {
