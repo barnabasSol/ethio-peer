@@ -39,6 +39,7 @@ func (g *gRPCServer) Run() error {
 	ps := peer.NewService(pr)
 	ph := peer.NewGrpcHandler(ps)
 	proto_peer.RegisterPeerServiceServer(gs, ph)
+
 	log.Println("peer grpc started")
 	return gs.Serve(lis)
 }

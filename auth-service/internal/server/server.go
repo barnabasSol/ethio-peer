@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"strings"
 	"syscall"
 	"time"
 
@@ -43,39 +42,8 @@ func (s *Server) Run() error {
 	s.echo.Use(middleware.Recover())
 
 	s.echo.GET("/health", func(c echo.Context) error {
-		log.Println("Request Headers:")
-		for name, values := range c.Request().Header {
-			for _, value := range values {
-				if strings.HasPrefix(name, "X-Claim") {
-					log.Printf("%s: %s\n", name, value)
-				}
-			}
-		}
 		return c.String(http.StatusOK, "OK")
 	})
-
-	s.echo.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins: []string{
-			"http://localhost:5173",
-			"http://localhost:5138",
-		},
-		AllowMethods: []string{
-			http.MethodGet,
-			http.MethodPost,
-			http.MethodPut,
-			http.MethodPatch,
-			http.MethodDelete,
-			http.MethodOptions,
-		},
-		AllowHeaders: []string{
-			echo.HeaderOrigin,
-			echo.HeaderContentType,
-			echo.HeaderAccept,
-			echo.HeaderAuthorization,
-			echo.HeaderCookie,
-		},
-		AllowCredentials: true,
-	}))
 
 	s.echo.Static("/static", "public")
 

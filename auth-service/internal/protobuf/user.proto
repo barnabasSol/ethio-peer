@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+option go_package = "ep-auth-service/internal/genproto/user";
+// import "google/protobuf/timestamp.proto";
+
+
+service UserService {
+  rpc GetUser(GetUserRequest) returns (GetUserResponse) {}
+}
+
+message GetUserRequest {
+  string user_id = 1;
+}
+
+message GetUserResponse {
+  string user_id = 1;
+  string username = 2;
+  string name = 3;
+  repeated string roles = 4;
+  string email = 5;
+  string institute_email = 6;
+  // google.protobuf.Timestamp created_at = 7;
+}

@@ -15,8 +15,15 @@ import (
 )
 
 type Service interface {
-	UpdateProfilePicture(ctx context.Context, user_id string) (string, error)
-	DeleteProfilePicture(ctx context.Context, user_id string) error
+	UpdateProfilePicture(
+		ctx context.Context,
+		user_id string,
+	) (string, error)
+
+	DeleteProfilePicture(
+		ctx context.Context,
+		user_id string,
+	) error
 }
 
 type service struct {
@@ -26,7 +33,6 @@ type service struct {
 }
 
 func NewService(m *minio.Client, repo Repository) Service {
-
 	return &service{
 		minio:     m,
 		r:         repo,
@@ -63,7 +69,6 @@ func (s *service) UpdateProfilePicture(
 			http.StatusForbidden,
 			"cannot change profile picture besides your own",
 		)
-
 	}
 
 	s.r.UpdateProfilePicture(
@@ -76,7 +81,6 @@ func (s *service) UpdateProfilePicture(
 			object_key,
 		),
 	)
-
 	return presignedURL.String(), nil
 
 }
@@ -92,7 +96,6 @@ func (s *service) DeleteProfilePicture(
 			"invalid peer ID",
 		)
 	}
-
 	p, err := s.r.GetPeer(ctx, id)
 	if err != nil {
 		return err
@@ -104,7 +107,6 @@ func (s *service) DeleteProfilePicture(
 			"cannot delete profile picture besides your own",
 		)
 	}
-
 	if p.ProfilePhoto == "" {
 		return echo.NewHTTPError(
 			http.StatusNotFound,
@@ -119,7 +121,6 @@ func (s *service) DeleteProfilePicture(
 			s.minio_cfg.ImageBucket,
 		),
 	)
-
 	err = s.minio.RemoveObject(
 		ctx,
 		s.minio_cfg.ImageBucket,

@@ -50,7 +50,10 @@ func (s *Service) sendEmail(toEmail, subject, textBody, htmlBody string) error {
 	}
 
 	if resp.IsError() {
-		return fmt.Errorf("mailtrap API error: %s", resp.String())
+		return fmt.Errorf(
+			"mailtrap API error: %s",
+			resp.String(),
+		)
 	}
 	return nil
 }
@@ -77,10 +80,18 @@ func (s *Service) SendOTP(otpPayload broker.OtpPayload) error {
 
 	subject := "Your EthioPeer OTP Code"
 
-	textBody := fmt.Sprintf("Hello,\n\nYour OTP code is: %s\n\nThank you.", otpPayload.OTP)
+	textBody := fmt.Sprintf(
+		"Hello,\n\nYour OTP code is: %s\n\nThank you.",
+		otpPayload.OTP,
+	)
 	htmlBody := buf.String()
 
-	return s.sendEmail(otpPayload.Email, subject, textBody, htmlBody)
+	return s.sendEmail(
+		otpPayload.Email,
+		subject,
+		textBody,
+		htmlBody,
+	)
 }
 
 func (s *Service) SendWelcome(welcomePayload broker.WelcomePayload) error {
@@ -95,7 +106,10 @@ func (s *Service) SendWelcome(welcomePayload broker.WelcomePayload) error {
 		return err
 	}
 	var textBuf bytes.Buffer
-	if err := textTemplate.Execute(&textBuf, welcomePayload); err != nil {
+	if err := textTemplate.Execute(
+		&textBuf,
+		welcomePayload,
+	); err != nil {
 		return err
 	}
 
@@ -113,9 +127,17 @@ func (s *Service) SendWelcome(welcomePayload broker.WelcomePayload) error {
 		return err
 	}
 	var htmlBuf bytes.Buffer
-	if err := htmlTemplate.Execute(&htmlBuf, welcomePayload); err != nil {
+	if err := htmlTemplate.Execute(
+		&htmlBuf,
+		welcomePayload,
+	); err != nil {
 		return err
 	}
 
-	return s.sendEmail(welcomePayload.Email, subject, textBuf.String(), htmlBuf.String())
+	return s.sendEmail(
+		welcomePayload.Email,
+		subject,
+		textBuf.String(),
+		htmlBuf.String(),
+	)
 }

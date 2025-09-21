@@ -7,9 +7,10 @@ import (
 	"ep-auth-service/internal/features/common"
 	"ep-auth-service/internal/features/jwt"
 	"ep-auth-service/internal/features/otp"
-	"errors"
 	"log"
+	"net/http"
 
+	"github.com/labstack/echo/v4"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -52,7 +53,10 @@ func (s *service) LoginUser(
 	)
 
 	if err != nil {
-		return nil, ErrIncorrectPassword
+		return nil, echo.NewHTTPError(
+			http.StatusUnauthorized,
+			"incorrect password",
+		)
 	}
 
 	if !user.InstituteEmailVerified {
@@ -67,7 +71,10 @@ func (s *service) LoginUser(
 
 		otp_json, err := json.Marshal(otp)
 		if err != nil {
-			return nil, errors.New("failed to marshal otp")
+			return nil, echo.NewHTTPError(
+				http.StatusInternalServerError,
+				"failed to bind otp",
+			)
 		}
 
 		s.broker.Publish(broker.Message{
@@ -88,13 +95,19 @@ func (s *service) LoginUser(
 	token, err := s.token_service.GenerateAccessToken(*user)
 	if err != nil {
 		log.Println(err)
-		return nil, err
+		return nil, echo.NewHTTPError(
+			http.StatusInternalServerError,
+			"failed to generate access token",
+		)
 	}
 
 	refresh, err := s.token_service.GenerateRefreshToken(32)
 	if err != nil {
 		log.Println(err)
-		return nil, err
+		return nil, echo.NewHTTPError(
+			http.StatusInternalServerError,
+			"failed to generate refresh token",
+		)
 	}
 
 	if err := s.rep.InsertRefreshToken(ctx, user.Id, refresh); err != nil {

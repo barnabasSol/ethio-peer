@@ -2,7 +2,6 @@ package otp
 
 import (
 	"ep-auth-service/internal/features/common"
-	"log"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -33,31 +32,13 @@ func (h *Handler) VerifyOTP(ctx echo.Context) error {
 	}
 	err := req.Validate()
 	if err != nil {
-		return ctx.JSON(
-			http.StatusBadRequest,
-			map[string]string{"error": err.Error()},
-		)
+		return err
 	}
+
 	result, err := h.s.VerifyOTP(ctx.Request().Context(), req)
 
 	if err != nil {
-		if status_code, found := OtpErrors[err]; found {
-			return ctx.JSON(
-				status_code,
-				map[string]string{"error": err.Error()},
-			)
-		}
-		if status_code, found := common.Errors[err]; found {
-			return ctx.JSON(
-				status_code,
-				map[string]string{"error": err.Error()},
-			)
-		}
-		log.Println(err)
-		return ctx.JSON(
-			http.StatusInternalServerError,
-			map[string]string{"error": "unexpected error"},
-		)
+		return err
 	}
 
 	if with_cookie != "" && with_cookie == "true" {

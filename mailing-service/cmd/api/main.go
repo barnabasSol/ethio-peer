@@ -7,17 +7,9 @@ import (
 	"ep-mailing-service/internal/mail"
 	"log"
 	"os"
-
-	"github.com/joho/godotenv"
 )
 
 func main() {
-	err := godotenv.Load()
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	mailtrap_host := os.Getenv("HOST")
 	mailtrap_token := os.Getenv("TOKEN")
 	sender := os.Getenv("SENDER")

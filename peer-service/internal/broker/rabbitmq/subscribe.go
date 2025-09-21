@@ -50,7 +50,11 @@ func (r *RabbitMQ) Subscribe(que_name, binding_key string) (<-chan amqp.Delivery
 func (r *RabbitMQ) Listen(msgs <-chan amqp.Delivery) {
 	log.Println("peer service is waiting for messages...")
 	for msg := range msgs {
-		log.Printf("Received [%s]: %s", msg.RoutingKey, msg.Body)
+		log.Printf(
+			"Received [%s]: %s",
+			msg.RoutingKey,
+			msg.Body,
+		)
 		switch msg.RoutingKey {
 		case "peer.new":
 			var payload PeerPayload
@@ -70,14 +74,17 @@ func (r *RabbitMQ) Listen(msgs <-chan amqp.Delivery) {
 				continue
 			}
 			collection := r.db.Database(db.Name).Collection(models.PeerCollection)
-			result, err := collection.InsertOne(context.Background(), models.Peer{
-				UserId:       obj_id,
-				OverallScore: 0,
-				OnlineStatus: false,
-				Bio:          payload.Bio,
-				Interests:    payload.Interests,
-				UpdatedAt:    time.Now().UTC(),
-			})
+			result, err := collection.InsertOne(
+				context.Background(),
+				models.Peer{
+					UserId:       obj_id,
+					OverallScore: 0,
+					OnlineStatus: false,
+					Bio:          payload.Bio,
+					Interests:    payload.Interests,
+					UpdatedAt:    time.Now().UTC(),
+				},
+			)
 			if err != nil || !result.Acknowledged {
 				msg.Nack(false, false)
 				continue

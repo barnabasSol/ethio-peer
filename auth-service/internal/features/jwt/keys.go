@@ -6,7 +6,7 @@ import (
 )
 
 func ReadPrivateKey() ([]byte, error) {
-	absPath, err := filepath.Abs("internal/certs/private.pem")
+	absPath, err := filepath.Abs("certs/private.pem")
 	if err != nil {
 		return nil, err
 	}

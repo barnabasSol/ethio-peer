@@ -29,7 +29,10 @@ func (h *Handler) UpdateProfilePicture(c echo.Context) error {
 			"missing X-Claim-Sub header",
 		)
 	}
-	presignedURL, err := h.s.UpdateProfilePicture(c.Request().Context(), sub)
+	presignedURL, err := h.s.UpdateProfilePicture(
+		c.Request().Context(),
+		sub,
+	)
 	if err != nil {
 		return err
 	}

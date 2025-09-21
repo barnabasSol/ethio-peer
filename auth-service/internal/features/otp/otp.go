@@ -5,13 +5,14 @@ import (
 	"crypto/rand"
 	"log"
 	"math/big"
+	"net/http"
 	"os"
 	"strconv"
-	"strings"
 	"sync"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/labstack/echo/v4"
 )
 
 type OTP struct {
@@ -22,14 +23,16 @@ type OTP struct {
 }
 
 type OTPManager struct {
-	mu         sync.RWMutex
-	collection map[string]OTP
+	mu            sync.RWMutex
+	collection    map[string]OTP
+	pending_users map[string]struct{}
 }
 
 func NewOTPManager(ctx context.Context) *OTPManager {
 	m := &OTPManager{
-		mu:         sync.RWMutex{},
-		collection: make(map[string]OTP),
+		mu:            sync.RWMutex{},
+		collection:    make(map[string]OTP),
+		pending_users: map[string]struct{}{},
 	}
 	go scan(ctx, m)
 	return m
@@ -43,19 +46,29 @@ func (m *OTPManager) removeOTP(session_id string) {
 
 func (m *OTPManager) Generate(user_id string) (*OTP, error) {
 	if m.exists(user_id) {
-		return nil, ErrPendingOTP
+		return nil, echo.NewHTTPError(
+			http.StatusConflict,
+			"otp already pending, please try again later",
+		)
 	}
+	m.add_to_pending(user_id)
 	exp := os.Getenv("OTP_EXP_IN_MINS")
 	expInMins, err := strconv.Atoi(exp)
 	if err != nil {
 		log.Println("Invalid OTP_EXP_IN_MINS:", err)
-		return nil, ErrFailedToGenOTP
+		return nil, echo.NewHTTPError(
+			http.StatusInternalServerError,
+			"failed to generate otp",
+		)
 	}
 
 	value, err := generateOTP()
 
 	if err != nil {
-		return nil, ErrFailedToGenOTP
+		return nil, echo.NewHTTPError(
+			http.StatusInternalServerError,
+			"failed to generate otp",
+		)
 	}
 
 	sessionID := uuid.NewString()
@@ -67,7 +80,7 @@ func (m *OTPManager) Generate(user_id string) (*OTP, error) {
 	}
 
 	m.mu.Lock()
-	m.collection[sessionID+":"+user_id] = otp
+	m.collection[sessionID] = otp
 	m.mu.Unlock()
 	return &otp, nil
 }
@@ -78,7 +91,10 @@ func generateOTP() (string, error) {
 
 	otp := make([]byte, otpLength)
 	for i := range otpLength {
-		num, err := rand.Int(rand.Reader, big.NewInt(int64(len(digits))))
+		num, err := rand.Int(
+			rand.Reader,
+			big.NewInt(int64(len(digits))),
+		)
 		if err != nil {
 			return "", err
 		}
@@ -91,11 +107,12 @@ func generateOTP() (string, error) {
 func (m *OTPManager) exists(userID string) bool {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
-	for key := range m.collection {
-		parts := strings.SplitN(key, ":", 2)
-		if len(parts) == 2 && parts[1] == userID {
-			return true
-		}
-	}
-	return false
+	_, exists := m.pending_users[userID]
+	return exists
+}
+
+func (m *OTPManager) add_to_pending(userID string) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	m.pending_users[userID] = struct{}{}
 }

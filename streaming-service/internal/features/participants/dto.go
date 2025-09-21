@@ -1,7 +1,7 @@
 package participants
 
 type Join struct {
-	RoomName    string `json:"room_name"`
+	SessionName string `json:"room_name"`
 	IsAnonymous bool   `json:"is_anonymous"`
 }
 

@@ -3,3 +3,4 @@
 *.env
 *.pem
 *config.yml
+*.ps1

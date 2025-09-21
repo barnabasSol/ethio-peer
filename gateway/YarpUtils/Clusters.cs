@@ -15,7 +15,7 @@ public static class Clusters
                 {
                     {
                         "destination1",
-                        new DestinationConfig { Address = "http://localhost:2000" }
+                        new DestinationConfig { Address = "http://auth-service:2000" }
                     },
                 },
             },
@@ -26,7 +26,7 @@ public static class Clusters
                 {
                     {
                         "destination2",
-                        new DestinationConfig { Address = "http://localhost:2017" }
+                        new DestinationConfig { Address = "http://bridge-service:2017" }
                     },
                 },
             },
@@ -37,7 +37,7 @@ public static class Clusters
                 {
                     {
                         "destination3",
-                        new DestinationConfig { Address = "http://localhost:2013" }
+                        new DestinationConfig { Address = "http://peer-service:2013" }
                     },
                 },
             },

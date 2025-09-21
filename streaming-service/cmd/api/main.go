@@ -1,28 +1,14 @@
 package main
 
 import (
-	"github.com/joho/godotenv"
+	server "ep-streaming-service/internal/server/http"
+	"log"
+	"os"
 )
 
 func main() {
-	godotenv.Load()
+	srv := server.New(os.Getenv("APP_PORT"))
+	if err := srv.Run(); err != nil {
+		log.Println(err)
+	}
 }
-
-// func generateToken(room, identity string) (string, error) {
-
-// 	canPublish := true
-// 	canSubscribe := true
-
-// 	at := auth.NewAccessToken(apiKey, apiSecret)
-// 	grant := &auth.VideoGrant{
-// 		RoomJoin:     true,
-// 		Room:         room,
-// 		CanPublish:   &canPublish,
-// 		CanSubscribe: &canSubscribe,
-// 	}
-// 	at.SetVideoGrant(grant).
-// 		SetIdentity(identity).
-// 		SetValidFor(time.Hour)
-
-// 	return at.ToJWT()
-// }

@@ -5,8 +5,10 @@ import (
 	"ep-auth-service/internal/db"
 	"ep-auth-service/internal/models"
 	"log"
+	"net/http"
 	"time"
 
+	"github.com/labstack/echo/v4"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 )
@@ -43,7 +45,10 @@ func (r *repository) GetUser(
 	var user models.User
 	err := user_collection.FindOne(ctx, filter).Decode(&user)
 	if err != nil {
-		return nil, ErrUserDoesntExist
+		return nil, echo.NewHTTPError(
+			http.StatusNotFound,
+			"user doesnt exist",
+		)
 	}
 	return &user, nil
 }
@@ -62,7 +67,10 @@ func (r *repository) InsertRefreshToken(
 		UpdatedAt:    time.Now().UTC(),
 	})
 	if err != nil || !result.Acknowledged {
-		return ErrFailedToAuthenticate
+		return echo.NewHTTPError(
+			http.StatusNotFound,
+			"something went wrong during auth",
+		)
 	}
 	return nil
 }

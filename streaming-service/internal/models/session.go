@@ -13,6 +13,7 @@ type Session struct {
 	OwnerId        string        `json:"owner_id"`
 	OwnerUsername  string        `json:"owner_username"`
 	SessionName    string        `bson:"session_name"`
+	Description    string        `json:"description"`
 	ParticipantIds []string      `bson:"participant_ids"`
 	IsLive         bool          `bson:"is_live"`
 	CreatedAt      time.Time     `bson:"created_at"`

@@ -38,7 +38,7 @@ builder.Services.AddCors(options =>
         policy =>
         {
             policy
-                .WithOrigins("http://localhost:5173")
+                .WithOrigins("http://localhost:5173", "https://ep-web.barney-host.site")
                 .AllowAnyHeader()
                 .AllowAnyMethod()
                 .AllowCredentials();
@@ -76,14 +76,28 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseCors("WebOriginCorsPolicy");
+
+app.Use(
+    async (context, next) =>
+    {
+        if (HttpMethods.IsOptions(context.Request.Method))
+        {
+            Console.WriteLine(
+                $"[CORS Preflight] {context.Request.Method} {context.Request.Path} from {context.Request.Headers.Origin}"
+            );
+        }
+
+        await next.Invoke();
+    }
+);
+
 app.MapControllers();
 
 app.MapHealthChecks("/health");
 
 app.UseAuthentication();
 app.UseAuthorization();
-
-app.UseCors("WebOriginCorsPolicy");
 
 app.MapReverseProxy();
 
