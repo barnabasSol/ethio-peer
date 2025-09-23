@@ -54,7 +54,10 @@ func (s *Server) Run() error {
 
 	go func() {
 		if err := s.echo.StartServer(srv); err != nil {
-			log.Fatalf("failed to start the streaming server %v", err)
+			log.Fatalf(
+				"failed to start the streaming server %v",
+				err,
+			)
 		}
 	}()
 

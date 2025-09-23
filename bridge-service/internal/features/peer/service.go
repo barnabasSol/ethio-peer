@@ -33,7 +33,6 @@ func (s service) GetPeer(
 	if err != nil {
 		log.Println(err)
 		return nil, errors.New("failed to fetch peer")
-
 	}
 	return &PeerResponse{
 		UserId:       resp.UserId,

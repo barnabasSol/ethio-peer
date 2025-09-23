@@ -1,7 +1,8 @@
-package changepassword
+package resetpassword
 
 type Service interface {
-	ChangePassword(user_id string, password_hash string)
+	VerifyCredential(VerifyRequest) (string, error)
+	ChangePassword(ChangePasswordRequest) error
 }
 
 type service struct {
@@ -14,6 +15,10 @@ func NewService(repo Repository) Service {
 	}
 }
 
-func (s *service) ChangePassword(user_id string, password_hash string) {
+func (s *service) VerifyCredential(req VerifyRequest) (string, error) {
+	return "", nil
+}
 
+func (s *service) ChangePassword(req ChangePasswordRequest) error {
+	return nil
 }

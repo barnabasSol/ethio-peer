@@ -1,5 +1,7 @@
 package sessions
 
+import "time"
+
 type Create struct {
 	Name        string   `json:"name"`
 	Subject     string   `json:"subject"`
@@ -10,7 +12,7 @@ type Create struct {
 type Session struct {
 	Name         string        `json:"name"`
 	Owner        Owner         `json:"owner"`
-	Duration     string        `json:"duration"`
+	Duration     time.Duration `json:"duration"`
 	Description  string        `json:"description"`
 	IsLive       bool          `json:"is_live"`
 	Participants []Participant `json:"participants"`

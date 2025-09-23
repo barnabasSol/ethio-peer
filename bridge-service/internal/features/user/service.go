@@ -125,7 +125,11 @@ func (s *service) GetCurrentUser(
 			u,
 			10*time.Minute,
 		); err != nil {
-			log.Printf("failed to cache user %s: %v", u.UserId, err)
+			log.Printf(
+				"failed to cache user %s: %v",
+				u.UserId,
+				err,
+			)
 		}
 	}(result)
 

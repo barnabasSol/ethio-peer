@@ -5,7 +5,10 @@ import (
 	"time"
 )
 
-func SetCookie(key, value string, exp_mins int) *http.Cookie {
+func SetCookie(
+	key, value string,
+	exp_mins int,
+) *http.Cookie {
 	cookie := new(http.Cookie)
 	cookie.Name = key
 	cookie.Value = value

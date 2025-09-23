@@ -17,5 +17,5 @@ type Session struct {
 	ParticipantIds []string      `bson:"participant_ids"`
 	IsLive         bool          `bson:"is_live"`
 	CreatedAt      time.Time     `bson:"created_at"`
-	EndedAt        time.Time     `bson:"updated_at"`
+	EndedAt        *time.Time    `bson:"updated_at"`
 }

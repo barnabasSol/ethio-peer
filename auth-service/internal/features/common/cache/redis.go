@@ -14,10 +14,7 @@ type Redis struct {
 	ttl    time.Duration
 }
 
-func New(
-	addr string,
-	ttl time.Duration,
-) (*Redis, error) {
+func New(addr string, ttl time.Duration) (*Redis, error) {
 	rdb := redis.NewClient(&redis.Options{
 		Addr: addr,
 		DB:   0,
