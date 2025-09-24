@@ -13,24 +13,27 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"go.mongodb.org/mongo-driver/v2/mongo"
 )
 
 type Server struct {
 	addr string
+	db   *mongo.Client
 	echo *echo.Echo
 }
 
 func New(
 	addr string,
+	db *mongo.Client,
 ) *Server {
 	return &Server{
 		addr: addr,
+		db:   db,
 		echo: echo.New(),
 	}
 }
 
 func (s *Server) Run() error {
-
 	s.echo.Use(middleware.Logger())
 	s.echo.Use(middleware.Recover())
 
@@ -74,7 +77,10 @@ func (s *Server) Run() error {
 	<-quit
 	log.Println("bridge service is shutting down")
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(
+		context.Background(),
+		5*time.Second,
+	)
 	defer cancel()
 
 	return s.echo.Shutdown(ctx)

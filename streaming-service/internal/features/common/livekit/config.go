@@ -6,12 +6,14 @@ type Config struct {
 	ApiSecret    string
 	EgressKey    string
 	EgressSecret string
+	WebhookKey   string
 }
 
 func NewConfig(
 	host, apikey, apisecret string,
 	egresskey string,
 	egresssecret string,
+	webhook string,
 ) *Config {
 	return &Config{
 		Host:         host,
@@ -19,5 +21,6 @@ func NewConfig(
 		ApiSecret:    apisecret,
 		EgressKey:    egresskey,
 		EgressSecret: egresssecret,
+		WebhookKey:   webhook,
 	}
 }

@@ -9,13 +9,13 @@ import (
 const SessionCollection = "sessions"
 
 type Session struct {
-	Id             bson.ObjectID `bson:"_id,omitempty"`
-	OwnerId        string        `json:"owner_id"`
-	OwnerUsername  string        `json:"owner_username"`
-	SessionName    string        `bson:"session_name"`
-	Description    string        `json:"description"`
-	ParticipantIds []string      `bson:"participant_ids"`
-	IsLive         bool          `bson:"is_live"`
-	CreatedAt      time.Time     `bson:"created_at"`
-	EndedAt        *time.Time    `bson:"updated_at"`
+	Id            bson.ObjectID `bson:"_id,omitempty"`
+	OwnerId       string        `bson:"owner_id"`
+	OwnerUsername string        `bson:"owner_username"`
+	SessionName   string        `bson:"session_name"`
+	Description   string        `bson:"description"`
+	Participants  []Participant `bson:"participant_ids"`
+	Tags          []string      `bson:"tags"`
+	CreatedAt     time.Time     `bson:"created_at"`
+	EndedAt       *time.Time    `bson:"ended_at"`
 }

@@ -3,6 +3,7 @@ package sessions
 import (
 	"context"
 	"ep-streaming-service/internal/db"
+	"ep-streaming-service/internal/features/common/flags"
 	"ep-streaming-service/internal/models"
 	"net/http"
 	"time"
@@ -38,13 +39,22 @@ func (r *repository) InsertSession(
 ) (string, error) {
 	collection := r.db.Database(db.Name).Collection(models.SessionCollection)
 	result, err := collection.InsertOne(ctx, models.Session{
-		OwnerId:        owner_id,
-		OwnerUsername:  username,
-		Description:    session.Description,
-		ParticipantIds: []string{owner_id},
-		SessionName:    session.Name,
-		CreatedAt:      time.Now().UTC(),
-		EndedAt:        nil,
+		OwnerId:       owner_id,
+		OwnerUsername: username,
+		Description:   session.Description,
+		Tags:          session.Tags,
+		Participants: []models.Participant{
+			{
+				UserId:      owner_id,
+				FlagStatus:  flags.OK,
+				IsAnonymous: false,
+				CreatedAt:   time.Now().UTC(),
+				UpdatedAt:   time.Now().UTC(),
+			},
+		},
+		SessionName: session.Name,
+		CreatedAt:   time.Now().UTC(),
+		EndedAt:     nil,
 	})
 	if err != nil {
 		return "", echo.NewHTTPError(
@@ -70,16 +80,3 @@ func (r *repository) DeleteSession(ctx context.Context) {
 func (r *repository) GetLiveSessions(ctx context.Context) {
 	panic("unimplemented")
 }
-
-// collection := r.db.Database(db.Name).Collection(models.PeerCollection)
-// result, err := collection.InsertOne(
-// 	context.Background(),
-// 	models.Peer{
-// 		UserId:       obj_id,
-// 		OverallScore: 0,
-// 		OnlineStatus: false,
-// 		Bio:          payload.Bio,
-// 		Interests:    payload.Interests,
-// 		UpdatedAt:    time.Now().UTC(),
-// 	},
-// )VM

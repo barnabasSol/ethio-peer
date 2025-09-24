@@ -41,6 +41,17 @@ public static class Clusters
                     },
                 },
             },
+            new ClusterConfig
+            {
+                ClusterId = "stream-cluster",
+                Destinations = new Dictionary<string, DestinationConfig>
+                {
+                    {
+                        "destination4",
+                        new DestinationConfig { Address = "http://streaming-service:2019" }
+                    },
+                },
+            },
         ];
     }
 }

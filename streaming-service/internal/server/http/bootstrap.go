@@ -1,8 +1,10 @@
 package server
 
 import (
+	broker "ep-streaming-service/internal/broker/rabbitmq"
 	"ep-streaming-service/internal/features/common/livekit"
 	"ep-streaming-service/internal/features/sessions"
+	"log"
 	"os"
 )
 
@@ -12,14 +14,26 @@ func (s *Server) bootstrap() error {
 	lk_api_secret := os.Getenv("LK_API_SECRET")
 	lk_egress_key := os.Getenv("LK_EGRESS_KEY")
 	lk_egress_secret := os.Getenv("LK_EGRESS_SECRET")
+	wh := os.Getenv("LK_WH_KEY")
 	livekit_cfg := livekit.NewConfig(
 		host,
 		lk_api_key,
 		lk_api_secret,
 		lk_egress_key,
 		lk_egress_secret,
+		wh,
 	)
-	ss := sessions.NewService(nil, *livekit_cfg)
+	b, err := broker.InitRabbitMQ()
+	if err != nil {
+		log.Fatal(err)
+	}
+	sr := sessions.NewRepository(s.db)
+	ss := sessions.NewService(sr, b, *livekit_cfg)
+	sessions.InitHandler(
+		ss,
+		*livekit_cfg,
+		s.echo.Group("session"),
+	)
 
 	return nil
 }

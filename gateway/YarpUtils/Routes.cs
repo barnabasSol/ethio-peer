@@ -13,7 +13,7 @@ public static class Routes
                 RouteId = "auth-reset-password",
                 CorsPolicy = "WebOriginCorsPolicy",
                 ClusterId = "auth-cluster",
-                Match = new RouteMatch { Path = "/auth/health/{**catch-all}" },
+                Match = new RouteMatch { Path = "api/auth/health/{**catch-all}" },
                 Transforms = [new Dictionary<string, string> { { "PathRemovePrefix", "/auth" } }],
                 AuthorizationPolicy = "authenticated",
             },
@@ -35,6 +35,18 @@ public static class Routes
                 Transforms =
                 [
                     new Dictionary<string, string> { { "PathRemovePrefix", "/api/bridge" } },
+                ],
+                AuthorizationPolicy = "authenticated",
+            },
+            new RouteConfig
+            {
+                RouteId = "stream",
+                ClusterId = "stream-cluster",
+                CorsPolicy = "WebOriginCorsPolicy",
+                Match = new RouteMatch { Path = "/api/stream/{**catch-all}" },
+                Transforms =
+                [
+                    new Dictionary<string, string> { { "PathRemovePrefix", "/api/stream" } },
                 ],
                 AuthorizationPolicy = "authenticated",
             },
