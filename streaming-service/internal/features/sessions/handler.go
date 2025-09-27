@@ -36,7 +36,10 @@ func (h *Handler) HandleLiveKitWebhook(c echo.Context) error {
 		h.lk_cfg.ApiKey,
 		h.lk_cfg.ApiSecret,
 	)
-	event, err := webhook.ReceiveWebhookEvent(c.Request(), authProvider)
+	event, err := webhook.ReceiveWebhookEvent(
+		c.Request(),
+		authProvider,
+	)
 	if err != nil {
 		return c.NoContent(http.StatusBadRequest)
 	}

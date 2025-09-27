@@ -3,6 +3,8 @@ package login
 import (
 	"ep-auth-service/internal/features/common"
 	"net/http"
+	"os"
+	"strconv"
 
 	"github.com/labstack/echo/v4"
 )
@@ -42,10 +44,17 @@ func (h *Handler) Login(ctx echo.Context) error {
 	if with_cookie != "" && with_cookie == "true" {
 		if !result.Data.VerificationRequired {
 			if result.Data.AccessToken != nil && result.Data.RefreshToken != nil {
+				expiry, err := strconv.Atoi(os.Getenv("JWT_EXPIRY_MINS"))
+				if err != nil {
+					return ctx.JSON(
+						http.StatusInternalServerError,
+						map[string]string{"error": "failed setting expiry"},
+					)
+				}
 				atc := common.SetCookie(
 					"access_token",
 					*result.Data.AccessToken,
-					15,
+					expiry,
 				)
 				rtc := common.SetCookie(
 					"refresh_token",

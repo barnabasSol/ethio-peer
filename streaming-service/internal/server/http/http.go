@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"strings"
 	"syscall"
 	"time"
 
@@ -38,14 +37,6 @@ func (s *Server) Run() error {
 	s.echo.Use(middleware.Recover())
 
 	s.echo.GET("/health", func(c echo.Context) error {
-		log.Println("Request Headers:")
-		for name, values := range c.Request().Header {
-			for _, value := range values {
-				if strings.HasPrefix(name, "X-Claim") {
-					log.Printf("%s: %s\n", name, value)
-				}
-			}
-		}
 		return c.String(http.StatusOK, "OK")
 	})
 

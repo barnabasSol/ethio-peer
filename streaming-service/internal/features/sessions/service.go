@@ -49,14 +49,12 @@ func NewService(
 
 func (s *service) CreteSession(
 	ctx context.Context,
-	username string,
-	user_id string,
+	username, user_id string,
 	session Create,
 ) (*common.Response[CreateResponse], error) {
 	sid, err := s.repo.InsertSession(
 		ctx,
 		session,
-		user_id,
 		username,
 	)
 	if err != nil {
@@ -89,6 +87,7 @@ func (s *service) GetSessions(
 ) {
 	panic("unimplemented")
 }
+
 func (s *service) EndSession(
 	ctx context.Context,
 	owner_id, session_id string,

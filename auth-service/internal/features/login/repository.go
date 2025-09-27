@@ -32,6 +32,7 @@ func (r *repository) GetUser(
 	ctx context.Context,
 	login LoginRequest,
 ) (*models.User, error) {
+
 	user_collection := r.db.Database(db.Name).Collection(models.UserCollection)
 	filter := bson.D{}
 	if login.Username != nil {

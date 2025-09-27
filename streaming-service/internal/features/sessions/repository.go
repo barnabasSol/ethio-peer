@@ -14,12 +14,11 @@ import (
 )
 
 type Repository interface {
-	GetLiveSessions(ctx context.Context)
 	DeleteSession(ctx context.Context)
 	InsertSession(
 		ctx context.Context,
 		session Create,
-		owner_id, username string,
+		username string,
 	) (string, error)
 }
 
@@ -35,26 +34,27 @@ func NewRepository(db *mongo.Client) Repository {
 func (r *repository) InsertSession(
 	ctx context.Context,
 	session Create,
-	owner_id, username string,
+	username string,
 ) (string, error) {
 	collection := r.db.Database(db.Name).Collection(models.SessionCollection)
 	result, err := collection.InsertOne(ctx, models.Session{
-		OwnerId:       owner_id,
-		OwnerUsername: username,
-		Description:   session.Description,
-		Tags:          session.Tags,
+		SessionName: session.Name,
+		Description: session.Description,
+		Tags:        session.Tags,
 		Participants: []models.Participant{
 			{
-				UserId:      owner_id,
-				FlagStatus:  flags.OK,
-				IsAnonymous: false,
-				CreatedAt:   time.Now().UTC(),
-				UpdatedAt:   time.Now().UTC(),
+				Username:       username,
+				Name:           session.OwnerName,
+				ProfilePicture: session.OwnerProfilePic,
+				IsOwner:        true,
+				FlagStatus:     flags.OK,
+				IsAnonymous:    false,
+				CreatedAt:      time.Now().UTC(),
+				UpdatedAt:      time.Now().UTC(),
 			},
 		},
-		SessionName: session.Name,
-		CreatedAt:   time.Now().UTC(),
-		EndedAt:     nil,
+		CreatedAt: time.Now().UTC(),
+		EndedAt:   nil,
 	})
 	if err != nil {
 		return "", echo.NewHTTPError(
@@ -74,9 +74,5 @@ func (r *repository) InsertSession(
 }
 
 func (r *repository) DeleteSession(ctx context.Context) {
-	panic("unimplemented")
-}
-
-func (r *repository) GetLiveSessions(ctx context.Context) {
 	panic("unimplemented")
 }

@@ -1,17 +1,21 @@
 package resetpassword
 
+import "ep-auth-service/internal/features/common/cache"
+
 type Service interface {
 	VerifyCredential(VerifyRequest) (string, error)
 	ChangePassword(ChangePasswordRequest) error
 }
 
 type service struct {
-	repo Repository
+	cache *cache.Redis
+	repo  Repository
 }
 
-func NewService(repo Repository) Service {
+func NewService(repo Repository, c *cache.Redis) Service {
 	return &service{
-		repo: repo,
+		repo:  repo,
+		cache: c,
 	}
 }
 

@@ -3,8 +3,10 @@ package participants
 import (
 	"context"
 	"ep-streaming-service/internal/db"
+	"ep-streaming-service/internal/features/common/flags"
 	"ep-streaming-service/internal/models"
 	"net/http"
+	"time"
 
 	"github.com/labstack/echo/v4"
 	"go.mongodb.org/mongo-driver/v2/bson"
@@ -13,17 +15,23 @@ import (
 
 type Repository interface {
 	UpdateFlag(ctx context.Context, flag Flag) error
-	Insert(context.Context, Join) error
-	GetSession(context.Context, string) (*models.Session, error)
+	Insert(context.Context, bool, Join) error
+	GetSession(context.Context, bson.ObjectID) (*models.Session, error)
 }
 
 type repository struct {
 	db *mongo.Client
 }
 
+func NewRepository(db *mongo.Client) Repository {
+	return &repository{
+		db: db,
+	}
+}
+
 func (r *repository) GetSession(
 	ctx context.Context,
-	sid string,
+	sid bson.ObjectID,
 ) (*models.Session, error) {
 	collection := r.db.Database(db.Name).Collection(models.SessionCollection)
 	var session models.Session
@@ -48,31 +56,47 @@ func (r *repository) GetSession(
 	return &session, nil
 }
 
-// Insert implements Repository.
-func (r *repository) Insert(context.Context, Join) error {
-	panic("unimplemented")
+func (r *repository) Insert(
+	ctx context.Context,
+	is_owner bool,
+	join Join,
+) error {
+	collection := r.db.Database(db.Name).Collection(models.SessionCollection)
+	sessionID, err := bson.ObjectIDFromHex(join.SessionId)
+	if err != nil {
+		return err
+	}
+
+	participant := models.Participant{
+		Username:       join.Username,
+		Name:           join.Name,
+		ProfilePicture: join.ProfilePicture,
+		IsAnonymous:    join.AsAnonymous,
+		IsOwner:        is_owner,
+		FlagStatus:     flags.OK,
+		CreatedAt:      time.Now(),
+		UpdatedAt:      time.Now(),
+	}
+
+	filter := bson.M{"_id": sessionID}
+	update := bson.M{
+		"$push": bson.M{"participant_ids": participant},
+		"$set":  bson.M{"updated_at": time.Now()},
+	}
+
+	result, err := collection.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return err
+	}
+	if result.MatchedCount == 0 {
+		return mongo.ErrNoDocuments
+	}
+	return nil
 }
 
-// UpdateFlag implements Repository.
 func (r *repository) UpdateFlag(
 	ctx context.Context,
 	flag Flag,
 ) error {
 	panic("unimplemented")
 }
-
-func NewRepository(db *mongo.Client) Repository {
-	return &repository{
-		db: db,
-	}
-}
-
-// user_collection := r.db.Database(db.Name).Collection(models.UserCollection)
-// filter := bson.M{"_id": user_id}
-// var user models.User
-
-// err := user_collection.FindOne(ctx, filter).Decode(&user)
-// if err != nil {
-// 	return nil, errors.New("user not found")
-// }
-// return &user, nil

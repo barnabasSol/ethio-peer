@@ -3,10 +3,12 @@ package sessions
 import "time"
 
 type Create struct {
-	Name        string   `json:"name"`
-	Subject     string   `json:"subject"`
-	Description string   `json:"description"`
-	Tags        []string `json:"tags"`
+	OwnerProfilePic string   `json:"peer_profile_pic"`
+	OwnerName       string   `json:"owner_name"`
+	Name            string   `json:"name"`
+	Subject         string   `json:"subject"`
+	Description     string   `json:"description"`
+	Tags            []string `json:"tags"`
 }
 type CreateResponse struct {
 	// Token  string `json:"token"`

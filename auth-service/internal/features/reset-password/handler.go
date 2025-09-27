@@ -7,9 +7,10 @@ type Handler struct {
 	s     Service
 }
 
-func NewHandler(echo *echo.Echo) *Handler {
+func NewHandler(echo *echo.Echo, s Service) *Handler {
 	h := &Handler{
 		group: echo.Group("password"),
+		s:     s,
 	}
 	h.group.POST("/reset", h.ResetPassword)
 	return h

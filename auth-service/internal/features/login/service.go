@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	broker "ep-auth-service/internal/broker/rabbitmq"
 	"ep-auth-service/internal/features/common"
-	"ep-auth-service/internal/features/jwt"
+	"ep-auth-service/internal/features/common/jwt"
 	"ep-auth-service/internal/features/otp"
 	"log"
 	"net/http"
@@ -15,7 +15,10 @@ import (
 )
 
 type Service interface {
-	LoginUser(ctx context.Context, req LoginRequest) (*common.Response[LoginResponse], error)
+	LoginUser(
+		ctx context.Context,
+		req LoginRequest,
+	) (*common.Response[LoginResponse], error)
 }
 
 type service struct {

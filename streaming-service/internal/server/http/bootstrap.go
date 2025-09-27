@@ -3,6 +3,7 @@ package server
 import (
 	broker "ep-streaming-service/internal/broker/rabbitmq"
 	"ep-streaming-service/internal/features/common/livekit"
+	"ep-streaming-service/internal/features/participants"
 	"ep-streaming-service/internal/features/sessions"
 	"log"
 	"os"
@@ -28,11 +29,23 @@ func (s *Server) bootstrap() error {
 		log.Fatal(err)
 	}
 	sr := sessions.NewRepository(s.db)
-	ss := sessions.NewService(sr, b, *livekit_cfg)
+	ss := sessions.NewService(
+		sr,
+		b,
+		*livekit_cfg,
+	)
 	sessions.InitHandler(
 		ss,
 		*livekit_cfg,
 		s.echo.Group("session"),
+	)
+
+	pr := participants.NewRepository(s.db)
+	ps := participants.NewService(pr, livekit_cfg)
+	participants.InitHandler(
+		ps,
+		*livekit_cfg,
+		s.echo.Group("participant"),
 	)
 
 	return nil

@@ -5,12 +5,14 @@ type KickOut struct {
 }
 
 type Join struct {
-	UserId      string `json:"user_id"`
-	SessionId   string `json:"session_id"`
-	AsAnonymous bool   `json:"as_anonymous"`
+	Name           string `json:"name"`
+	Username       string `json:"username"`
+	SessionId      string `json:"session_id"`
+	ProfilePicture string `json:"profile_picture"`
+	AsAnonymous    bool   `json:"as_anonymous"`
 }
 
-type Particiant struct {
+type Participant struct {
 	Name           string `json:"name"`
 	Username       string `json:"username"`
 	ProfilePicture string `json:"profile_picture"`

@@ -2,7 +2,7 @@ package otp
 
 import (
 	"context"
-	"ep-auth-service/internal/features/jwt"
+	"ep-auth-service/internal/features/common/jwt"
 	"log"
 	"net/http"
 
