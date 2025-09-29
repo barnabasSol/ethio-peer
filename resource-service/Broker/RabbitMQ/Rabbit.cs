@@ -49,22 +49,22 @@ public class Rabbit
                 switch (routingKey)
                 {
                     case "session.created":
-                        await ProcessSessionCreation(ea, message); 
+                        await ProcessSessionCreation(ea, message);
                         break;
 
                     case "session.member.joined":
-                        await ProcessMemberJoined(ea,message);
+                        await ProcessMemberJoined(ea, message);
                         break;
 
                     default:
                         Console.WriteLine($"Unhandled routing key: {routingKey}");
                         break;
-                } 
+                }
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error processing message: {ex.Message}");
-                await _channel.BasicNackAsync(ea.DeliveryTag, multiple: false, requeue: false); 
+                await _channel.BasicNackAsync(ea.DeliveryTag, multiple: false, requeue: false);
             }
 
         };
@@ -75,7 +75,7 @@ public class Rabbit
     private async Task ProcessMemberJoined(BasicDeliverEventArgs ea, string message)
     {
         var scope = _serviceProvider.CreateScope();
-        var roomRepo = scope.ServiceProvider.GetRequiredService<RoomRepository>(); 
+        var roomRepo = scope.ServiceProvider.GetRequiredService<RoomRepository>();
         var opts = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
         var member = JsonSerializer.Deserialize<MemberData>(message, opts);
         if (member != null)
@@ -88,6 +88,7 @@ public class Rabbit
                 MemberId = member.MemberId
             };
             roomRepo.AddParticipant(dto).Wait();
+            await _channel!.BasicAckAsync(ea.DeliveryTag, multiple: false);
         }
         else
         {
@@ -114,11 +115,12 @@ public class Rabbit
             RoomDTO roomDto = new RoomDTO
             {
                 SessionId = session.SessionId,
-                Name = session.UserName.ToUpper() + "'s " + topicName
+                Name = session.UserName.ToUpper() + "'s " + topicName,
+                TopicId = session.TopicId
 
             };
-           var room= await roomRepo.AddRoom(roomDto);
-            await roomRepo.AddParticipant(new RoomMemberDTO{RoomId=room.Id,MemberId=session.OwnerId});
+            var room = await roomRepo.AddRoom(roomDto);
+            await roomRepo.AddParticipant(new RoomMemberDTO { RoomId = room.Id, MemberId = session.OwnerId });
             await _channel!.BasicAckAsync(ea.DeliveryTag, multiple: false);
 
         }

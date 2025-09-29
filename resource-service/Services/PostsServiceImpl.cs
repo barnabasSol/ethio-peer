@@ -1,5 +1,6 @@
 using Grpc.Core;
 using ResourceService.Grpc.ProtoBuf;
+using ResourceService.Models;
 using ResourceService.Repositories;
 
 namespace ResourceService.Services;
@@ -12,11 +13,16 @@ public class PostsServiceImpl : PostsService.PostsServiceBase
     {
         _postsRepository = postsRepository;
     }
-    public override async Task<PostsReply> GetPosts(PostsRequest request,ServerCallContext context)
+    public override async Task<PostsReply> GetPosts(PostsRequest request, ServerCallContext context)
     {
-        var posts = await _postsRepository.GetPostsByRoomId(Guid.Parse(request.RoomId));
-        var reply = new PostsReply();
-        reply.Posts.AddRange(posts.Select(p => new Post
+        var pagedQuery = new PagedQuery
+    {
+        PageSize = request.PageSize,
+        PageNumber = request.PageNumber
+    };
+        var posts = await _postsRepository.GetPostsByRoomId(Guid.Parse(request.RoomId),pagedQuery); 
+        var reply=new PostsReply();
+        reply.Posts.AddRange(posts.Items.Select(p => new Grpc.ProtoBuf.Post
         {
             Id = p.Id.ToString(),
             SenderId = p.SenderId.ToString(),
@@ -24,6 +30,6 @@ public class PostsServiceImpl : PostsService.PostsServiceBase
             RoomId = p.RoomId.ToString(),
             CreatedAt = p.CreatedAt.ToString("o") // ISO 8601 format
         }));
-        return reply;
+        return reply; 
     }
 }

@@ -1,5 +1,5 @@
 syntax = "proto3";
-
+import "google/protobuf/wrappers.proto";
 option csharp_namespace = "ResourceService.Grpc.ProtoBuf";
 
 message Post{
@@ -12,6 +12,8 @@ message Post{
 
 message PostsRequest {
   string roomId = 1; 
+  google.protobuf.Int32Value pageSize = 2;
+  google.protobuf.Int32Value pageNumber = 3;
 }
 
 message PostsReply {    

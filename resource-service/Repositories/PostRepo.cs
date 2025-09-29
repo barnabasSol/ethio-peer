@@ -25,11 +25,11 @@ namespace ResourceService.Repositories
         }
 
         //Get Posts by RoomId
-        public async Task<List<Post>> GetPostsByRoomId(Guid roomId)
+        public async Task<PagedList<Post>> GetPostsByRoomId(Guid roomId,PagedQuery pq)
         {
-            var room = await _context.Rooms.FindAsync(roomId) ?? throw new ArgumentNullException(nameof(roomId),"Room not found");
-            var posts = await _context.Posts.Where(p => p.RoomId == roomId).OrderBy(p => p.CreatedAt).ToListAsync();
-            return posts;
+            var room = await _context.Rooms.Where(r => r.Id == roomId).FirstOrDefaultAsync() ?? throw new ArgumentNullException(nameof(roomId),"Room not found");
+            var postsQuery = _context.Posts.Where(p => p.RoomId == roomId).OrderByDescending(p => p.CreatedAt).AsQueryable();
+            return await PagedList<Post>.CreateAsync(postsQuery,pq.PageSize,pq.PageNumber);
         }
         
     }

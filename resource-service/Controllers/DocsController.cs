@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using ResourceService.Models;
 using ResourceService.Repositories;
@@ -6,26 +5,39 @@ using ResourceService.Repositories;
 namespace ResourceService.Controllers;
 
 [ApiController]
-[Route("api/[controller]s")]
+[Route("[controller]s")]
 public class DocumentController(DocRepo docRepo) : ControllerBase
 {
     private readonly DocRepo _docRepo = docRepo;
     [HttpGet]
-    public async Task<IActionResult> GetDocs()
+    public async Task<IActionResult> GetDocs([FromQuery] CourseCategory? category)
     {
-        var docs = await _docRepo.GetDocsAsync();
+        var docs = await _docRepo.GetDocsAsync(category);
         return Ok(docs);
+    }
+    [HttpGet("suggestions")]
+    public async Task<IActionResult> GetSuggestedDocs([FromQuery] List<string> courses)
+    {
+        try
+        {
+            var docs = await _docRepo.GetDocumentSuggestionsAsync(courses);
+            return Ok(docs);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ex.Message);
+        }
     }
 
     //upload doc
     [HttpPost]
     [IgnoreAntiforgeryToken]
-    public async Task<IActionResult> DocumentUpload([FromForm] DocDTO dto)
+    public async Task<IActionResult> DocumentUpload([FromBody] DocDTO dto)
     {
         try
         {
-            var doc = await _docRepo.AddDoc(dto);
-            return CreatedAtAction(nameof(DocumentUpload), doc);
+            var docUrl = await _docRepo.AddDoc(dto);
+            return Ok(new {uploadUrl= docUrl});
         }
         catch (FileNotFoundException)
         {
@@ -46,8 +58,9 @@ public class DocumentController(DocRepo docRepo) : ControllerBase
     {
         try
         {
-            var stream = await _docRepo.DownloadDoc(id);
-            return File(stream, "application/octet-stream", id);
+            return Ok();
+            // var stream = await _docRepo.DownloadDoc(id);
+            // return File(stream, "application/octet-stream", id);
         }
         catch (FileNotFoundException)
         {
@@ -57,7 +70,7 @@ public class DocumentController(DocRepo docRepo) : ControllerBase
 
     //update metadata
     [HttpPut("{id}")]
-    public async Task<IActionResult> DocumentUpdate(string id, [FromForm] DocDTO dto)
+    public async Task<IActionResult> DocumentUpdate(Guid id, [FromForm] DocDTO dto)
     {
         try
         {
@@ -79,7 +92,7 @@ public class DocumentController(DocRepo docRepo) : ControllerBase
     }
     //delete doc
     [HttpDelete("{id}")]
-    public async Task<IActionResult> DeleteDoc(string id)
+    public async Task<IActionResult> DeleteDoc(Guid id)
     {
         try
         {
