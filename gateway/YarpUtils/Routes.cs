@@ -61,6 +61,18 @@ public static class Routes
             },
             new RouteConfig
             {
+                RouteId = "resource",
+                ClusterId = "resource-cluster",
+                CorsPolicy = "WebOriginCorsPolicy",
+                Match = new RouteMatch { Path = "/api/stream/{**catch-all}" },
+                Transforms =
+                [
+                    new Dictionary<string, string> { { "PathRemovePrefix", "/api/stream" } },
+                ],
+                AuthorizationPolicy = "authenticated",
+            },
+            new RouteConfig
+            {
                 RouteId = "peer",
                 ClusterId = "peer-cluster",
                 CorsPolicy = "WebOriginCorsPolicy",

@@ -72,7 +72,6 @@ func (r *repository) Insert(
 		Name:           join.Name,
 		ProfilePicture: join.ProfilePicture,
 		IsAnonymous:    join.AsAnonymous,
-		IsOwner:        is_owner,
 		FlagStatus:     flags.OK,
 		CreatedAt:      time.Now(),
 		UpdatedAt:      time.Now(),
@@ -80,7 +79,7 @@ func (r *repository) Insert(
 
 	filter := bson.M{"_id": sessionID}
 	update := bson.M{
-		"$push": bson.M{"participant_ids": participant},
+		"$push": bson.M{"participants": participant},
 		"$set":  bson.M{"updated_at": time.Now()},
 	}
 

@@ -17,6 +17,7 @@ type Participant struct {
 	Username       string `json:"username"`
 	ProfilePicture string `json:"profile_picture"`
 	IsAnonymous    bool   `json:"is_anonymous"`
+	IsMain         bool   `json:"is_main"`
 }
 
 type Flag struct {

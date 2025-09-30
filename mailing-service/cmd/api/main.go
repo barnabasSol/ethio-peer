@@ -70,7 +70,7 @@ func main() {
 			msg.Ack(false)
 
 		default:
-			log.Printf("⚠️ Unknown email event: %s", msg.RoutingKey)
+			log.Printf("Unknown email event: %s", msg.RoutingKey)
 		}
 	}
 

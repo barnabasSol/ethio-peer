@@ -24,6 +24,18 @@ type service struct {
 	rep           Repository
 }
 
+func NewService(
+	rep Repository,
+	rmq *broker.RabbitMQ,
+	tg jwt.Generator,
+) Service {
+	return &service{
+		rep:           rep,
+		token_service: tg,
+		broker:        rmq,
+	}
+}
+
 func (s *service) Refresh(
 	ctx context.Context,
 	req Request,
@@ -68,7 +80,11 @@ func (s *service) Refresh(
 		)
 	}
 
-	if err := s.rep.InsertRefreshToken(ctx, refresh, req); err != nil {
+	if err := s.rep.InsertRefreshToken(
+		ctx,
+		refresh,
+		req,
+	); err != nil {
 		return nil, err
 	}
 	return &common.Response[Response]{
@@ -78,16 +94,4 @@ func (s *service) Refresh(
 			RefreshToken: refresh,
 		},
 	}, nil
-}
-
-func NewService(
-	rep Repository,
-	rmq *broker.RabbitMQ,
-	tg jwt.Generator,
-) Service {
-	return &service{
-		rep:           rep,
-		token_service: tg,
-		broker:        rmq,
-	}
 }

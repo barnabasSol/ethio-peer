@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"time"
 
-	lk "github.com/livekit/protocol/livekit"
+	lk_protocol "github.com/livekit/protocol/livekit"
 
 	"github.com/labstack/echo/v4"
 	"github.com/livekit/protocol/auth"
@@ -50,9 +50,24 @@ func (s *service) GetParticipants(
 	*[]common.Response[[]Participant],
 	error,
 ) {
-	res, err := s.rc.ListParticipants(ctx, &lk.ListParticipantsRequest{
-		Room: session_id,
-	})
+
+	sess_obj_id, err := bson.ObjectIDFromHex(session_id)
+	if err != nil {
+		return nil, echo.NewHTTPError(
+			http.StatusBadRequest,
+			"invalid session id",
+		)
+	}
+	session, err := s.repo.GetSession(ctx, sess_obj_id)
+	if err != nil {
+		return nil, err
+	}
+	res, err := s.rc.ListParticipants(
+		ctx,
+		&lk_protocol.ListParticipantsRequest{
+			Room: session_id,
+		},
+	)
 	if err != nil {
 		return nil, echo.NewHTTPError(
 			http.StatusInternalServerError,
@@ -60,11 +75,17 @@ func (s *service) GetParticipants(
 		)
 	}
 
-	participants := make([]Participant, 0, len(res.Participants))
+	participants := make(
+		[]Participant,
+		0,
+		len(res.Participants),
+	)
 	for _, p := range res.Participants {
+		is_main := false
 		var metadata struct {
 			Name           string `json:"name"`
 			ProfilePicture string `json:"profile_picture"`
+			IsAdmin        string `json:"is_admin"`
 		}
 		err := json.Unmarshal([]byte(p.Metadata), &metadata)
 		if err != nil {
@@ -72,11 +93,16 @@ func (s *service) GetParticipants(
 			metadata.ProfilePicture = ""
 		}
 
+		if session.Owner.Username == p.Identity {
+			is_main = true
+		}
+
 		participant := Participant{
 			Name:           metadata.Name,
 			Username:       p.Identity,
 			ProfilePicture: metadata.ProfilePicture,
 			IsAnonymous:    false,
+			IsMain:         is_main,
 		}
 		participants = append(participants, participant)
 	}
@@ -113,15 +139,21 @@ func (s *service) Join(
 	var grant *auth.VideoGrant
 	var metadata string
 
-	u := getParticipantByusername(session.Participants, req.Username)
-	if u == nil {
-		err := s.repo.Insert(ctx, false, req)
-		if err != nil {
-			return nil, err
+	var u *models.Participant
+	if req.Username != session.Owner.Username {
+		u = getParticipantByusername(
+			session.Participants,
+			req.Username,
+		)
+		if u == nil {
+			err := s.repo.Insert(ctx, false, req)
+			if err != nil {
+				return nil, err
+			}
 		}
 	}
 
-	if u != nil && u.IsOwner {
+	if req.Username == session.Owner.Username {
 		grant = &auth.VideoGrant{
 			RoomJoin:   true,
 			RoomRecord: true,
@@ -130,8 +162,9 @@ func (s *service) Join(
 			Room:       req.SessionId,
 		}
 		metadata = `{
-        "name": "` + req.Name + `",
-        "profile_picture": "` + u.ProfilePicture + `"
+        "name": "` + session.Owner.Name + `",
+        "is_admin": "` + "true" + `",
+        "profile_picture": "` + session.Owner.ProfilePicture + `"
     }`
 	} else {
 		grant = &auth.VideoGrant{
@@ -140,6 +173,7 @@ func (s *service) Join(
 		}
 		metadata = `{
         "name": "` + req.Name + `",
+        "is_admin": "` + "false" + `",
         "profile_picture": "` + req.ProfilePicture + `"
     }`
 
@@ -159,8 +193,7 @@ func (s *service) Join(
 	}
 
 	return &common.Response[string]{
-		Message: "",
-		Data:    token,
+		Data: token,
 	}, nil
 }
 

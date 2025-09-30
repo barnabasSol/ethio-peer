@@ -3,7 +3,6 @@ package sessions
 import (
 	"context"
 	"ep-streaming-service/internal/db"
-	"ep-streaming-service/internal/features/common/flags"
 	"ep-streaming-service/internal/models"
 	"net/http"
 	"time"
@@ -38,20 +37,14 @@ func (r *repository) InsertSession(
 ) (string, error) {
 	collection := r.db.Database(db.Name).Collection(models.SessionCollection)
 	result, err := collection.InsertOne(ctx, models.Session{
-		SessionName: session.Name,
-		Description: session.Description,
-		Tags:        session.Tags,
-		Participants: []models.Participant{
-			{
-				Username:       username,
-				Name:           session.OwnerName,
-				ProfilePicture: session.OwnerProfilePic,
-				IsOwner:        true,
-				FlagStatus:     flags.OK,
-				IsAnonymous:    false,
-				CreatedAt:      time.Now().UTC(),
-				UpdatedAt:      time.Now().UTC(),
-			},
+		SessionName:  session.Name,
+		Description:  session.Description,
+		Tags:         session.Tags,
+		Participants: []models.Participant{},
+		Owner: models.Owner{
+			Username:       username,
+			Name:           session.OwnerName,
+			ProfilePicture: session.OwnerProfilePic,
 		},
 		CreatedAt: time.Now().UTC(),
 		EndedAt:   nil,

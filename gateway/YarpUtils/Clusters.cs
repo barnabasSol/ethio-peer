@@ -52,6 +52,17 @@ public static class Clusters
                     },
                 },
             },
+            new ClusterConfig
+            {
+                ClusterId = "resource-cluster",
+                Destinations = new Dictionary<string, DestinationConfig>
+                {
+                    {
+                        "destination4",
+                        new DestinationConfig { Address = "http://resource-service:2019" }
+                    },
+                },
+            },
         ];
     }
 }
