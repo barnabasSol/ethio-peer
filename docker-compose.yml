@@ -86,7 +86,7 @@ services:
   resource-service:
     build:
       context: resource-service
-      dockerfile: dockerfile
+      dockerfile: Dockerfile
     restart: always
     environment:
       ASPNETCORE_URLS: "http://0.0.0.0:8090"

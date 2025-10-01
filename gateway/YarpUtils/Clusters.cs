@@ -58,7 +58,7 @@ public static class Clusters
                 Destinations = new Dictionary<string, DestinationConfig>
                 {
                     {
-                        "destination4",
+                        "destination5",
                         new DestinationConfig { Address = "http://resource-service:8090" }
                     },
                 },

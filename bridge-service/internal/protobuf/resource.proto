@@ -1,6 +1,6 @@
 syntax = "proto3";
-import "google/protobuf/wrappers.proto";
-option csharp_namespace = "ResourceService.Grpc.ProtoBuf";
+// import "google/protobuf/wrappers.proto";
+option go_package = "ep-bridge-service/internal/genproto/resource";
 
 message Post{
  string id = 1;
@@ -12,8 +12,8 @@ message Post{
 
 message PostsRequest {
   string room_id = 1; 
-  google.protobuf.Int32Value page_size = 2;
-  google.protobuf.Int32Value page_number = 3;
+//   google.protobuf.Int32Value pageSize = 2;
+//   google.protobuf.Int32Value pageNumber = 3;
 }
 
 message PostsReply {    
