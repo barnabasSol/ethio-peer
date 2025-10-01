@@ -1,19 +1,24 @@
 using ResourceService.Models;
 using ResourceService.Repositories;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 namespace ResourceService.Controllers;
 [ApiController]
-[Route("api/[controller]s")]
+[Route("[controller]s")]
 public class CourseController(CourseRepo courseRepo) : ControllerBase
 {
     public required CourseRepo _courseRepo = courseRepo;
 
     [HttpGet]
-    public async Task<IActionResult> GetCourses()
+    public async Task<IActionResult> GetCourses(CourseCategory? category)
     {
-        var course = await _courseRepo.GetAllCoursesAsync();
-        return Ok(course);
+        return Ok(category == null ? await _courseRepo.GetAllCoursesAsync() : await _courseRepo.GetCoursesByCategoryAsync(category.Value));
+        // if (category != null)
+        // {
+        //     var courses = await _courseRepo.GetCoursesByCategoryAsync(category.Value);
+        //     return Ok(courses);
+        // }
+        //  courses = await _courseRepo.GetAllCoursesAsync();
+        // return Ok(course);
     }
 
     [HttpGet("{code}")]
@@ -33,12 +38,7 @@ public class CourseController(CourseRepo courseRepo) : ControllerBase
         });
     }
 
-    [HttpGet("category/{category}")]
-    public IActionResult GetCoursesByCategory(CourseCategory category)
-    {
-        var courses = _courseRepo.GetCoursesByCategoryAsync(category);
-        return Ok(courses);
-    }
+    
 
     [HttpPost]
     public async Task<IActionResult> CreateCourse([FromBody] CourseDTO course)

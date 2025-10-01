@@ -1,0 +1,199 @@
+[
+    {
+        "courseCode": "CS221",
+        "name": "Computer Programming I",
+        "creditHour": 5,
+        "description": "This course introduces the fundamental concepts of computer programming using a high-level programming language. Students will learn about variables, data types, control structures, functions, and basic input/output operations. The course emphasizes problem-solving skills and algorithm development through hands-on coding exercises and projects.",
+        "category":0
+    },
+    {
+        "courseCode": "CS222",
+        "name": "Computer Programming II",
+        "creditHour": 5,
+        "description": "This course builds upon the concepts introduced in Computer Programming I, focusing on more advanced programming techniques and data structures. Students will explore topics such as arrays, linked lists, stacks, queues, recursion, and object-oriented programming principles. The course includes practical coding assignments and projects to reinforce learning and enhance problem-solving abilities."
+        , "category":0
+    },
+    {
+        "courseCode": "CS321",
+        "name": "Data Structures and Algorithm Analysis",
+        "creditHour": 5,
+        "description": "This course provides an in-depth study of data structures and algorithms, essential for efficient problem-solving in computer science. Students will learn about various data structures such as trees, graphs, hash tables, and heaps, along with algorithm design techniques including sorting, searching, and graph traversal. The course emphasizes algorithm analysis, focusing on time and space complexity to evaluate the efficiency of different approaches."
+        , "category":0
+    
+    },
+    {
+        "courseCode": "CS211",
+        "name": "ICT Fundamentals",
+        "creditHour": 5,
+        "description": "This course introduces the fundamental concepts of Information and Communication Technology (ICT). Students will explore the basics of computer hardware, software, networking, and internet technologies. The course covers topics such as computer architecture, operating systems, data management, and cybersecurity. Through practical exercises and projects, students will develop a foundational understanding of ICT and its applications in various fields."
+    
+    },
+    {
+        "courseCode": "CS224",
+        "name": "Object Oriented Programming",
+        "creditHour": 5,
+        "description": "This course introduces the concepts of Object-Oriented Programming (OOP) using a modern programming language. Students will learn about classes, objects, inheritance, polymorphism, encapsulation, and abstraction. The course emphasizes the principles of OOP design and development through hands-on coding exercises and projects, enabling students to create modular and reusable software components."
+    },
+    {
+        "courseCode": "CS223",
+        "name": "Windows Programming",
+        "creditHour": 5,
+        "description": "This course provides an introduction to Windows programming using a suitable programming language and framework. Students will learn about the Windows operating system architecture, event-driven programming, graphical user interface (GUI) design, and application development. The course includes practical exercises and projects to develop skills in creating Windows-based applications with a focus on usability and functionality."
+    },
+    {
+        "courseCode": "CS262",
+        "name": "Introduction to UNIX",
+        "creditHour": 3,
+        "description": "This course introduces the UNIX operating system, covering its history, architecture, and key features. Students will learn about the command-line interface, file system structure, process management, and basic shell scripting. The course emphasizes practical skills through hands-on exercises, enabling students to navigate and utilize the UNIX environment effectively for various computing tasks."
+    },
+    {
+        "courseCode": "CS213",
+        "name": "Introduction to Emerging Technologies",
+        "creditHour": 4,
+        "description": "This course explores the latest advancements and trends in emerging technologies that are shaping the future of computing and information technology. Students will examine topics such as artificial intelligence, blockchain, Internet of Things (IoT), virtual reality, and cloud computing. The course emphasizes understanding the potential applications, benefits, and challenges associated with these technologies through case studies and practical examples."
+    },
+    {
+        "courseCode": "CS301",
+        "name": "Logic Design",
+        "creditHour": 4,
+        "description": "This course introduces the fundamental concepts of logic design, focusing on the principles and techniques used in digital circuit design. Students will learn about Boolean algebra, logic gates, combinational and sequential circuits, flip-flops, and state machines. The course includes practical exercises and projects to develop skills in designing and analyzing digital systems using hardware description languages (HDLs) and simulation tools."
+    },
+    {
+        "courseCode": "CS341",
+        "name": "DataBase Management Systems",
+        "creditHour": 5,
+        "description": "This course provides an introduction to database management systems (DBMS), covering the fundamental concepts and techniques used in designing, implementing, and managing databases. Students will learn about data models, relational databases, SQL, normalization, indexing, and transaction management. The course emphasizes practical skills through hands-on exercises and projects, enabling students to create and manipulate databases effectively for various applications."
+    },
+    {
+        "courseCode": "CS342",
+        "name": "Database Programming & Admin",
+        "creditHour": 4,
+        "description": "This course focuses on database programming and administration, providing students with the skills needed to develop and manage database applications. Students will learn about advanced SQL programming, stored procedures, triggers, and database connectivity using programming languages. The course also covers database administration topics such as backup and recovery, performance tuning, security, and user management. Practical exercises and projects will enable students to apply their knowledge in real-world scenarios."
+    },
+    {
+        "courseCode": "CS302",
+        "name": "Computer Organization & Assembly Language Programming",
+        "creditHour": 4,
+        "description": "This course introduces the concepts of computer organization and assembly language programming. Students will learn about the architecture of computer systems, including the CPU, memory, input/output devices, and instruction sets. The course covers assembly language programming techniques, addressing modes, and low-level programming concepts. Through practical exercises and projects, students will develop an understanding of how software interacts with hardware at a fundamental level."
+    },
+    {
+        "courseCode": "CS322",
+        "name": "Web Design & Development I",
+        "creditHour": 5,
+        "description": "This course provides an introduction to web design and development, focusing on the fundamental concepts and technologies used in creating websites and web applications. Students will learn about HTML, CSS, JavaScript, and responsive design principles. The course emphasizes practical skills through hands-on exercises and projects, enabling students to design and develop functional and visually appealing web pages that are optimized for various devices and screen sizes."
+    },
+    {
+        "courseCode": "CS323",
+        "name": "Web Design & Development II",
+        "creditHour": 4,
+        "description": "This course builds upon the concepts introduced in Web Design & Development I, focusing on more advanced web development techniques and technologies. Students will explore topics such as client-side and server-side scripting, web frameworks, content management systems, and web application security. The course includes practical exercises and projects to enhance students' skills in creating dynamic and interactive web applications that provide a seamless user experience."
+    },
+    {
+        "courseCode": "CS343",
+        "name": "Systems Analysis & Design",
+        "creditHour": 4,
+        "description": "This course introduces the concepts of systems analysis and design, focusing on the methodologies and techniques used in developing information systems. Students will learn about the systems development life cycle (SDLC), requirements gathering, process modeling, data modeling, and system design principles. The course emphasizes practical skills through case studies and projects, enabling students to analyze business needs and design effective information systems that meet organizational goals."
+    },
+    {
+        "courseCode": "CS363",
+        "name": "Operating Systems",
+        "creditHour": 4,
+        "description": "This course provides an in-depth study of operating systems, covering their fundamental concepts, structures, and functions. Students will learn about process management, memory management, file systems, input/output systems, and security. The course emphasizes practical skills through hands-on exercises and projects, enabling students to understand how operating systems manage hardware resources and provide services to applications and users."
+    },
+    {
+        "courseCode": "CS415",
+        "name": "Focusing Areas on ICT",
+        "creditHour": 2,
+        "description": "This course explores specialized topics and emerging trends in the field of Information and Communication Technology (ICT). Students will have the opportunity to focus on specific areas of interest, such as cybersecurity, cloud computing, data science, or mobile technologies. The course emphasizes current developments and practical applications through case studies, guest lectures, and hands-on projects, allowing students to deepen their knowledge and skills in their chosen ICT focus area."
+    },
+    {
+        "courseCode": "CS446",
+        "name": "Object Oriented Software Engineering",
+        "creditHour": 4,
+        "description": "This course introduces the principles and practices of object-oriented software engineering, focusing on the methodologies and techniques used in developing software systems using object-oriented concepts. Students will learn about software development life cycle (SDLC), requirements analysis, design patterns, UML modeling, and testing strategies. The course emphasizes practical skills through case studies and projects, enabling students to apply object-oriented principles to design and develop robust and maintainable software solutions."
+    },
+    {
+        "courseCode": "CS461",
+        "name": "Computer Networks",
+        "creditHour": 5,
+        "description": "This course provides an introduction to computer networks, covering the fundamental concepts, architectures, and protocols used in modern networking. Students will learn about network models, data transmission, routing, switching, and network security. The course emphasizes practical skills through hands-on exercises and projects, enabling students to understand how computer networks operate and how to design and manage network infrastructures effectively."
+    },
+    {
+        "courseCode": "CS465",
+        "name": "Network Adminstration",
+        "creditHour": 4,
+        "description": "This course focuses on network administration, providing students with the skills needed to manage and maintain computer networks. Students will learn about network configuration, monitoring, troubleshooting, and security management. The course covers topics such as network protocols, firewalls, VPNs, and wireless networking. Practical exercises and projects will enable students to apply their knowledge in real-world scenarios, preparing them for roles in network administration and support."
+    },
+    {
+        "courseCode": "CS427",
+        "name": "Compiler Design",
+        "creditHour": 4,
+        "description": "This course introduces the principles and techniques of compiler design, focusing on the processes involved in translating high-level programming languages into machine code. Students will learn about lexical analysis, syntax analysis, semantic analysis, optimization, and code generation. The course emphasizes practical skills through hands-on exercises and projects, enabling students to understand the inner workings of compilers and develop their own simple compiler components."
+    },
+    {
+        "courseCode": "CS447",
+        "name": "Data Mining",
+        "creditHour": 4,
+        "description": "This course provides an introduction to data mining, covering the fundamental concepts, techniques, and applications used in extracting valuable insights from large datasets. Students will learn about data preprocessing, classification, clustering, association rule mining, and anomaly detection. The course emphasizes practical skills through hands-on exercises and projects, enabling students to apply data mining techniques to real-world problems and make informed decisions based on data analysis."
+    },
+    {
+        "courseCode": "CS486",
+        "name": "Computer Systems Security",
+        "creditHour": 5,
+        "description": "This course focuses on computer systems security, providing students with the knowledge and skills needed to protect computer systems and networks from various threats and vulnerabilities. Students will learn about security principles, cryptography, access control, network security, and incident response. The course emphasizes practical skills through hands-on exercises and projects, enabling students to implement security measures and best practices to safeguard information systems."
+    },
+    {
+        "courseCode": "CS488",
+        "name": "Artificial Intelligence",
+        "creditHour": 4,
+        "description": "This course introduces the concepts and techniques of artificial intelligence (AI), focusing on the development of intelligent systems that can perform tasks typically requiring human intelligence. Students will learn about search algorithms, knowledge representation, reasoning, machine learning, and natural language processing. The course emphasizes practical skills through hands-on exercises and projects, enabling students to design and implement AI solutions for various applications."
+    },
+    {
+        "courseCode": "CS497",
+        "name": "Geographic Information Systems",
+        "creditHour": 5,
+        "description": "This course provides an introduction to Geographic Information Systems (GIS), covering the fundamental concepts, technologies, and applications used in spatial data analysis and mapping. Students will learn about GIS data models, spatial analysis techniques, cartography, and remote sensing. The course emphasizes practical skills through hands-on exercises and projects, enabling students to utilize GIS tools and software to analyze geographic data and create informative maps for various purposes."
+    },
+    {
+        "courseCode": "CS389",
+        "name": "Computer Graphics",
+        "creditHour": 4,
+        "description": "This course introduces the principles and techniques of computer graphics, focusing on the creation and manipulation of visual images using computer technology. Students will learn about graphics hardware, rendering algorithms, 2D and 3D modeling, animation, and image processing. The course emphasizes practical skills through hands-on exercises and projects, enabling students to develop their own computer graphics applications and understand the underlying concepts of visual computing."
+    },
+    {
+        "courseCode": "CS362",
+        "name": "UNIX Systems Administration",
+        "creditHour": 5,
+        "description": "This course focuses on UNIX systems administration, providing students with the skills needed to manage and maintain UNIX-based operating systems. Students will learn about system installation, configuration, user management, file systems, process management, and security. The course emphasizes practical skills through hands-on exercises and projects, enabling students to apply their knowledge in real-world scenarios and prepare for roles in UNIX system administration and support."
+    },
+    {
+        "courseCode": "CS468",
+        "name": "Mobile Application",
+        "creditHour": 4,
+        "description": "This course provides an introduction to mobile application development, focusing on the fundamental concepts and technologies used in creating applications for mobile devices. Students will learn about mobile operating systems, user interface design, mobile programming languages, and app deployment. The course emphasizes practical skills through hands-on exercises and projects, enabling students to design and develop functional and user-friendly mobile applications for various platforms."
+    },
+    {
+        "courseCode": "CS485",
+        "name": "Information Retrieval",
+        "creditHour": 4,
+        "description": "This course introduces the concepts and techniques of information retrieval, focusing on the methods used to search, retrieve, and manage information from large datasets and digital libraries. Students will learn about indexing, query processing, ranking algorithms, and evaluation metrics. The course emphasizes practical skills through hands-on exercises and projects, enabling students to develop effective information retrieval systems and understand the challenges associated with managing and accessing information in the digital age."
+    },
+    {
+        "courseCode": "CS448",
+        "name": "Software Testing",
+        "creditHour": 4,
+        "description": "This course focuses on software testing, providing students with the knowledge and skills needed to ensure the quality and reliability of software systems. Students will learn about various testing methodologies, including unit testing, integration testing, system testing, and acceptance testing. The course covers test planning, test case design, defect tracking, and test automation. Practical exercises and projects will enable students to apply their knowledge in real-world scenarios, preparing them for roles in software quality assurance and testing."
+    },
+    {
+        "courseCode": "CS481",
+        "name": "IT Research Methods",
+        "creditHour": 4,
+        "description": "This course introduces research methods and techniques used in the field of Information Technology (IT). Students will learn about research design, data collection, data analysis, and reporting. The course covers both qualitative and quantitative research methods, emphasizing the importance of ethical considerations in research. Through practical exercises and projects, students will develop the skills needed to conduct independent research and contribute to the advancement of knowledge in the IT field."
+    },
+    {
+        "courseCode": "CS495",
+        "name": "IT Project Management",
+        "creditHour": 4,
+        "description": "This course focuses on IT project management, providing students with the knowledge and skills needed to plan, execute, and manage IT projects effectively. Students will learn about project management methodologies, including Agile and Waterfall, as well as key concepts such as project scope, time management, cost management, risk management, and quality assurance. The course emphasizes practical skills through case studies and projects, enabling students to apply project management principles in real-world IT scenarios."
+    }
+]

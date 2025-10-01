@@ -1,21 +1,22 @@
 using Microsoft.AspNetCore.Mvc;
+using ResourceService.Models;
 using ResourceService.Repositories;
 
 namespace ResourceService.Controllers;
 
 [ApiController]
-[Route("api/[controller]s")]
+[Route("[controller]s")]
 public class PostController(PostRepo postRepo) : ControllerBase
 {
     private readonly PostRepo _postRepo = postRepo;
 
     // Get Posts by RoomId
     [HttpGet]
-    public async Task<IActionResult> GetPostsByRoomId([FromQuery] Guid roomId)
+    public async Task<IActionResult> GetPostsByRoomId([FromQuery] Guid roomId,[FromQuery]PagedQuery pq)
     {
         try
         {
-            var posts = await _postRepo.GetPostsByRoomId(roomId);
+            var posts = await _postRepo.GetPostsByRoomId(roomId,pq);
             return Ok(posts);
         }
         catch (ArgumentNullException e)

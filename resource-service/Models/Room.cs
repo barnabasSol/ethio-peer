@@ -6,6 +6,10 @@ namespace ResourceService.Models
     {
         public Guid Id { get; set; }
         public Guid SessionId { get; set; }
+        public Guid TopicId { get; set; }
+        [JsonIgnore]
+        public Topic? Topic { get; set; }
+
         public string Name { get; set; } = string.Empty; 
         [JsonIgnore]
         public List<Post> Posts { get; set; } = [];

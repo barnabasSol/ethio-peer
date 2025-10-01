@@ -1,10 +1,9 @@
 using ResourceService.Models;
 using ResourceService.Repositories;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 namespace ResourceService.Controllers;
 [ApiController]
-[Route("api/[controller]s")]
+[Route("[controller]s")]
 public class TopicController(TopicRepo topicRepo) : ControllerBase
 {
     public required TopicRepo _topicRepo = topicRepo;

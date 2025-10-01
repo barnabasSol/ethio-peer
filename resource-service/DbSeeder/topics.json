@@ -1,0 +1,27 @@
+[
+    {
+        "name": "Time Management",
+        "description": "Time management is the process of organizing and planning how to divide your time between specific activities. Good time management enables you to work smarter, not harder, so that you get more done in less time, even when time is tight and pressures are high. Failing to manage your time effectively can lead to missed deadlines, stress, and a poor work-life balance. Key techniques include prioritizing tasks, setting goals, breaking tasks into smaller steps, and minimizing distractions.",
+        "courseCode": "CS495"
+    },
+     {
+        "name": "Qualitative Research Method",
+        "description": "Qualitative research methods are used to gather non-numerical data and understand concepts, opinions, or experiences. This approach is often used in social sciences to explore complex phenomena that cannot be quantified easily. Common qualitative research methods include interviews, focus groups, ethnography, and content analysis. These methods allow researchers to gain insights into people's behaviors, motivations, and social contexts. The data collected is typically analyzed through thematic analysis or narrative analysis to identify patterns and themes.",
+        "courseCode": "CS481"
+    },
+    {
+        "name": "Pillars of Object-Oriented Programming",
+        "description": "Object-oriented programming (OOP) is a programming paradigm based on the concept of 'objects', which can contain data and code to manipulate that data. The four main pillars of OOP are encapsulation, abstraction, inheritance, and polymorphism. Encapsulation involves bundling the data and methods that operate on the data within a single unit or class, restricting access to some components. Abstraction is the concept of hiding complex implementation details and showing only the necessary features of an object. Inheritance allows a new class to inherit properties and behaviors from an existing class, promoting code reusability. Polymorphism enables objects of different classes to be treated as objects of a common superclass, allowing for flexibility and the ability to define methods in different ways.",
+        "courseCode": "CS224"
+    },
+    {
+        "name": "Agile Software Development",
+        "description": "Agile software development is a methodology that emphasizes flexibility, collaboration, and customer satisfaction in the software development process. It promotes iterative development, where requirements and solutions evolve through the collaborative effort of cross-functional teams. Agile methodologies, such as Scrum and Kanban, focus on delivering small, incremental changes to the software, allowing for frequent feedback and adaptation. Key principles of Agile include valuing individuals and interactions over processes and tools, working software over comprehensive documentation, customer collaboration over contract negotiation, and responding to change over following a plan.",
+        "courseCode": "CS448"
+    },
+    {
+        "name": "Term Frequency-Inverse Document Frequency (TF-IDF)a",
+        "description": "TF-IDF is a statistical measure used to evaluate the importance of a word in a document relative to a collection of documents (corpus). It combines two metrics: Term Frequency (TF), which measures how frequently a term appears in a document, and Inverse Document Frequency (IDF), which measures how important a term is by considering how many documents contain that term. The TF-IDF score increases with the number of times a word appears in a document but is offset by the frequency of the word in the entire corpus. This helps to highlight words that are more relevant to a specific document while downplaying common words that appear across many documents. TF-IDF is widely used in information retrieval, text mining, and natural language processing tasks.",
+        "courseCode": "CS485"
+    }
+]

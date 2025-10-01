@@ -96,10 +96,11 @@ public class CourseRepo
         }
     }
 
-    public List<Course> GetCoursesByCategoryAsync(CourseCategory category)
+    public async Task<List<Course>> GetCoursesByCategoryAsync(CourseCategory category)
     {
-        var courses = _context.Courses.Where(c => c.Category == category).ToList();
+        var courses = await _context.Courses.Where(c => c.Category == category).ToListAsync();
         return courses;
 
     }
+ 
 }

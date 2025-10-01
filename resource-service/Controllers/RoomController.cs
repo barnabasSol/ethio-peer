@@ -5,13 +5,13 @@ using ResourceService.Repositories;
 namespace ResourceService.Controllers;
 
 [ApiController]
-[Route("api/[controller]s")]
+[Route("[controller]s")]
 public class RoomController(RoomRepository roomRepo) : ControllerBase
 {
     private readonly RoomRepository _roomRepo = roomRepo;
     //Get Rooms
     [HttpGet]
-    public async Task<IActionResult> GetRooms([FromQuery] Guid? memberId)
+    public async Task<IActionResult> GetRooms([FromQuery] Guid? memberId,CourseCategory? category)
     {
         try
         {
@@ -22,7 +22,7 @@ public class RoomController(RoomRepository roomRepo) : ControllerBase
             }
             else
             {
-                var rooms = await Task.Run(() => _roomRepo.GetRooms());
+                var rooms = await _roomRepo.GetRoomsAsync(category);
                 return Ok(rooms);
             }
         }
@@ -34,6 +34,12 @@ public class RoomController(RoomRepository roomRepo) : ControllerBase
         {
             return StatusCode(500, ex.Message);
         }
+    }
+    [HttpGet("suggestions")]
+    public async Task<IActionResult> GetSuggestedRooms([FromQuery] List<string> courses)
+    { 
+        var rooms = await _roomRepo.GetSuggestedRooms(courses);
+        return Ok(rooms);
     }
 
 
