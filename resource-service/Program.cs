@@ -27,16 +27,17 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowVueClient",
         policy =>
         {
-            policy.WithOrigins("http://localhost:5173", "http://localhost:5174","http://127.0.0.1:5500")
+            policy.WithOrigins("http://localhost:5173", "http://localhost:5174", "http://127.0.0.1:5500")
                   .AllowAnyHeader()
                   .AllowAnyMethod()
                   .AllowCredentials(); // needed for SignalR
         });
 });
+
 builder.Services.AddMinio(configureClient => configureClient
             .WithEndpoint(builder.Configuration["Minio:Endpoint"])
             .WithCredentials(builder.Configuration["Minio:AccessKey"], builder.Configuration["Minio:SecretKey"])
-            .WithSSL(false)
+            .WithSSL(true)
         .Build());
 var app = builder.Build();
 // using (var scope = app.Services.CreateScope())
