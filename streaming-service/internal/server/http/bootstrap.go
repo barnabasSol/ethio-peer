@@ -1,16 +1,52 @@
-package http
+package server
 
-import "os"
+import (
+	broker "ep-streaming-service/internal/broker/rabbitmq"
+	"ep-streaming-service/internal/features/common/livekit"
+	"ep-streaming-service/internal/features/participants"
+	"ep-streaming-service/internal/features/sessions"
+	"log"
+	"os"
+)
 
 func (s *Server) bootstrap() error {
+	host := os.Getenv("LK_URL")
 	lk_api_key := os.Getenv("LK_API_KEY")
 	lk_api_secret := os.Getenv("LK_API_SECRET")
-	_ = lk_api_key
-	_ = lk_api_secret
-
 	lk_egress_key := os.Getenv("LK_EGRESS_KEY")
 	lk_egress_secret := os.Getenv("LK_EGRESS_SECRET")
-	_ = lk_egress_key
-	_ = lk_egress_secret
+	wh := os.Getenv("LK_WH_KEY")
+	livekit_cfg := livekit.NewConfig(
+		host,
+		lk_api_key,
+		lk_api_secret,
+		lk_egress_key,
+		lk_egress_secret,
+		wh,
+	)
+	b, err := broker.InitRabbitMQ()
+	if err != nil {
+		log.Fatal(err)
+	}
+	sr := sessions.NewRepository(s.db)
+	ss := sessions.NewService(
+		sr,
+		b,
+		*livekit_cfg,
+	)
+	sessions.InitHandler(
+		ss,
+		*livekit_cfg,
+		s.echo.Group("session"),
+	)
+
+	pr := participants.NewRepository(s.db)
+	ps := participants.NewService(pr, livekit_cfg)
+	participants.InitHandler(
+		ps,
+		*livekit_cfg,
+		s.echo.Group("participant"),
+	)
+
 	return nil
 }

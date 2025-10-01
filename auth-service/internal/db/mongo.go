@@ -18,7 +18,7 @@ func NewMongoDbClient(ctx context.Context) (*mongo.Client, error) {
 		return nil, err
 	}
 
-	ConfigProp(client)
+	configProp(client)
 
 	return client, nil
 }

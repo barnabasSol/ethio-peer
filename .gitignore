@@ -3,7 +3,4 @@
 *.env
 *.pem
 *config.yml
-*.sln
-*.vs
-*.vscode
-*.user
+*.ps1

@@ -3,6 +3,8 @@ package login
 import (
 	"ep-auth-service/internal/features/common"
 	"net/http"
+	"os"
+	"strconv"
 
 	"github.com/labstack/echo/v4"
 )
@@ -32,34 +34,27 @@ func (h *Handler) Login(ctx echo.Context) error {
 	}
 
 	if err := req.Validate(); err != nil {
-		return ctx.JSON(
-			LoginErrors[err],
-			map[string]string{"error": err.Error()},
-		)
+		return err
 	}
 
 	result, err := h.s.LoginUser(ctx.Request().Context(), req)
-
 	if err != nil {
-		if status_code, found := LoginErrors[err]; found {
-			return ctx.JSON(
-				status_code,
-				map[string]string{"error": err.Error()},
-			)
-		}
-		return ctx.JSON(
-			http.StatusInternalServerError,
-			map[string]string{"error": "unexpected error"},
-		)
+		return err
 	}
-
 	if with_cookie != "" && with_cookie == "true" {
 		if !result.Data.VerificationRequired {
 			if result.Data.AccessToken != nil && result.Data.RefreshToken != nil {
+				expiry, err := strconv.Atoi(os.Getenv("JWT_EXPIRY_MINS"))
+				if err != nil {
+					return ctx.JSON(
+						http.StatusInternalServerError,
+						map[string]string{"error": "failed setting expiry"},
+					)
+				}
 				atc := common.SetCookie(
 					"access_token",
 					*result.Data.AccessToken,
-					15,
+					expiry,
 				)
 				rtc := common.SetCookie(
 					"refresh_token",
@@ -81,7 +76,6 @@ func (h *Handler) Login(ctx echo.Context) error {
 			)
 		}
 	}
-
 	return ctx.JSON(http.StatusOK, result)
 
 }

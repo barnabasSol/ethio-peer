@@ -9,7 +9,6 @@ import (
 )
 
 type Service interface {
-	UpdateProfilePic(ctx context.Context, user_id string) error
 	GetPeer(
 		ctx context.Context,
 		req *peer.GetPeerRequest,
@@ -47,7 +46,4 @@ func (s *service) GetPeer(
 			Interests:    peer_res.Interests,
 		},
 	}, nil
-}
-func (s *service) UpdateProfilePic(ctx context.Context, user_id string) error {
-	return nil
 }

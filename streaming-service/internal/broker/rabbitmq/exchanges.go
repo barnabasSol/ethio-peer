@@ -6,13 +6,13 @@ import (
 
 func NewNotificationExchange(ch *amqp.Channel) error {
 	err := ch.ExchangeDeclare(
-		"notification_exchange", // name
-		"topic",                 // type
-		true,                    // durable
-		false,                   // auto-deleted
-		false,                   // internal
-		false,                   // no-wait
-		nil,                     // arguments
+		"session_exchange", // name
+		"topic",            // type
+		true,               // durable
+		false,              // auto-deleted
+		false,              // internal
+		false,              // no-wait
+		nil,                // arguments
 	)
 
 	return err

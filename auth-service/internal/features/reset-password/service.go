@@ -1,19 +1,28 @@
-package changepassword
+package resetpassword
+
+import "ep-auth-service/internal/features/common/cache"
 
 type Service interface {
-	ChangePassword(user_id string, password_hash string)
+	VerifyCredential(VerifyRequest) (string, error)
+	ChangePassword(ChangePasswordRequest) error
 }
 
 type service struct {
-	repo Repository
+	cache *cache.Redis
+	repo  Repository
 }
 
-func NewService(repo Repository) Service {
+func NewService(repo Repository, c *cache.Redis) Service {
 	return &service{
-		repo: repo,
+		repo:  repo,
+		cache: c,
 	}
 }
 
-func (s *service) ChangePassword(user_id string, password_hash string) {
+func (s *service) VerifyCredential(req VerifyRequest) (string, error) {
+	return "", nil
+}
 
+func (s *service) ChangePassword(req ChangePasswordRequest) error {
+	return nil
 }

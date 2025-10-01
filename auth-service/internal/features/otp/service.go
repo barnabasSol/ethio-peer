@@ -2,8 +2,11 @@ package otp
 
 import (
 	"context"
-	"ep-auth-service/internal/features/jwt"
+	"ep-auth-service/internal/features/common/jwt"
 	"log"
+	"net/http"
+
+	"github.com/labstack/echo/v4"
 )
 
 type Service interface {
@@ -39,10 +42,16 @@ func (s *service) VerifyOTP(
 	v, found := s.m.collection[ov.SessionId]
 	s.m.mu.RUnlock()
 	if !found {
-		return nil, ErrInvalidOTP
+		return nil, echo.NewHTTPError(
+			http.StatusBadRequest,
+			"invalid otp session",
+		)
 	}
 	if v.Value != ov.Code {
-		return nil, ErrIncorrectOTP
+		return nil, echo.NewHTTPError(
+			http.StatusUnauthorized,
+			"incorrect code",
+		)
 	}
 
 	s.m.removeOTP(ov.SessionId)
@@ -53,19 +62,28 @@ func (s *service) VerifyOTP(
 		return nil, err
 	}
 
-	s.repo.UpdateUser(ctx, user.Id, true, true)
-
-	token, err := s.t.GenerateAccessToken(*user)
-
+	err = s.repo.UpdateUser(ctx, user.Id, true, true)
 	if err != nil {
 		log.Println(err)
 		return nil, err
 	}
 
+	token, err := s.t.GenerateAccessToken(*user)
+	if err != nil {
+		log.Println(err)
+		return nil, echo.NewHTTPError(
+			http.StatusInternalServerError,
+			"failed to authenticate, try again later",
+		)
+	}
+
 	refresh, err := s.t.GenerateRefreshToken(32)
 	if err != nil {
 		log.Println(err)
-		return nil, err
+		return nil, echo.NewHTTPError(
+			http.StatusInternalServerError,
+			"failed to authenticate, try again later",
+		)
 	}
 	return &OtpSuccess{
 		UserId:       user.Id.Hex(),

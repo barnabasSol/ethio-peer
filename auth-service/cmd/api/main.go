@@ -5,7 +5,6 @@ import (
 	broker "ep-auth-service/internal/broker/rabbitmq"
 	"ep-auth-service/internal/db"
 	"ep-auth-service/internal/server"
-	"fmt"
 	"log"
 	"os"
 	"time"
@@ -31,7 +30,15 @@ func main() {
 		log.Fatalln(err.Error())
 	}
 
-	port := fmt.Sprintf(":%s", os.Getenv("PORT"))
+	port := os.Getenv("PORT")
+	grpc_port := os.Getenv("GRPC_PORT")
+
+	grpc_srv := server.NewGrpcServer(grpc_port, mongo)
+	go func() {
+		if err := grpc_srv.Run(); err != nil {
+			log.Fatalf("%s", err.Error())
+		}
+	}()
 
 	app := server.New(port, mongo, rmq)
 

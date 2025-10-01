@@ -24,9 +24,10 @@ func cleanup(m *OTPManager) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	now := time.Now()
-	for k, v := range m.collection {
-		if v.TTL.Before(now) {
+	for k, otp := range m.collection {
+		if otp.TTL.Before(now) {
 			// log.Println("cleaned")
+			delete(m.pending_users, otp.UserId)
 			delete(m.collection, k)
 		}
 	}

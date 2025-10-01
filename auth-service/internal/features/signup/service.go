@@ -5,12 +5,13 @@ import (
 	"encoding/json"
 	broker "ep-auth-service/internal/broker/rabbitmq"
 	"ep-auth-service/internal/features/common"
-	"ep-auth-service/internal/features/jwt"
+	"ep-auth-service/internal/features/common/jwt"
 	"ep-auth-service/internal/features/otp"
 	"ep-auth-service/internal/models"
-	"errors"
+	"net/http"
 	"time"
 
+	"github.com/labstack/echo/v4"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -74,14 +75,20 @@ func (s *service) SignUpUser(
 
 	id, err := s.repo.Insert(ctx, user_model)
 	if err != nil {
-		return nil, ErrFailedToCreateUser
+		return nil, echo.NewHTTPError(
+			http.StatusInternalServerError,
+			"failed to create user",
+		)
 	}
 	user_model.Id = id
 
 	new_otp, err := s.otp_manager.Generate(id.Hex())
 
 	if err != nil {
-		return nil, errors.New("failed to generate otp")
+		return nil, echo.NewHTTPError(
+			http.StatusInternalServerError,
+			"failed to generate otp",
+		)
 	}
 
 	otp := broker.OtpPayload{
@@ -97,12 +104,18 @@ func (s *service) SignUpUser(
 
 	otp_json, err := json.Marshal(otp)
 	if err != nil {
-		return nil, errors.New("failed to generate otp")
+		return nil, echo.NewHTTPError(
+			http.StatusInternalServerError,
+			"failed to marshal otp",
+		)
 	}
 
 	new_peer_json, err := json.Marshal(new_peer)
 	if err != nil {
-		return nil, errors.New("failed to generate otp")
+		return nil, echo.NewHTTPError(
+			http.StatusInternalServerError,
+			"something went wrong",
+		)
 	}
 
 	s.broker.Publish(broker.Message{

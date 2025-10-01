@@ -22,7 +22,10 @@ func NewService(gc *transport.GrpcClient) Service {
 	}
 }
 
-func (s service) GetPeer(ctx context.Context, user_id string) (*PeerResponse, error) {
+func (s service) GetPeer(
+	ctx context.Context,
+	user_id string,
+) (*PeerResponse, error) {
 	c := peer.NewPeerServiceClient(s.gc.Conn)
 	req := &peer.GetPeerRequest{UserId: user_id}
 
@@ -30,7 +33,6 @@ func (s service) GetPeer(ctx context.Context, user_id string) (*PeerResponse, er
 	if err != nil {
 		log.Println(err)
 		return nil, errors.New("failed to fetch peer")
-
 	}
 	return &PeerResponse{
 		UserId:       resp.UserId,

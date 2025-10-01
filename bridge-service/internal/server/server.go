@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"strings"
 	"syscall"
 	"time"
 
@@ -20,6 +19,7 @@ type Server struct {
 	addr       string
 	echo       *echo.Echo
 	peerClient *transport.GrpcClient
+	userClient *transport.GrpcClient
 }
 
 func New(
@@ -37,15 +37,7 @@ func (s *Server) Run() error {
 	s.echo.Use(middleware.Recover())
 
 	s.echo.GET("/health", func(c echo.Context) error {
-		log.Println("Request Headers:")
-		for name, values := range c.Request().Header {
-			for _, value := range values {
-				if strings.HasPrefix(name, "X-Claim") {
-					log.Printf("%s: %s\n", name, value)
-				}
-			}
-		}
-		return c.String(http.StatusOK, "OK")
+		return c.String(http.StatusOK, "I'm OK")
 	})
 
 	srv := &http.Server{
@@ -79,7 +71,6 @@ func (s *Server) Run() error {
 	if s.peerClient != nil && s.peerClient.Conn != nil {
 		s.peerClient.Conn.Close()
 	}
-
 	return s.echo.Shutdown(ctx)
 
 }

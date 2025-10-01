@@ -2,9 +2,10 @@ package server
 
 import (
 	"context"
-	"ep-auth-service/internal/features/jwt"
+	"ep-auth-service/internal/features/common/jwt"
 	"ep-auth-service/internal/features/login"
 	"ep-auth-service/internal/features/otp"
+	refreshtoken "ep-auth-service/internal/features/refresh-token"
 	"ep-auth-service/internal/features/signup"
 	"log"
 )
@@ -43,5 +44,13 @@ func (s *Server) bootstrap() error {
 		token_gen,
 	)
 	otp.InitHandler(otp_service, s.echo.Group("/otp"))
+
+	ref_repo := refreshtoken.NewRepository(s.db)
+	ref_service := refreshtoken.NewService(
+		ref_repo,
+		s.broker,
+		token_gen,
+	)
+	refreshtoken.InitHandler(ref_service, s.echo.Group("/refresh"))
 	return nil
 }

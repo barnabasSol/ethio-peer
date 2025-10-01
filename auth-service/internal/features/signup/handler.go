@@ -2,7 +2,6 @@ package signup
 
 import (
 	"net/http"
-	"strings"
 
 	"github.com/labstack/echo/v4"
 )
@@ -41,16 +40,7 @@ func (h *Handler) SignUpUser(ctx echo.Context) error {
 
 	result, err := h.s.SignUpUser(ctx.Request().Context(), req)
 	if err != nil {
-		if strings.Contains(err.Error(), "in use") {
-			return ctx.JSON(
-				http.StatusConflict,
-				map[string]string{"error": err.Error()},
-			)
-		}
-		return ctx.JSON(
-			http.StatusInternalServerError,
-			map[string]string{"error": err.Error()},
-		)
+		return err
 	}
 
 	return ctx.JSON(http.StatusOK, result)

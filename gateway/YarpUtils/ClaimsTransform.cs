@@ -31,6 +31,7 @@ public class ClaimsTransform : RequestTransform
             context.ProxyRequest.Headers.Remove("X-Claim-Jti");
             context.ProxyRequest.Headers.Add("X-Claim-Jti", jti);
         }
+
         var roles = user
             .Claims.Where(c => c.Type == ClaimTypes.Role)
             .Select(c => c.Value)

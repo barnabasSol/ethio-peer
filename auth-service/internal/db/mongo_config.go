@@ -12,7 +12,7 @@ import (
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
-func ConfigProp(client *mongo.Client) {
+func configProp(client *mongo.Client) {
 	collection := client.Database(Name).Collection(models.UserCollection)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
