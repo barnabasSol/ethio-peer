@@ -59,7 +59,7 @@ public static class Clusters
                 {
                     {
                         "destination4",
-                        new DestinationConfig { Address = "http://resource-service:2019" }
+                        new DestinationConfig { Address = "http://resource-service:8090" }
                     },
                 },
             },

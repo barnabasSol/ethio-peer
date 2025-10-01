@@ -64,10 +64,10 @@ public static class Routes
                 RouteId = "resource",
                 ClusterId = "resource-cluster",
                 CorsPolicy = "WebOriginCorsPolicy",
-                Match = new RouteMatch { Path = "/api/stream/{**catch-all}" },
+                Match = new RouteMatch { Path = "/api/resource/{**catch-all}" },
                 Transforms =
                 [
-                    new Dictionary<string, string> { { "PathRemovePrefix", "/api/stream" } },
+                    new Dictionary<string, string> { { "PathRemovePrefix", "/api/resource" } },
                 ],
                 AuthorizationPolicy = "authenticated",
             },
