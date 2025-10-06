@@ -40,6 +40,14 @@ func (s *service) Refresh(
 	ctx context.Context,
 	req Request,
 ) (*common.Response[Response], error) {
+	user_id, err := s.token_service.ParseRefreshTokenJWT(req.RefreshToken)
+	if err != nil {
+		return nil, echo.NewHTTPError(
+			http.StatusUnauthorized,
+			err.Error(),
+		)
+	}
+	req.UserId = user_id
 	rt, err := s.rep.GetRefreshToken(ctx, req)
 	if err != nil {
 		return nil, err
@@ -71,7 +79,7 @@ func (s *service) Refresh(
 		)
 	}
 
-	refresh, err := s.token_service.GenerateRefreshToken(32)
+	refresh, err := s.token_service.GenerateRefreshTokenJWT(u.Id.Hex())
 	if err != nil {
 		log.Println(err)
 		return nil, echo.NewHTTPError(

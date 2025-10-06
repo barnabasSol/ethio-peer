@@ -5,16 +5,19 @@ import (
 	"ep-streaming-service/internal/db"
 	"ep-streaming-service/internal/features/common/flags"
 	"ep-streaming-service/internal/models"
+	"log"
 	"net/http"
 	"time"
 
 	"github.com/labstack/echo/v4"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
 type Repository interface {
 	UpdateFlag(ctx context.Context, flag Flag) error
+	GetParticipantByUsername(ctx context.Context, username string) (*models.Participant, error)
 	Insert(context.Context, bool, Join) error
 	GetSession(context.Context, bson.ObjectID) (*models.Session, error)
 }
@@ -48,8 +51,8 @@ func (r *repository) GetSession(
 	}
 	if session.EndedAt != nil {
 		return nil, echo.NewHTTPError(
-			http.StatusNotFound,
-			"session expired",
+			http.StatusConflict,
+			"session is over",
 		)
 	}
 
@@ -72,6 +75,7 @@ func (r *repository) Insert(
 		Name:           join.Name,
 		ProfilePicture: join.ProfilePicture,
 		IsAnonymous:    join.AsAnonymous,
+		IsMuted:        false,
 		FlagStatus:     flags.OK,
 		CreatedAt:      time.Now(),
 		UpdatedAt:      time.Now(),
@@ -98,4 +102,41 @@ func (r *repository) UpdateFlag(
 	flag Flag,
 ) error {
 	panic("unimplemented")
+}
+
+func (r *repository) GetParticipantByUsername(
+	ctx context.Context,
+	username string,
+) (*models.Participant, error) {
+	collection := r.db.Database(db.Name).Collection(models.SessionCollection)
+	filter := bson.M{
+		"participants.username": username,
+	}
+	projection := bson.M{
+		"participants": bson.M{
+			"$elemMatch": bson.M{
+				"username": username,
+			},
+		},
+	}
+
+	var result struct {
+		Participants []models.Participant `bson:"participants"`
+	}
+	err := collection.FindOne(
+		ctx,
+		filter,
+		options.FindOne().SetProjection(projection),
+	).Decode(&result)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+	if len(result.Participants) == 0 {
+		return nil, echo.NewHTTPError(
+			http.StatusNotFound,
+			"participant not found",
+		)
+	}
+	return &result.Participants[0], nil
 }

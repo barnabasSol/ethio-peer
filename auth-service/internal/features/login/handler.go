@@ -51,6 +51,12 @@ func (h *Handler) Login(ctx echo.Context) error {
 						map[string]string{"error": "failed setting expiry"},
 					)
 				}
+				cleared_at := common.ClearCookie("access_token")
+				cleared_rt := common.ClearCookie("refresh_token")
+
+				ctx.SetCookie(cleared_at)
+				ctx.SetCookie(cleared_rt)
+
 				atc := common.SetCookie(
 					"access_token",
 					*result.Data.AccessToken,
@@ -70,7 +76,6 @@ func (h *Handler) Login(ctx echo.Context) error {
 					Message: result.Message,
 					Data: LoginResponse{
 						VerificationRequired: false,
-						UserId:               result.Data.UserId,
 					},
 				},
 			)

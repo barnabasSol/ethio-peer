@@ -8,6 +8,7 @@ type Participant struct {
 	ProfilePicture string    `bson:"profile_picture"`
 	IsAnonymous    bool      `bson:"is_anonymous"`
 	FlagStatus     int       `bson:"flag_status"`
+	IsMuted        bool      `bson:"is_muted"`
 	CreatedAt      time.Time `bson:"created_at"`
 	UpdatedAt      time.Time `bson:"updated_at"`
 }

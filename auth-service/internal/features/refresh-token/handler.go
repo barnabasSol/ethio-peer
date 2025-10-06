@@ -1,13 +1,11 @@
 package refreshtoken
 
 import (
-	"crypto/rsa"
 	"ep-auth-service/internal/features/common"
-	"errors"
 	"net/http"
 	"os"
+	"strconv"
 
-	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4"
 )
 
@@ -25,111 +23,63 @@ func InitHandler(s Service, group *echo.Group) *Handler {
 	return h
 }
 func (h *Handler) Refresh(ctx echo.Context) error {
-	withCookie := ctx.QueryParam("with_cookie")
+	with_cookie := ctx.QueryParam("with_cookie")
 
-	refreshTokenCookie, err := ctx.Cookie("refresh_token")
-	if err != nil || refreshTokenCookie == nil || refreshTokenCookie.Value == "" {
+	rt_cookie, err := ctx.Cookie("refresh_token")
+	if err != nil || rt_cookie == nil || rt_cookie.Value == "" {
 		return echo.NewHTTPError(
 			http.StatusUnauthorized,
 			"failed to refresh, no refresh token provided",
 		)
 	}
-	refreshToken := refreshTokenCookie.Value
-
-	accessTokenCookie, err := ctx.Cookie("access_token")
-	if err != nil || accessTokenCookie == nil || accessTokenCookie.Value == "" {
-		return echo.NewHTTPError(
-			http.StatusUnauthorized,
-			"failed to refresh, no access token provided",
-		)
-	}
-	accessToken := accessTokenCookie.Value
-
-	publicKey, err := loadPublicKey("/root/certs/public.pem")
-	if err != nil {
-		ctx.Logger().Errorf("Failed to load public key: %v", err)
-		return echo.NewHTTPError(http.StatusInternalServerError, "server error")
-	}
-
-	token, err := jwt.ParseWithClaims(
-		accessToken,
-		jwt.MapClaims{},
-		func(token *jwt.Token) (any, error) {
-			if _, ok := token.Method.(*jwt.SigningMethodRSA); !ok {
-				return nil, echo.NewHTTPError(
-					http.StatusUnauthorized,
-					"unexpected signing method",
-				)
-			}
-			return publicKey, nil
-		},
-		jwt.WithValidMethods([]string{"RS256"}),
-	)
-
-	if err != nil {
-		if errors.Is(err, jwt.ErrTokenExpired) {
-
-		} else {
-			ctx.Logger().Errorf("Failed to validate access token: %v", err)
-			return echo.NewHTTPError(
-				http.StatusUnauthorized,
-				"invalid or tampered access token",
-			)
-		}
-	}
-
-	claims, ok := token.Claims.(jwt.MapClaims)
-	if !ok {
-		return echo.NewHTTPError(http.StatusUnauthorized, "invalid access token claims")
-	}
-
-	userID, ok := claims["sub"].(string)
-	if !ok || userID == "" {
-		return echo.NewHTTPError(http.StatusUnauthorized, "missing or invalid sub claim")
-	}
-
-	ctx.Logger().Infof("UserID: %s", userID)
-
-	req := Request{
-		UserId:       userID,
-		RefreshToken: refreshToken,
-	}
-
-	result, err := h.s.Refresh(ctx.Request().Context(), req)
+	result, err := h.s.Refresh(ctx.Request().Context(), Request{
+		RefreshToken: rt_cookie.Value,
+	})
 	if err != nil {
 		return err
 	}
 
-	if withCookie == "true" && result.Data.AccessToken != "" && result.Data.RefreshToken != "" {
-		atc := common.SetCookie(
-			"access_token",
-			result.Data.AccessToken,
-			15,
+	if with_cookie != "" && with_cookie == "true" {
+		if result.Data.AccessToken != "" && result.Data.RefreshToken != "" {
+			expiry, err := strconv.Atoi(os.Getenv("JWT_EXPIRY_MINS"))
+			if err != nil {
+				return ctx.JSON(
+					http.StatusInternalServerError,
+					map[string]string{"error": "failed setting expiry"},
+				)
+			}
+
+			cleared_at := common.ClearCookie("access_token")
+			cleared_rt := common.ClearCookie("refresh_token")
+
+			ctx.SetCookie(cleared_at)
+			ctx.SetCookie(cleared_rt)
+
+			common.SetCookie(
+				"refresh_token",
+				result.Data.RefreshToken,
+				60*24*5,
+			)
+			atc := common.SetCookie(
+				"access_token",
+				result.Data.AccessToken,
+				expiry,
+			)
+			rtc := common.SetCookie(
+				"refresh_token",
+				result.Data.RefreshToken,
+				60*24*5,
+			)
+			ctx.SetCookie(atc)
+			ctx.SetCookie(rtc)
+		}
+		return ctx.JSON(
+			http.StatusOK,
+			common.Response[Response]{
+				Message: result.Message,
+			},
 		)
-		rtc := common.SetCookie(
-			"refresh_token",
-			result.Data.RefreshToken,
-			60*24*7,
-		)
-		ctx.SetCookie(atc)
-		ctx.SetCookie(rtc)
-		return ctx.JSON(http.StatusOK, common.Response[struct{}]{
-			Message: result.Message,
-			Data:    struct{}{},
-		})
 	}
 
 	return ctx.JSON(http.StatusOK, result)
-}
-
-func loadPublicKey(path string) (*rsa.PublicKey, error) {
-	pemData, err := os.ReadFile(path)
-	if err != nil {
-		return nil, err
-	}
-	key, err := jwt.ParseRSAPublicKeyFromPEM(pemData)
-	if err != nil {
-		return nil, err
-	}
-	return key, nil
 }

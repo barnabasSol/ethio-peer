@@ -6,12 +6,11 @@ type Create struct {
 	OwnerProfilePic string   `json:"peer_profile_pic"`
 	OwnerName       string   `json:"owner_name"`
 	Name            string   `json:"name"`
-	Subject         string   `json:"subject"`
+	TopicId         string   `json:"topic_id"`
 	Description     string   `json:"description"`
 	Tags            []string `json:"tags"`
 }
 type CreateResponse struct {
-	// Token  string `json:"token"`
 	RoomId string `json:"room_id"`
 }
 

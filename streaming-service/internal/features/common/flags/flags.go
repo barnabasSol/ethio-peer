@@ -2,6 +2,6 @@ package flags
 
 const (
 	OK = iota
-	Suspend
+	SUSPEND
 	BAN
 )

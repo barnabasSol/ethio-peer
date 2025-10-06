@@ -77,12 +77,12 @@ func (s *service) VerifyOTP(
 		)
 	}
 
-	refresh, err := s.t.GenerateRefreshToken(32)
+	refresh, err := s.t.GenerateRefreshTokenJWT(user.Id.Hex())
 	if err != nil {
 		log.Println(err)
 		return nil, echo.NewHTTPError(
 			http.StatusInternalServerError,
-			"failed to authenticate, try again later",
+			"failed to generate refresh token",
 		)
 	}
 	return &OtpSuccess{

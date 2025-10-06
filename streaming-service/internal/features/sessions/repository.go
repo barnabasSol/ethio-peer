@@ -14,6 +14,7 @@ import (
 
 type Repository interface {
 	DeleteSession(ctx context.Context)
+	FilterSessions(context.Context, string)
 	InsertSession(
 		ctx context.Context,
 		session Create,
@@ -29,6 +30,10 @@ func NewRepository(db *mongo.Client) Repository {
 	return &repository{
 		db: db,
 	}
+}
+
+func (r *repository) FilterSessions(context.Context, string) {
+	panic("unimplemented")
 }
 func (r *repository) InsertSession(
 	ctx context.Context,

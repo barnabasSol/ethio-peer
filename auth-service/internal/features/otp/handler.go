@@ -42,8 +42,16 @@ func (h *Handler) VerifyOTP(ctx echo.Context) error {
 	}
 
 	if with_cookie != "" && with_cookie == "true" {
+
+		cleared_at := common.ClearCookie("access_token")
+		cleared_rt := common.ClearCookie("refresh_token")
+
+		ctx.SetCookie(cleared_at)
+		ctx.SetCookie(cleared_rt)
+
 		atc := common.SetCookie("access_token", *result.AccessToken, 15)
 		rtc := common.SetCookie("refresh_token", *result.RefreshToken, 60*24*7)
+
 		ctx.SetCookie(atc)
 		ctx.SetCookie(rtc)
 

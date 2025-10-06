@@ -58,24 +58,32 @@ func (r *repository) GetRefreshToken(
 	ctx context.Context,
 	req Request,
 ) (*models.RefreshToken, error) {
-	user_collection := r.db.Database(db.Name).Collection(models.TokenCollection)
-	user_obj_id, err := bson.ObjectIDFromHex(req.UserId)
+
+	token_collection := r.db.Database(db.Name).Collection(models.TokenCollection)
+	userObjId, err := bson.ObjectIDFromHex(req.UserId)
 	if err != nil {
 		return nil, echo.NewHTTPError(
 			http.StatusBadRequest,
-			"invalid id",
+			"invalid user id",
 		)
 	}
-	filter := bson.D{{Key: "user_id", Value: user_obj_id}}
-	var user models.RefreshToken
-	err = user_collection.FindOne(ctx, filter).Decode(&user)
+
+	filter := bson.M{
+		"user_id":       userObjId,
+		"refresh_token": req.RefreshToken,
+	}
+
+	var refreshToken models.RefreshToken
+	err = token_collection.FindOne(ctx, filter).Decode(&refreshToken)
 	if err != nil {
 		return nil, echo.NewHTTPError(
 			http.StatusUnauthorized,
-			"user has no refresh tokens",
+			"refresh token not found or invalid",
 		)
 	}
-	return &user, nil
+
+	return &refreshToken, nil
+
 }
 
 func (r *repository) DeleteRefreshToken(
@@ -102,6 +110,12 @@ func (r *repository) InsertRefreshToken(
 	collection := r.db.Database(db.Name).Collection(models.TokenCollection)
 
 	user_obj_id, err := bson.ObjectIDFromHex(req.UserId)
+	if err != nil {
+		return echo.NewHTTPError(
+			http.StatusBadRequest,
+			"invalid user id",
+		)
+	}
 	result, err := collection.InsertOne(ctx, models.RefreshToken{
 		UserId:       user_obj_id,
 		RefreshToken: new_refresh_token,

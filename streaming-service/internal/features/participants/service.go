@@ -6,14 +6,16 @@ import (
 	"ep-streaming-service/internal/features/common"
 	"ep-streaming-service/internal/features/common/livekit"
 	"ep-streaming-service/internal/models"
+	"log"
 	"net/http"
+	"strconv"
 	"time"
 
 	lk_protocol "github.com/livekit/protocol/livekit"
+	lksdk "github.com/livekit/server-sdk-go/v2"
 
 	"github.com/labstack/echo/v4"
 	"github.com/livekit/protocol/auth"
-	lksdk "github.com/livekit/server-sdk-go/v2"
 	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
@@ -69,6 +71,7 @@ func (s *service) GetParticipants(
 		},
 	)
 	if err != nil {
+		log.Println(err)
 		return nil, echo.NewHTTPError(
 			http.StatusInternalServerError,
 			"failed fetching participants",
@@ -87,7 +90,10 @@ func (s *service) GetParticipants(
 			ProfilePicture string `json:"profile_picture"`
 			IsAdmin        string `json:"is_admin"`
 		}
-		err := json.Unmarshal([]byte(p.Metadata), &metadata)
+		err := json.Unmarshal(
+			[]byte(p.Metadata),
+			&metadata,
+		)
 		if err != nil {
 			metadata.Name = ""
 			metadata.ProfilePicture = ""
@@ -153,13 +159,16 @@ func (s *service) Join(
 		}
 	}
 
+	publish, subscribe, publishdata := true, true, true
+
 	if req.Username == session.Owner.Username {
 		grant = &auth.VideoGrant{
-			RoomJoin:   true,
-			RoomRecord: true,
-			RoomAdmin:  true,
-			RoomCreate: true,
-			Room:       req.SessionId,
+			RoomJoin:       true,
+			RoomRecord:     true,
+			RoomAdmin:      true,
+			RoomCreate:     true,
+			CanPublishData: &publish,
+			Room:           req.SessionId,
 		}
 		metadata = `{
         "name": "` + session.Owner.Name + `",
@@ -168,12 +177,16 @@ func (s *service) Join(
     }`
 	} else {
 		grant = &auth.VideoGrant{
-			RoomJoin: true,
-			Room:     req.SessionId,
+			RoomJoin:       true,
+			Room:           req.SessionId,
+			CanPublish:     &publish,
+			CanSubscribe:   &subscribe,
+			CanPublishData: &publishdata,
 		}
 		metadata = `{
         "name": "` + req.Name + `",
         "is_admin": "` + "false" + `",
+        "is_muted": "` + strconv.FormatBool(u.IsMuted) + `",
         "profile_picture": "` + req.ProfilePicture + `"
     }`
 

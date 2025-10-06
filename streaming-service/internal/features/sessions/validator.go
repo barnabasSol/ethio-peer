@@ -15,24 +15,10 @@ func (r Create) Validate() error {
 		)
 	}
 
-	if r.Subject == "" {
-		return echo.NewHTTPError(
-			http.StatusBadRequest,
-			"please provide a subject",
-		)
-	}
-
 	if len(r.Name) > 100 {
 		return echo.NewHTTPError(
 			http.StatusBadRequest,
 			"name must be at most 100 characters",
-		)
-	}
-
-	if len(r.Subject) > 100 {
-		return echo.NewHTTPError(
-			http.StatusBadRequest,
-			"subject must be at most 100 characters",
 		)
 	}
 

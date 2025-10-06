@@ -104,7 +104,7 @@ func (s *service) LoginUser(
 		)
 	}
 
-	refresh, err := s.token_service.GenerateRefreshToken(32)
+	refresh, err := s.token_service.GenerateRefreshTokenJWT(user.Id.Hex())
 	if err != nil {
 		log.Println(err)
 		return nil, echo.NewHTTPError(
@@ -113,7 +113,11 @@ func (s *service) LoginUser(
 		)
 	}
 
-	if err := s.rep.InsertRefreshToken(ctx, user.Id, refresh); err != nil {
+	if err := s.rep.InsertRefreshToken(
+		ctx,
+		user.Id,
+		refresh,
+	); err != nil {
 		return nil, err
 	}
 	id := user.Id.Hex()

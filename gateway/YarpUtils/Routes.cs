@@ -23,17 +23,11 @@ public static class Routes
                 CorsPolicy = "WebOriginCorsPolicy",
                 ClusterId = "auth-cluster",
                 Match = new RouteMatch { Path = "/api/auth/password/{**catch-all}" },
-                Transforms = [new Dictionary<string, string> { { "PathRemovePrefix", "/api/auth" } }],
+                Transforms =
+                [
+                    new Dictionary<string, string> { { "PathRemovePrefix", "/api/auth" } },
+                ],
                 AuthorizationPolicy = "authenticated",
-            },
-            new RouteConfig
-            {
-                RouteId = "auth-refresh",
-                CorsPolicy = "WebOriginCorsPolicy",
-                ClusterId = "auth-cluster",
-                Match = new RouteMatch { Path = "/api/auth/refresh/{**catch-all}" },
-                Transforms = [new Dictionary<string, string> { { "PathRemovePrefix", "/api/auth" } }],
-                AuthorizationPolicy = "anonymous",
             },
             new RouteConfig
             {

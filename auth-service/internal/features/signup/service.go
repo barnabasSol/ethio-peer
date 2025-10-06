@@ -8,6 +8,7 @@ import (
 	"ep-auth-service/internal/features/common/jwt"
 	"ep-auth-service/internal/features/otp"
 	"ep-auth-service/internal/models"
+	"log"
 	"net/http"
 	"time"
 
@@ -74,7 +75,9 @@ func (s *service) SignUpUser(
 	}
 
 	id, err := s.repo.Insert(ctx, user_model)
+
 	if err != nil {
+		log.Println(err)
 		return nil, echo.NewHTTPError(
 			http.StatusInternalServerError,
 			"failed to create user",

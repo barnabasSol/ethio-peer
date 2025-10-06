@@ -5,6 +5,8 @@ import (
 	"crypto/rsa"
 	"encoding/base64"
 	"ep-auth-service/internal/models"
+	"errors"
+	"fmt"
 	"log"
 	"os"
 	"strconv"
@@ -15,8 +17,10 @@ import (
 )
 
 type Generator interface {
+	ParseRefreshTokenJWT(tokenString string) (string, error)
 	GenerateAccessToken(user models.User) (string, error)
 	GenerateRefreshToken(n int) (string, error)
+	GenerateRefreshTokenJWT(user_id string) (string, error)
 }
 
 type generator struct {
@@ -83,4 +87,44 @@ func (g generator) GenerateRefreshToken(n int) (string, error) {
 		return "", err
 	}
 	return base64.URLEncoding.EncodeToString(b), nil
+}
+
+func (g generator) GenerateRefreshTokenJWT(userId string) (string, error) {
+	claims := jwt.RegisteredClaims{
+		Subject: userId,
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
+	token.Header["kid"] = "7a101016-033e-44de-9137-572a113a592f"
+
+	signed, err := token.SignedString(g.privateKey)
+	if err != nil {
+		return "", err
+	}
+	return signed, nil
+}
+
+func (g generator) ParseRefreshTokenJWT(tokenString string) (string, error) {
+	token, err := jwt.ParseWithClaims(
+		tokenString,
+		&jwt.RegisteredClaims{},
+		func(token *jwt.Token) (any, error) {
+			if _, ok := token.Method.(*jwt.SigningMethodRSA); !ok {
+				return nil, fmt.Errorf(
+					"unexpected signing method: %v",
+					token.Header["alg"],
+				)
+			}
+			return &g.privateKey.PublicKey, nil
+		},
+	)
+
+	if err != nil {
+		return "", errors.New("tampered token")
+	}
+
+	if claims, ok := token.Claims.(*jwt.RegisteredClaims); ok && token.Valid {
+		return claims.Subject, nil
+	}
+	return "", errors.New("invalid token claims or token expired")
 }
