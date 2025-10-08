@@ -6,10 +6,24 @@ type Create struct {
 	OwnerProfilePic string   `json:"peer_profile_pic"`
 	OwnerName       string   `json:"owner_name"`
 	Name            string   `json:"name"`
-	TopicId         string   `json:"topic_id"`
+	Topic           Topic    `json:"topic"`
 	Description     string   `json:"description"`
 	Tags            []string `json:"tags"`
 }
+
+type Update struct {
+	SessionId   string  `json:"session_id"`
+	SessionName *string `json:"session_name"`
+	Description *string `json:"description"`
+	Topic       *Topic  `json:"topic"`
+	IsEnded     *bool   `json:"ended_at"`
+}
+
+type Topic struct {
+	Id   string `json:"id"`
+	Name string `json:"name"`
+}
+
 type CreateResponse struct {
 	RoomId string `json:"room_id"`
 }

@@ -27,6 +27,7 @@ func InitHandler(
 		s:      s,
 	}
 	h.group.POST("", h.CreateSession)
+	h.group.PATCH("", h.UpdateSession)
 	h.group.POST("/livekit/webhook", h.HandleLiveKitWebhook)
 	return h
 }
@@ -80,4 +81,36 @@ func (h *Handler) CreateSession(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, res)
+}
+
+func (h *Handler) UpdateSession(c echo.Context) error {
+	username := c.Request().Header.Get("X-Claim-Username")
+	var req Update
+	if err := c.Bind(&req); err != nil {
+		return c.JSON(
+			http.StatusBadRequest,
+			map[string]string{"error": "invalid request"},
+		)
+	}
+	if err := req.Validate(); err != nil {
+		return c.JSON(
+			http.StatusBadRequest,
+			map[string]string{"error": err.Error()},
+		)
+	}
+
+	err := h.s.UpdateSession(
+		c.Request().Context(),
+		req,
+		username,
+	)
+
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(
+		http.StatusOK,
+		map[string]string{"result": "successfully updated"},
+	)
 }

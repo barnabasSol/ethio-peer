@@ -17,7 +17,6 @@ func (r *LoginRequest) Validate() error {
 	if r.InstituteEmail != nil {
 		count++
 	}
-
 	if count == 0 || count > 1 {
 		return echo.NewHTTPError(
 			http.StatusBadRequest,

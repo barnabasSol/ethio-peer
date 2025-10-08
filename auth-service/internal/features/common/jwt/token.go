@@ -90,8 +90,17 @@ func (g generator) GenerateRefreshToken(n int) (string, error) {
 }
 
 func (g generator) GenerateRefreshTokenJWT(userId string) (string, error) {
+	rt_exp := os.Getenv("RT_EXPIRY_DAYS")
+	if rt_exp == "" {
+		rt_exp = "7"
+	}
+	exp, err := strconv.Atoi(rt_exp)
+	if err != nil {
+
+	}
 	claims := jwt.RegisteredClaims{
-		Subject: userId,
+		Subject:   userId,
+		ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Duration(exp) * time.Minute)),
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
@@ -99,7 +108,8 @@ func (g generator) GenerateRefreshTokenJWT(userId string) (string, error) {
 
 	signed, err := token.SignedString(g.privateKey)
 	if err != nil {
-		return "", err
+		log.Println(err)
+		return "", errors.New("failed to sign token")
 	}
 	return signed, nil
 }

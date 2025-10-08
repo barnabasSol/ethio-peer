@@ -90,9 +90,16 @@ func (r *repository) DeleteRefreshToken(
 	ctx context.Context,
 	req Request,
 ) error {
+	uid, err := bson.ObjectIDFromHex(req.UserId)
+	if err != nil {
+		return echo.NewHTTPError(
+			http.StatusBadRequest,
+			"invalid user id",
+		)
+	}
 	collection := r.db.Database(db.Name).Collection(models.TokenCollection)
-	filter := bson.D{{Key: "user_id", Value: req.UserId}}
-	_, err := collection.DeleteOne(ctx, filter)
+	filter := bson.D{{Key: "user_id", Value: uid}}
+	_, err = collection.DeleteMany(ctx, filter)
 	if err != nil {
 		return echo.NewHTTPError(
 			http.StatusInternalServerError,
@@ -116,13 +123,22 @@ func (r *repository) InsertRefreshToken(
 			"invalid user id",
 		)
 	}
-	result, err := collection.InsertOne(ctx, models.RefreshToken{
-		UserId:       user_obj_id,
-		RefreshToken: new_refresh_token,
-		CreatedAt:    time.Now().UTC(),
-		UpdatedAt:    time.Now().UTC(),
-	})
-	if err != nil || !result.Acknowledged {
+	result, err := collection.InsertOne(
+		ctx,
+		models.RefreshToken{
+			UserId:       user_obj_id,
+			RefreshToken: new_refresh_token,
+			CreatedAt:    time.Now().UTC(),
+			UpdatedAt:    time.Now().UTC(),
+		},
+	)
+	if err != nil {
+		return echo.NewHTTPError(
+			http.StatusInternalServerError,
+			"failed to insert refresh token",
+		)
+	}
+	if !result.Acknowledged {
 		return echo.NewHTTPError(
 			http.StatusNotFound,
 			"something went wrong during auth",

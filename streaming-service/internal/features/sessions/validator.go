@@ -1,6 +1,7 @@
 package sessions
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 
@@ -42,6 +43,31 @@ func (r Create) Validate() error {
 				fmt.Sprintf("tag '%s' is too long (max 30 chars)", tag),
 			)
 		}
+	}
+
+	return nil
+}
+
+func (r Update) Validate() error {
+	if r.SessionId == "" {
+		return errors.New("please provide the session id")
+	}
+	count := 0
+	if r.Description == nil {
+		count++
+	}
+	if r.IsEnded == nil {
+		count++
+
+	}
+	if r.SessionName == nil {
+		count++
+	}
+	if r.Topic == nil {
+		count++
+	}
+	if count == 4 {
+		return errors.New("please provide neccessary fields")
 	}
 
 	return nil

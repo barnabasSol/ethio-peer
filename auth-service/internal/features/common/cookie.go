@@ -21,6 +21,20 @@ import (
 // 	return cookie
 // }
 
+// func ClearCookie(key string) *http.Cookie {
+// 	return &http.Cookie{
+// 		Name:     key,
+// 		Value:    "",
+// 		Path:     "/",
+// 		MaxAge:   -1,
+// 		HttpOnly: true,
+// 		Secure:   true,
+// 		Domain:   "barney-host.site",
+// 		SameSite: http.SameSiteNoneMode,
+// 		Expires:  time.Unix(0, 0),
+// 	}
+// }
+
 func SetCookie(
 	key, value string,
 	exp_mins int,

@@ -20,6 +20,7 @@ type Service interface {
 		session Create,
 	) (*common.Response[CreateResponse], error)
 	EndSession(ctx context.Context, session_id, owner_id string) error
+	UpdateSession(ctx context.Context, req Update, username string) error
 	GetSessions(ctx context.Context, filter string)
 }
 
@@ -45,6 +46,28 @@ func NewService(
 			cfg.ApiSecret,
 		),
 	}
+}
+
+func (s *service) UpdateSession(
+	ctx context.Context,
+	req Update,
+	username string,
+) error {
+	ok, err := s.repo.IsOwner(ctx, req.SessionId, username)
+	if err != nil {
+		return err
+	}
+	if !ok {
+		return echo.NewHTTPError(
+			http.StatusForbidden,
+			"you don't own the room",
+		)
+	}
+	err = s.repo.UpdateSession(ctx, req)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (s *service) CreteSession(
