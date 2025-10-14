@@ -59,7 +59,11 @@ func (s *service) SignUpUser(
 		bcrypt.DefaultCost,
 	)
 	if err != nil {
-		return nil, err
+		log.Println(err)
+		return nil, echo.NewHTTPError(
+			http.StatusInternalServerError,
+			"failed to process password",
+		)
 	}
 	user_model := models.User{
 		Username:               user.Username,

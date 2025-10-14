@@ -7,21 +7,10 @@ import (
 )
 
 func (r *VerifyRequest) Validate() error {
-	count := 0
-	if r.Username != nil {
-		count++
-	}
-	if r.Email != nil {
-		count++
-	}
-	if r.InstituteEmail != nil {
-		count++
-	}
-
-	if count == 0 || count > 1 {
+	if r.InstituteEmail != "" {
 		return echo.NewHTTPError(
 			http.StatusBadRequest,
-			"please provide one credential",
+			"please provide correct credential",
 		)
 	}
 	return nil

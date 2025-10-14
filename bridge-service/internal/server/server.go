@@ -16,10 +16,11 @@ import (
 )
 
 type Server struct {
-	addr       string
-	echo       *echo.Echo
-	peerClient *transport.GrpcClient
-	userClient *transport.GrpcClient
+	addr           string
+	echo           *echo.Echo
+	peerClient     *transport.GrpcClient
+	userClient     *transport.GrpcClient
+	resourceClient *transport.GrpcClient
 }
 
 func New(

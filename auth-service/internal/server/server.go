@@ -11,7 +11,6 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/labstack/echo-contrib/jaegertracing"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"go.mongodb.org/mongo-driver/v2/mongo"
@@ -41,10 +40,6 @@ func (s *Server) Run() error {
 
 	s.echo.Use(middleware.Logger())
 	s.echo.Use(middleware.Recover())
-
-	c := jaegertracing.New(s.echo, nil)
-
-	defer c.Close()
 
 	s.echo.GET("/health", func(c echo.Context) error {
 		return c.String(http.StatusOK, "OK")

@@ -1,22 +1,19 @@
 package sessions
 
-import "time"
+import (
+	"time"
+
+	"go.mongodb.org/mongo-driver/v2/bson"
+)
 
 type Create struct {
-	OwnerProfilePic string   `json:"peer_profile_pic"`
-	OwnerName       string   `json:"owner_name"`
-	Name            string   `json:"name"`
-	Topic           Topic    `json:"topic"`
-	Description     string   `json:"description"`
-	Tags            []string `json:"tags"`
-}
-
-type Update struct {
-	SessionId   string  `json:"session_id"`
-	SessionName *string `json:"session_name"`
-	Description *string `json:"description"`
-	Topic       *Topic  `json:"topic"`
-	IsEnded     *bool   `json:"ended_at"`
+	OwnerProfilePic string     `json:"peer_profile_pic"`
+	OwnerName       string     `json:"owner_name"`
+	Name            string     `json:"name"`
+	Topic           Topic      `json:"topic"`
+	Description     string     `json:"description"`
+	StartsAt        *time.Time `json:"starts_at"`
+	Tags            []string   `json:"tags"`
 }
 
 type Topic struct {
@@ -24,25 +21,35 @@ type Topic struct {
 	Name string `json:"name"`
 }
 
+type Update struct {
+	SessionId   string  `json:"session_id"`
+	SessionName *string `json:"session_name"`
+	Description *string `json:"description"`
+	Topic       *Topic  `json:"topic"`
+	IsEnded     *bool   `json:"is_ended"`
+}
+
 type CreateResponse struct {
 	RoomId string `json:"room_id"`
 }
 
 type Session struct {
-	Name         string        `json:"name"`
-	Owner        Owner         `json:"owner"`
-	Duration     time.Duration `json:"duration"`
-	Description  string        `json:"description"`
-	CreatedAt    time.Time     `bson:"created_at"`
-	EndedAt      *time.Time    `bson:"ended_at"`
+	Id           bson.ObjectID `bson:"_id" json:"-"`
+	SessionId    string        `json:"session_id"`
+	Name         string        `bson:"session_name" json:"name"`
+	Owner        Owner         `bson:"owner" json:"owner"`
+	Description  string        `bson:"description" json:"description"`
+	CreatedAt    time.Time     `bson:"created_at" json:"created_at"`
+	EndedAt      *time.Time    `bson:"ended_at,omitempty" json:"ended_at,omitempty"`
+	Participants []Participant `bson:"participants" json:"participants"`
+	Duration     string        `json:"duration"`
 	IsLive       bool          `json:"is_live"`
-	Participants []Participant `json:"participants"`
 }
 
 type Owner struct {
-	Name           string `json:"name"`
-	Username       string `json:"username"`
-	ProfilePicture string `json:"profile_picture"`
+	Username       string `bson:"username"`
+	Name           string `bson:"name"`
+	ProfilePicture string `bson:"profile_picture"`
 }
 
 type Participant struct {

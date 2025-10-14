@@ -2,6 +2,7 @@ package sessions
 
 import (
 	"ep-streaming-service/internal/features/common/livekit"
+	"ep-streaming-service/internal/features/common/pagination"
 	"fmt"
 	"net/http"
 
@@ -29,6 +30,7 @@ func InitHandler(
 	h.group.POST("", h.CreateSession)
 	h.group.PATCH("", h.UpdateSession)
 	h.group.POST("/livekit/webhook", h.HandleLiveKitWebhook)
+	h.group.GET("", h.GetSessions)
 	return h
 }
 
@@ -113,4 +115,31 @@ func (h *Handler) UpdateSession(c echo.Context) error {
 		http.StatusOK,
 		map[string]string{"result": "successfully updated"},
 	)
+}
+
+func (h *Handler) GetSessions(c echo.Context) error {
+	username := c.Request().Header.Get("X-Claim-Username")
+	_ = username
+
+	filter := c.QueryParam("filter")
+	page := c.QueryParam("page")
+	page_size := c.QueryParam("page_size")
+	p := pagination.New(page, page_size)
+	if _, found := ValidFilters[filter]; !found {
+		return c.JSON(
+			http.StatusBadRequest,
+			map[string]string{"error": "invalid filter"},
+		)
+	}
+	res, err := h.s.GetSessions(
+		c.Request().Context(),
+		*p,
+		filter,
+	)
+
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(http.StatusOK, res)
 }

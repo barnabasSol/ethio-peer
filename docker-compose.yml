@@ -82,19 +82,19 @@ services:
     networks:
       - back-tier
 
-
   resource-service:
-    build:
-      context: resource-service
-      dockerfile: Dockerfile
-    restart: always
+    image: dagm123/resource-service:1.3
     environment:
-      ASPNETCORE_URLS: "http://0.0.0.0:8090"
+      ASPNETCORE_URLS: "http://0.0.0.0:8090;http://0.0.0.0:7027;"
+    depends_on:
+      - rabbitmq
+    restart: always
     deploy:
       mode: replicated
       replicas: 1
     networks:
       - back-tier
+
   cache:
     image: redis:7.4-alpine
     container_name: redis

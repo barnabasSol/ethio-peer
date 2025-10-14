@@ -72,3 +72,10 @@ func (r Update) Validate() error {
 
 	return nil
 }
+
+var ValidFilters = map[string]struct{}{
+	"upcoming":  {},
+	"ongoing":   {},
+	"concluded": {},
+	"":          {},
+}

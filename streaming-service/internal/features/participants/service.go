@@ -33,8 +33,10 @@ type service struct {
 	repo   Repository
 }
 
-func NewService(r Repository, cfg *livekit.Config) Service {
-
+func NewService(
+	r Repository,
+	cfg *livekit.Config,
+) Service {
 	return &service{
 		repo:   r,
 		lk_cfg: *cfg,
@@ -136,6 +138,12 @@ func (s *service) Join(
 	if err != nil {
 		return nil, err
 	}
+	if session.StartsAt.After(time.Now().UTC()) {
+		return nil, echo.NewHTTPError(
+			http.StatusConflict,
+			"session isn't on schedule yet",
+		)
+	}
 
 	at := auth.NewAccessToken(
 		s.lk_cfg.ApiKey,
@@ -195,7 +203,7 @@ func (s *service) Join(
 	at.SetVideoGrant(grant).
 		SetMetadata(metadata).
 		SetIdentity(req.Username).
-		SetValidFor(20 * time.Minute)
+		SetValidFor(5 * time.Minute)
 
 	token, err := at.ToJWT()
 	if err != nil {

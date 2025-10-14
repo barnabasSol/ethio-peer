@@ -2,13 +2,17 @@ package sessions
 
 import (
 	"context"
+	"encoding/json"
 	broker "ep-streaming-service/internal/broker/rabbitmq"
 	"ep-streaming-service/internal/features/common"
 	"ep-streaming-service/internal/features/common/livekit"
+	"ep-streaming-service/internal/features/common/pagination"
+	"log"
 	"net/http"
+	"sync"
 
 	"github.com/labstack/echo/v4"
-	lk_protcol "github.com/livekit/protocol/livekit"
+	lk_protocol "github.com/livekit/protocol/livekit"
 
 	lksdk "github.com/livekit/server-sdk-go/v2"
 )
@@ -21,7 +25,11 @@ type Service interface {
 	) (*common.Response[CreateResponse], error)
 	EndSession(ctx context.Context, session_id, owner_id string) error
 	UpdateSession(ctx context.Context, req Update, username string) error
-	GetSessions(ctx context.Context, filter string)
+	GetSessions(
+		ctx context.Context,
+		pagination pagination.Pagination,
+		filter string,
+	) (*common.Response[[]Session], error)
 }
 
 type service struct {
@@ -60,7 +68,7 @@ func (s *service) UpdateSession(
 	if !ok {
 		return echo.NewHTTPError(
 			http.StatusForbidden,
-			"you don't own the room",
+			"you don't own the session",
 		)
 	}
 	err = s.repo.UpdateSession(ctx, req)
@@ -85,7 +93,7 @@ func (s *service) CreteSession(
 	}
 	_, err = s.rc.CreateRoom(
 		ctx,
-		&lk_protcol.CreateRoomRequest{
+		&lk_protocol.CreateRoomRequest{
 			Name:         sid,
 			EmptyTimeout: 120,
 		},
@@ -106,9 +114,77 @@ func (s *service) CreteSession(
 
 func (s *service) GetSessions(
 	ctx context.Context,
-	filter string,
-) {
-	panic("unimplemented")
+	pagination pagination.Pagination,
+	req string,
+) (*common.Response[[]Session], error) {
+
+	res, err := s.repo.GetSessions(ctx, pagination, req)
+	if err != nil {
+		return nil, err
+	}
+	var wg sync.WaitGroup
+	for i := range *res {
+		(*res)[i].SessionId = (*res)[i].Id.Hex()
+		sess_id := (*res)[i].SessionId
+		if (*res)[i].EndedAt != nil {
+			(*res)[i].Duration = (*res)[i].EndedAt.Sub((*res)[i].CreatedAt).String()
+		}
+		i := i
+		wg.Go(func() {
+			log.Println("Fetching participants for session:", sess_id)
+			lk_p, err := s.rc.ListParticipants(
+				ctx,
+				&lk_protocol.ListParticipantsRequest{
+					Room: sess_id,
+				},
+			)
+			if err != nil {
+				log.Println("ListParticipants error:", err)
+				return
+			}
+
+			(*res)[i].Participants = []Participant{}
+
+			uniqueParticipants := make(map[string]Participant)
+
+			isLive := false
+
+			for _, lkp := range lk_p.Participants {
+				var metadata struct {
+					Name           string `json:"name"`
+					ProfilePicture string `json:"profile_picture"`
+					IsAdmin        string `json:"is_admin"`
+				}
+
+				err := json.Unmarshal([]byte(lkp.Metadata), &metadata)
+				if err != nil {
+					log.Println("Metadata unmarshal error:", err)
+					continue
+				}
+
+				if _, exists := uniqueParticipants[lkp.Identity]; !exists {
+					uniqueParticipants[lkp.Identity] = Participant{
+						Username:       lkp.Identity,
+						ProfilePicture: metadata.ProfilePicture,
+					}
+					if metadata.IsAdmin == "true" {
+						isLive = true
+					}
+				}
+			}
+
+			for _, p := range uniqueParticipants {
+				(*res)[i].Participants = append((*res)[i].Participants, p)
+			}
+
+			(*res)[i].IsLive = isLive
+		})
+	}
+	wg.Wait()
+
+	return &common.Response[[]Session]{
+		Data: *res,
+	}, nil
 }
 
 func (s *service) EndSession(

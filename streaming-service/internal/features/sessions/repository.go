@@ -3,6 +3,7 @@ package sessions
 import (
 	"context"
 	"ep-streaming-service/internal/db"
+	"ep-streaming-service/internal/features/common/pagination"
 	"ep-streaming-service/internal/models"
 	"log"
 	"net/http"
@@ -15,7 +16,7 @@ import (
 
 type Repository interface {
 	DeleteSession(ctx context.Context)
-	FilterSessions(context.Context, string)
+	GetSessions(context.Context, pagination.Pagination, string) (*[]Session, error)
 	IsOwner(ctx context.Context, session_id, username string) (bool, error)
 	UpdateSession(context.Context, Update) error
 	InsertSession(
@@ -66,7 +67,14 @@ func (r *repository) IsOwner(
 
 func (r *repository) UpdateSession(ctx context.Context, req Update) error {
 	collection := r.db.Database(db.Name).Collection(models.SessionCollection)
-	filter := bson.M{"_id": req.SessionId}
+	oid, err := bson.ObjectIDFromHex(req.SessionId)
+	if err != nil {
+		return echo.NewHTTPError(
+			http.StatusBadRequest,
+			"invalid user id",
+		)
+	}
+	filter := bson.M{"_id": oid}
 	update_filter := bson.M{}
 	if req.SessionName != nil && *req.SessionName != "" {
 		update_filter["session_name"] = *req.SessionName
@@ -79,7 +87,7 @@ func (r *repository) UpdateSession(ctx context.Context, req Update) error {
 	}
 
 	update := bson.M{"$set": update_filter}
-	_, err := collection.UpdateOne(ctx, filter, update)
+	_, err = collection.UpdateOne(ctx, filter, update)
 	if err != nil {
 		log.Println(err)
 		return echo.NewHTTPError(
@@ -90,27 +98,117 @@ func (r *repository) UpdateSession(ctx context.Context, req Update) error {
 	return nil
 }
 
-func (r *repository) FilterSessions(context.Context, string) {
-	panic("unimplemented")
+func (r *repository) GetSessions(
+	ctx context.Context,
+	p pagination.Pagination,
+	req string,
+) (*[]Session, error) {
+	collection := r.db.Database(db.Name).Collection(models.SessionCollection)
+
+	projection := bson.D{
+		{Key: "_id", Value: 1},
+		{Key: "session_name", Value: 1},
+		{Key: "owner", Value: 1},
+		{Key: "description", Value: 1},
+		{Key: "created_at", Value: 1},
+		{Key: "ended_at", Value: 1},
+		{Key: "participants", Value: 1},
+	}
+
+	popts := p.GetOptions().SetProjection(projection)
+
+	var filter bson.D
+	now := time.Now().UTC()
+	switch req {
+	case "upcoming":
+		filter = bson.D{{
+			Key: "starts_at",
+			Value: bson.D{{
+				Key:   "$gte",
+				Value: now,
+			}},
+		}}
+		popts.SetSort(bson.D{{Key: "starts_at", Value: -1}})
+	case "ongoing":
+		filter = bson.D{{
+			Key: "starts_at",
+			Value: bson.D{{
+				Key:   "$lte",
+				Value: now,
+			}},
+		},
+			{
+				Key: "ended_at",
+				Value: bson.D{{
+					Key:   "$in",
+					Value: []any{nil},
+				}},
+			}}
+		popts.SetSort(bson.D{{Key: "created_at", Value: -1}})
+	case "concluded":
+		filter = bson.D{
+			{
+				Key: "ended_at",
+				Value: bson.D{{
+					Key:   "$ne",
+					Value: nil,
+				}},
+			}}
+		popts.SetSort(bson.D{{Key: "ended_at", Value: -1}})
+	default:
+		filter = bson.D{}
+	}
+
+	cursor, err := collection.Find(ctx, filter, popts)
+
+	if err != nil {
+		log.Println(err)
+		return nil, echo.NewHTTPError(
+			http.StatusInternalServerError,
+			"failed fetching sessions",
+		)
+	}
+
+	defer cursor.Close(ctx)
+
+	var result []Session
+	if err := cursor.All(ctx, &result); err != nil {
+		log.Println(err)
+		return nil, echo.NewHTTPError(
+			http.StatusInternalServerError,
+			"failed mapping session response",
+		)
+	}
+	return &result, nil
 }
+
 func (r *repository) InsertSession(
 	ctx context.Context,
 	session Create,
 	username string,
 ) (string, error) {
+
 	collection := r.db.Database(db.Name).Collection(models.SessionCollection)
+	starts_at := time.Now().UTC()
+	if session.StartsAt != nil {
+		starts_at = *session.StartsAt
+	}
 	result, err := collection.InsertOne(ctx, models.Session{
-		SessionName:  session.Name,
-		Description:  session.Description,
-		Tags:         session.Tags,
-		Topic:        models.Topic(session.Topic),
-		Participants: []models.Participant{},
+		SessionName:   session.Name,
+		Description:   session.Description,
+		Tags:          session.Tags,
+		Topic:         models.Topic(session.Topic),
+		Scores:        []models.SessionScore{},
+		ComputedScore: 0,
+		Participants:  []models.Participant{},
 		Owner: models.Owner{
 			Username:       username,
 			Name:           session.OwnerName,
 			ProfilePicture: session.OwnerProfilePic,
 		},
+		UpdatedAt: time.Now().UTC(),
 		CreatedAt: time.Now().UTC(),
+		StartsAt:  &starts_at,
 		EndedAt:   nil,
 	})
 	if err != nil {

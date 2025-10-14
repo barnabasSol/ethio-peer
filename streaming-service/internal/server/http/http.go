@@ -57,12 +57,20 @@ func (s *Server) Run() error {
 
 	quit := make(chan os.Signal, 1)
 
-	signal.Notify(quit, os.Interrupt, syscall.SIGINT)
+	signal.Notify(
+		quit,
+		os.Interrupt,
+		syscall.SIGINT,
+	)
 
 	s.bootstrap()
 
 	for _, route := range s.echo.Routes() {
-		fmt.Printf("%s \t %s\n", route.Method, route.Path)
+		fmt.Printf(
+			"%s \t %s\n",
+			route.Method,
+			route.Path,
+		)
 	}
 
 	<-quit

@@ -4,6 +4,7 @@ import (
 	"ep-bridge-service/internal/features/common/cache"
 	"ep-bridge-service/internal/features/common/transport"
 	"ep-bridge-service/internal/features/peer"
+	"ep-bridge-service/internal/features/room"
 	"ep-bridge-service/internal/features/user"
 	"log"
 	"os"
@@ -20,6 +21,9 @@ func (s *Server) bootstrap() error {
 
 	auth_port := os.Getenv("AUTH_SERVICE_GRPC_PORT")
 	s.userClient = transport.NewGrpcClient("auth-service" + auth_port)
+
+	resource_port := os.Getenv("RESOURCE_SERVICE_GRPC_PORT")
+	s.resourceClient = transport.NewGrpcClient("resource-service" + resource_port)
 
 	redis_addr := os.Getenv("REDIS_ADDR")
 
@@ -39,5 +43,10 @@ func (s *Server) bootstrap() error {
 		cache,
 	)
 	user.InitHandler(us, auth_group)
+
+	resource_group := s.echo.Group("/resource")
+	rs := room.NewService(s.resourceClient, cache)
+	room.InitHandler(rs, resource_group)
+
 	return nil
 }
