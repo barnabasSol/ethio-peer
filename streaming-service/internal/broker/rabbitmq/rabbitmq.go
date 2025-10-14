@@ -23,7 +23,12 @@ func InitRabbitMQ() (*RabbitMQ, error) {
 		return nil, err
 	}
 
-	err = NewNotificationExchange(ch)
+	err = NewSessionExchange(ch)
+	if err != nil {
+		return nil, err
+	}
+
+	err = NewScoreExchange(ch)
 	if err != nil {
 		return nil, err
 	}

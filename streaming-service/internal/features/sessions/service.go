@@ -127,11 +127,10 @@ func (s *service) GetSessions(
 		(*res)[i].SessionId = (*res)[i].Id.Hex()
 		sess_id := (*res)[i].SessionId
 		if (*res)[i].EndedAt != nil {
-			(*res)[i].Duration = (*res)[i].EndedAt.Sub((*res)[i].CreatedAt).String()
+			(*res)[i].Duration = (*res)[i].EndedAt.Sub((*res)[i].StartsAt).String()
 		}
 		i := i
 		wg.Go(func() {
-			log.Println("Fetching participants for session:", sess_id)
 			lk_p, err := s.rc.ListParticipants(
 				ctx,
 				&lk_protocol.ListParticipantsRequest{
@@ -145,7 +144,7 @@ func (s *service) GetSessions(
 
 			(*res)[i].Participants = []Participant{}
 
-			uniqueParticipants := make(map[string]Participant)
+			unique_participants := make(map[string]Participant)
 
 			isLive := false
 
@@ -162,8 +161,8 @@ func (s *service) GetSessions(
 					continue
 				}
 
-				if _, exists := uniqueParticipants[lkp.Identity]; !exists {
-					uniqueParticipants[lkp.Identity] = Participant{
+				if _, exists := unique_participants[lkp.Identity]; !exists {
+					unique_participants[lkp.Identity] = Participant{
 						Username:       lkp.Identity,
 						ProfilePicture: metadata.ProfilePicture,
 					}
@@ -173,7 +172,7 @@ func (s *service) GetSessions(
 				}
 			}
 
-			for _, p := range uniqueParticipants {
+			for _, p := range unique_participants {
 				(*res)[i].Participants = append((*res)[i].Participants, p)
 			}
 
@@ -189,8 +188,41 @@ func (s *service) GetSessions(
 
 func (s *service) EndSession(
 	ctx context.Context,
-	owner_id, session_id string,
+	owner_username, session_id string,
 ) error {
-
-	panic("unimplemented")
+	ok, err := s.repo.IsOwner(
+		ctx,
+		session_id,
+		owner_username,
+	)
+	if err != nil {
+		return err
+	}
+	if !ok {
+		return echo.NewHTTPError(
+			http.StatusForbidden,
+			"you can't end this session",
+		)
+	}
+	_, err = s.rc.DeleteRoom(ctx, &lk_protocol.DeleteRoomRequest{
+		Room: session_id,
+	})
+	if err != nil {
+		return echo.NewHTTPError(
+			http.StatusForbidden,
+			"failed to end session please try again later",
+		)
+	}
+	yes := true
+	err = s.repo.UpdateSession(ctx, Update{
+		SessionId: session_id,
+		IsEnded:   &yes,
+	})
+	if err != nil {
+		return echo.NewHTTPError(
+			http.StatusForbidden,
+			"failed to end session please try again later",
+		)
+	}
+	return nil
 }

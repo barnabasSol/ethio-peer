@@ -29,6 +29,9 @@ type Update struct {
 	IsEnded     *bool   `json:"is_ended"`
 }
 
+type End struct {
+}
+
 type CreateResponse struct {
 	RoomId string `json:"room_id"`
 }
@@ -39,7 +42,7 @@ type Session struct {
 	Name         string        `bson:"session_name" json:"name"`
 	Owner        Owner         `bson:"owner" json:"owner"`
 	Description  string        `bson:"description" json:"description"`
-	CreatedAt    time.Time     `bson:"created_at" json:"created_at"`
+	StartsAt     time.Time     `bson:"starts_at" json:"starts_at"`
 	EndedAt      *time.Time    `bson:"ended_at,omitempty" json:"ended_at,omitempty"`
 	Participants []Participant `bson:"participants" json:"participants"`
 	Duration     string        `json:"duration"`

@@ -17,3 +17,8 @@ type WelcomePayload struct {
 	Email string `json:"email"`
 	Name  string `json:"name"`
 }
+
+type ScorePayload struct {
+	UserId string  `json:"user_id"`
+	Score  float32 `json:"score"`
+}

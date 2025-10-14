@@ -40,6 +40,7 @@ func (s *Server) Run() error {
 
 	s.echo.Use(middleware.Logger())
 	s.echo.Use(middleware.Recover())
+	s.echo.Use(middleware.ContextTimeout(7 * time.Second))
 
 	s.echo.GET("/health", func(c echo.Context) error {
 		return c.String(http.StatusOK, "OK")

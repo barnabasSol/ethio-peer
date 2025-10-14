@@ -16,8 +16,15 @@ import (
 
 type Repository interface {
 	DeleteSession(ctx context.Context)
-	GetSessions(context.Context, pagination.Pagination, string) (*[]Session, error)
-	IsOwner(ctx context.Context, session_id, username string) (bool, error)
+	GetSessions(
+		context.Context,
+		pagination.Pagination,
+		string,
+	) (*[]Session, error)
+	IsOwner(
+		ctx context.Context,
+		session_id, username string,
+	) (bool, error)
 	UpdateSession(context.Context, Update) error
 	InsertSession(
 		ctx context.Context,
@@ -110,7 +117,7 @@ func (r *repository) GetSessions(
 		{Key: "session_name", Value: 1},
 		{Key: "owner", Value: 1},
 		{Key: "description", Value: 1},
-		{Key: "created_at", Value: 1},
+		{Key: "starts_at", Value: 1},
 		{Key: "ended_at", Value: 1},
 		{Key: "participants", Value: 1},
 	}
@@ -128,7 +135,10 @@ func (r *repository) GetSessions(
 				Value: now,
 			}},
 		}}
-		popts.SetSort(bson.D{{Key: "starts_at", Value: -1}})
+		popts.SetSort(bson.D{{
+			Key:   "starts_at",
+			Value: -1,
+		}})
 	case "ongoing":
 		filter = bson.D{{
 			Key: "starts_at",
