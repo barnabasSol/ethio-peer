@@ -55,7 +55,7 @@ public static class Routes
             },
             new RouteConfig
             {
-                RouteId = "resource",
+                RouteId = "resource1",
                 ClusterId = "resource-cluster",
                 CorsPolicy = "WebOriginCorsPolicy",
                 Match = new RouteMatch { Path = "/api/resource/{**catch-all}" },
@@ -67,7 +67,7 @@ public static class Routes
             },
             new RouteConfig
             {
-                RouteId = "resource",
+                RouteId = "resource2",
                 ClusterId = "resource-cluster",
                 CorsPolicy = "WebOriginCorsPolicy",
                 Match = new RouteMatch { Path = "/api/resource/courses" },

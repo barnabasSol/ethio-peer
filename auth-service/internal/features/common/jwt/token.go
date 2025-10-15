@@ -98,9 +98,10 @@ func (g generator) GenerateRefreshTokenJWT(userId string) (string, error) {
 	if err != nil {
 
 	}
+	exp_at := jwt.NewNumericDate(time.Now().Add(time.Duration(exp) * 24 * time.Hour))
 	claims := jwt.RegisteredClaims{
 		Subject:   userId,
-		ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Duration(exp) * time.Minute)),
+		ExpiresAt: exp_at,
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
@@ -130,6 +131,7 @@ func (g generator) ParseRefreshTokenJWT(tokenString string) (string, error) {
 	)
 
 	if err != nil {
+		log.Println(err)
 		return "", errors.New("tampered token")
 	}
 

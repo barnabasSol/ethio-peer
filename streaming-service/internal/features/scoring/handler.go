@@ -41,7 +41,7 @@ func (h *Handler) ScoreSession(c echo.Context) error {
 		return err
 	}
 	return c.JSON(
-		http.StatusBadRequest,
+		http.StatusOK,
 		map[string]string{"message": "rating accepted, thank you for your feedback"},
 	)
 }

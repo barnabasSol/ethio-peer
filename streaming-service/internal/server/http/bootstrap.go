@@ -5,6 +5,7 @@ import (
 	"ep-streaming-service/internal/features/common/livekit"
 	"ep-streaming-service/internal/features/monitoring"
 	"ep-streaming-service/internal/features/participants"
+	"ep-streaming-service/internal/features/scoring"
 	"ep-streaming-service/internal/features/sessions"
 	"log"
 	"os"
@@ -54,6 +55,14 @@ func (s *Server) bootstrap() error {
 		ms,
 		*livekit_cfg,
 		s.echo.Group("monitoring"),
+	)
+
+	scr := scoring.NewRepository(s.db)
+	scs := scoring.NewService(scr, b)
+	scoring.InitHandler(
+		*livekit_cfg,
+		s.echo.Group(""),
+		scs,
 	)
 	return nil
 }
