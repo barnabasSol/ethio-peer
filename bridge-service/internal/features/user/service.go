@@ -103,7 +103,7 @@ func (s *service) GetCurrentUser(
 		Name:           user_resp.Name,
 		InstituteEmail: user_resp.InstituteEmail,
 		Email:          user_resp.Email,
-		OverallScore:   byte(peer_resp.OverallScore),
+		OverallScore:   peer_resp.OverallScore,
 		ProfilePhoto:   peer_resp.ProfilePhoto,
 		OnlineStatus:   peer_resp.OnlineStatus,
 		Bio:            peer_resp.Bio,

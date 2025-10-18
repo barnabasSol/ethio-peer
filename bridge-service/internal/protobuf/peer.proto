@@ -15,6 +15,6 @@ message GetPeerResponse {
   string profile_photo = 2;
   bool online_status = 3;
   string bio = 4;
-  uint32 overall_score = 5;
+  string overall_score = 5;
   repeated string interests = 6;
 }

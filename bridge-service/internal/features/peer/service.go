@@ -36,7 +36,7 @@ func (s service) GetPeer(
 	}
 	return &PeerResponse{
 		UserId:       resp.UserId,
-		OverallScore: byte(resp.OverallScore),
+		OverallScore: resp.OverallScore,
 		ProfilePhoto: resp.ProfilePhoto,
 		OnlineStatus: resp.OnlineStatus,
 		Bio:          resp.Bio,

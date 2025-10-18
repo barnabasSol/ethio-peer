@@ -3,6 +3,7 @@ package participants
 import (
 	"context"
 	"encoding/json"
+	broker "ep-streaming-service/internal/broker/rabbitmq"
 	"ep-streaming-service/internal/features/common"
 	"ep-streaming-service/internal/features/common/livekit"
 	"ep-streaming-service/internal/models"
@@ -30,15 +31,18 @@ type Service interface {
 type service struct {
 	lk_cfg livekit.Config
 	rc     *lksdk.RoomServiceClient
+	br     *broker.RabbitMQ
 	repo   Repository
 }
 
 func NewService(
 	r Repository,
+	rmq *broker.RabbitMQ,
 	cfg *livekit.Config,
 ) Service {
 	return &service{
 		repo:   r,
+		br:     rmq,
 		lk_cfg: *cfg,
 		rc: lksdk.NewRoomServiceClient(
 			cfg.Host,
@@ -212,6 +216,26 @@ func (s *service) Join(
 			"failed to generate stream token",
 		)
 	}
+
+	new_member_pl := broker.NewParticipantPayload{
+		SessionId: req.SessionId,
+		MemberId:  req.UserId,
+	}
+
+	new_member, err := json.Marshal(new_member_pl)
+
+	if err != nil {
+		return nil, echo.NewHTTPError(
+			http.StatusInternalServerError,
+			"failed to marshal new member payload",
+		)
+	}
+
+	s.br.Publish(broker.Message{
+		Exchange: "Session_Exg",
+		Topic:    "session.member.joined",
+		Data:     new_member,
+	})
 
 	return &common.Response[string]{
 		Data: token,

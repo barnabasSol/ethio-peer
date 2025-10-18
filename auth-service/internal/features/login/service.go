@@ -121,6 +121,7 @@ func (s *service) LoginUser(
 		return nil, err
 	}
 	id := user.Id.Hex()
+
 	return &common.Response[LoginResponse]{
 		Message: "successfully logged in",
 		Data: LoginResponse{

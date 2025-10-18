@@ -71,7 +71,7 @@ type GetPeerResponse struct {
 	ProfilePhoto  string                 `protobuf:"bytes,2,opt,name=profile_photo,json=profilePhoto,proto3" json:"profile_photo,omitempty"`
 	OnlineStatus  bool                   `protobuf:"varint,3,opt,name=online_status,json=onlineStatus,proto3" json:"online_status,omitempty"`
 	Bio           string                 `protobuf:"bytes,4,opt,name=bio,proto3" json:"bio,omitempty"`
-	OverallScore  uint32                 `protobuf:"varint,5,opt,name=overall_score,json=overallScore,proto3" json:"overall_score,omitempty"`
+	OverallScore  string                 `protobuf:"bytes,5,opt,name=overall_score,json=overallScore,proto3" json:"overall_score,omitempty"`
 	Interests     []string               `protobuf:"bytes,6,rep,name=interests,proto3" json:"interests,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -135,11 +135,11 @@ func (x *GetPeerResponse) GetBio() string {
 	return ""
 }
 
-func (x *GetPeerResponse) GetOverallScore() uint32 {
+func (x *GetPeerResponse) GetOverallScore() string {
 	if x != nil {
 		return x.OverallScore
 	}
-	return 0
+	return ""
 }
 
 func (x *GetPeerResponse) GetInterests() []string {
@@ -162,7 +162,7 @@ const file_peer_proto_rawDesc = "" +
 	"\rprofile_photo\x18\x02 \x01(\tR\fprofilePhoto\x12#\n" +
 	"\ronline_status\x18\x03 \x01(\bR\fonlineStatus\x12\x10\n" +
 	"\x03bio\x18\x04 \x01(\tR\x03bio\x12#\n" +
-	"\roverall_score\x18\x05 \x01(\rR\foverallScore\x12\x1c\n" +
+	"\roverall_score\x18\x05 \x01(\tR\foverallScore\x12\x1c\n" +
 	"\tinterests\x18\x06 \x03(\tR\tinterests2=\n" +
 	"\vPeerService\x12.\n" +
 	"\aGetPeer\x12\x0f.GetPeerRequest\x1a\x10.GetPeerResponse\"\x00B*Z(ep-bridge-service/internal/genproto/peerb\x06proto3"

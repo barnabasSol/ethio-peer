@@ -118,6 +118,7 @@ func (s *service) CreateSession(
 	}
 
 	new_room_json, err := json.Marshal(new_room)
+
 	if err != nil {
 		return nil, echo.NewHTTPError(
 			http.StatusInternalServerError,
@@ -132,6 +133,7 @@ func (s *service) CreateSession(
 	})
 
 	if err != nil {
+		log.Println("failed to publish event to resource service")
 		log.Println(err)
 	}
 

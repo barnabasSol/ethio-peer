@@ -29,3 +29,8 @@ type NewSessionPayload struct {
 	UserName  string `json:"UserName"`
 	TopicId   string `json:"TopicId"`
 }
+
+type NewParticipantPayload struct {
+	SessionId string `json:"SessionId"`
+	MemberId  string `json:"MemberId"`
+}

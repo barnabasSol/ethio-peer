@@ -26,7 +26,7 @@ func (s *Server) bootstrap() error {
 		lk_egress_secret,
 		wh,
 	)
-	b, err := broker.InitRabbitMQ()
+	rmq, err := broker.InitRabbitMQ()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -34,7 +34,7 @@ func (s *Server) bootstrap() error {
 	sr := sessions.NewRepository(s.db)
 	ss := sessions.NewService(
 		sr,
-		b,
+		rmq,
 		*livekit_cfg,
 	)
 	sessions.InitHandler(
@@ -44,7 +44,7 @@ func (s *Server) bootstrap() error {
 	)
 
 	pr := participants.NewRepository(s.db)
-	ps := participants.NewService(pr, livekit_cfg)
+	ps := participants.NewService(pr, rmq, livekit_cfg)
 	participants.InitHandler(
 		ps,
 		*livekit_cfg,
@@ -59,7 +59,7 @@ func (s *Server) bootstrap() error {
 	)
 
 	scr := scoring.NewRepository(s.db)
-	scs := scoring.NewService(scr, b)
+	scs := scoring.NewService(scr, rmq)
 	scoring.InitHandler(
 		*livekit_cfg,
 		s.echo.Group(""),

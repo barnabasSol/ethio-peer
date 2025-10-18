@@ -1,7 +1,7 @@
 syntax = "proto3";
 
 option go_package = "ep-auth-service/internal/genproto/user";
-// import "google/protobuf/timestamp.proto";
+import "google/protobuf/timestamp.proto";
 
 
 service UserService {
@@ -19,5 +19,5 @@ message GetUserResponse {
   repeated string roles = 4;
   string email = 5;
   string institute_email = 6;
-  // google.protobuf.Timestamp created_at = 7;
+  google.protobuf.Timestamp created_at = 7;
 }
