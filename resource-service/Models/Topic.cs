@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace ResourceService.Models;
 
@@ -12,5 +13,6 @@ public class Topic
     public string CourseCode { get; set; } = String.Empty;
     [ForeignKey("CourseCode")]
     public Course? Course { get; set; }
+    [JsonIgnore]
     public List<Room> Rooms { get; set; } = [];
 }

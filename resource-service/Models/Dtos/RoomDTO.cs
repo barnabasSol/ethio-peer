@@ -1,8 +1,8 @@
-namespace ResourceService.Models
+namespace ResourceService.Models.Dtos
 {
     public class RoomDTO
     {
-        public Guid SessionId { get; set; }
+        public string SessionId { get; set; }= string.Empty;
         public Guid TopicId { get; set; }
 
         public string Name { get; set; } = string.Empty;

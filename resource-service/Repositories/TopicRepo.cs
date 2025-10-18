@@ -1,5 +1,6 @@
 using ResourceService.Models;
 using Microsoft.EntityFrameworkCore;
+using ResourceService.Models.Dtos;
 
 namespace ResourceService.Repositories;
 
@@ -32,6 +33,10 @@ public class TopicRepo
     public async Task<IEnumerable<Topic>> GetAllTopicsAsync()
     {
         return await _context.Topics.ToListAsync();
+    } 
+    public async Task<List<Topic>> GetTopicsByPattern(string pattern)
+    {
+        return await _context.Topics.Where(t => EF.Functions.ILike(t.Name, $"{pattern}%")).ToListAsync();
     }
 
     public async Task<Topic> AddTopicAsync(TopicDTO topic)

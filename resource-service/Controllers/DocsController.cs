@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using ResourceService.Models;
+using ResourceService.Models.Dtos;
 using ResourceService.Repositories;
 
 namespace ResourceService.Controllers;
@@ -37,7 +38,7 @@ public class DocumentController(DocRepo docRepo) : ControllerBase
         try
         {
             var docUrl = await _docRepo.AddDoc(dto);
-            return Ok(new {uploadUrl= docUrl});
+            return Ok(new {data= docUrl});
         }
         catch (FileNotFoundException)
         {
@@ -54,11 +55,11 @@ public class DocumentController(DocRepo docRepo) : ControllerBase
     }
     //download doc
     [HttpGet("{id}")]
-    public async Task<IActionResult> DocumentDownload(string id)
+    public async Task<IActionResult> DocumentDownload(string key)
     {
         try
         {
-            return Ok();
+            return Ok(_docRepo.GenerateDownloadLink(key));
             // var stream = await _docRepo.DownloadDoc(id);
             // return File(stream, "application/octet-stream", id);
         }

@@ -4,7 +4,7 @@ namespace ResourceService.Models;
 
 public class PagedList<T>
 {
-    private PagedList(int pageSize, int pageNumber, int totalCount, List<T> items)
+    public PagedList(int pageSize, int pageNumber, int totalCount, List<T> items)
     {
         Items = items;
         PageSize = pageSize;
@@ -24,8 +24,7 @@ public class PagedList<T>
         
         int count = await query.CountAsync();
         var currentPage = pageNumber ?? 1;
-        var itemsPerPage = pageSize ?? count;
-        Console.WriteLine("Got these calcs " +  itemsPerPage + currentPage);
+        var itemsPerPage = pageSize ?? count; 
         var items = await query.Skip((currentPage - 1) * itemsPerPage).Take(itemsPerPage).ToListAsync();
 
         return new PagedList<T>(

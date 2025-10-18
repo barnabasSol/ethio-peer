@@ -12,11 +12,11 @@ public class PostController(PostRepo postRepo) : ControllerBase
 
     // Get Posts by RoomId
     [HttpGet]
-    public async Task<IActionResult> GetPostsByRoomId([FromQuery] Guid roomId,[FromQuery]PagedQuery pq)
+    public async Task<IActionResult> GetPostsByRoomId([FromQuery] Guid roomId, [FromQuery] PagedQuery pq)
     {
         try
         {
-            var posts = await _postRepo.GetPostsByRoomId(roomId,pq);
+            var posts = await _postRepo.GetPostsByRoomId(roomId, pq);
             return Ok(posts);
         }
         catch (ArgumentNullException e)
@@ -28,6 +28,10 @@ public class PostController(PostRepo postRepo) : ControllerBase
             return StatusCode(500, ex.Message);
         }
     }
+    [HttpGet("weekly")]
+    public async Task<IActionResult> GetWeeklyPosts()
+    {
+        return Ok(await _postRepo.GetWeeklyPosts());
+    }
 
-    
-}  
+}

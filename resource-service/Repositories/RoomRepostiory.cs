@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using ResourceService.Models;
+using ResourceService.Models.Dtos;
 
 namespace ResourceService.Repositories;
 
@@ -50,6 +51,7 @@ public class RoomRepository(Context context)
 
         return roomsList.Select(r => new RoomResp
         {
+            RoomId = r.Id,
             RoomName = r.Name,
             TopicName = r.Topic!.Name,
             MemberCount = _context.RoomMembers.AsNoTracking().Count(m => m.RoomId == r.Id),
@@ -68,11 +70,34 @@ public class RoomRepository(Context context)
     }
 
     //Get Rooms by memberId
-    public async Task<List<Room>> GetRoomsByMemberId(Guid memberId)
+    public async Task<List<RoomResp>> GetRoomsByMemberId(string memberId, bool explore = false, int count = 0)
     {
-        List<Room?> rooms = await _context.RoomMembers.Where(r => r.UserId == memberId).Select(r => r.Room).ToListAsync();
-        if (rooms == null || rooms.Count == 0) throw new ArgumentNullException(nameof(memberId), "No rooms found for the given userId");
-        return rooms!;
+        var roomsQuery = _context.Rooms
+      .AsNoTracking()
+      .Where(r => r.Topic != null).AsQueryable();
+        if (explore)
+        {
+            roomsQuery = roomsQuery.Where(r => !_context.RoomMembers.Any(m => m.RoomId == r.Id && m.UserId == memberId));
+        }
+        else
+            roomsQuery = roomsQuery.Where(r => _context.RoomMembers.Any(m => m.RoomId == r.Id && m.UserId == memberId));
+        if (roomsQuery.Count() == 0) return [];
+        if (count > 0)
+        {
+            roomsQuery = roomsQuery.Take(count);
+        }
+        var rooms = await roomsQuery.Include(r => r.Topic).ToListAsync();
+        
+        return rooms.Select(r => new RoomResp
+        {
+            RoomId = r.Id,
+            RoomName = r!.Name,
+            TopicName = r.Topic!.Name,
+            MemberCount = _context.RoomMembers.AsNoTracking().Count(m => m.RoomId == r.Id),
+            CourseCode = r.Topic.CourseCode
+        }).OrderByDescending(x => x.MemberCount)
+                .ThenBy(x => x.RoomName)
+                .ToList();
     }
 
     //Add member
@@ -92,14 +117,14 @@ public class RoomRepository(Context context)
         await _context.SaveChangesAsync();
     }
     //Get Members
-    public async Task<List<Guid>> GetMembers(Guid roomId)
+    public async Task<List<string>> GetMembers(Guid roomId)
     {
         var room = _context.Rooms.Where(r => r.Id == roomId).FirstOrDefault() ?? throw new ArgumentNullException(nameof(roomId), "There is no Room with the given id");
-        List<Guid> members = await _context.RoomMembers.Where(r => r.RoomId == roomId).Select(r => r.UserId).ToListAsync();
+        List<string> members = await _context.RoomMembers.Where(r => r.RoomId == roomId).Select(r => r.UserId).ToListAsync();
         return members;
     }
 
-    public async Task<Guid> GetRoomIdBySessionId(Guid sessionId)
+    public async Task<Guid> GetRoomIdBySessionId(string sessionId)
     {
         var roomId = await _context.Rooms.Where(r => r.SessionId == sessionId).Select(r => r.Id).FirstOrDefaultAsync();
         if (roomId == Guid.Empty) throw new ArgumentNullException(nameof(sessionId), "Room not found for the given sessionId");
@@ -107,25 +132,28 @@ public class RoomRepository(Context context)
 
     }
 
-    public async Task<List<RoomResp>> GetSuggestedRooms(List<string> courses)
+    public async Task<List<RoomResp>> GetSuggestedRooms(List<string>? courses, string memberId)
     {
         if (courses == null || courses.Count == 0)
         {
-            return await GetRoomsAsync(count: 3);
+            return await GetRoomsByMemberId(memberId, explore: true, count: 3);
         }
 
         var roomList = await _context.Rooms.AsNoTracking()
-      .Where(r => r.Topic != null && r.Topic.Course != null && courses.Contains(r.Topic.Course.Name))
+      .Where(r => r.Topic != null && r.Topic.Course != null && courses.Contains(r.Topic.Course.Name)
+      && !_context.RoomMembers.Any(m => m.RoomId == r.Id && m.UserId == memberId))
       .Include(r => r.Topic)
       .Take(3)
       .ToListAsync();
 
         if (roomList == null || roomList.Count == 0)
-            return await GetRoomsAsync(count: 3);
+            return await GetRoomsByMemberId(memberId, explore: true, count: 3);
+
 
         var rooms = roomList
             .Select(r => new RoomResp
             {
+                RoomId = r.Id,
                 TopicName = r.Topic!.Name,
                 RoomName = r.Name,
                 MemberCount = _context.RoomMembers.AsNoTracking().Count(m => m.RoomId == r.Id),

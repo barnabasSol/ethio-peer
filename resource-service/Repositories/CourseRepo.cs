@@ -1,5 +1,6 @@
 using ResourceService.Models;
 using Microsoft.EntityFrameworkCore;
+using ResourceService.Models.Dtos;
 
 namespace ResourceService.Repositories;
 
@@ -77,6 +78,10 @@ public class CourseRepo
             throw;
         }
 
+    }
+    public async Task<List<Course>> GetCoursesByPattern(string pattern)
+    {
+        return await _context.Courses.Where(t => EF.Functions.ILike(t.Name, $"{pattern}%")).ToListAsync();
     }
     public async Task DeleteCourseAsync(string courseCode)
     {

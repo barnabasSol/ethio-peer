@@ -2,6 +2,6 @@ namespace ResourceService.Broker.RabbitMQ.Dtos;
 
 public class MemberData
 {
-    public Guid SessionId { get; set; } 
-    public Guid MemberId { get; set; }
+    public string SessionId { get; set; } =string.Empty;
+    public string MemberId { get; set; }=string.Empty;
 }

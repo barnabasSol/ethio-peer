@@ -3,6 +3,7 @@ using Minio;
 using Minio.DataModel;
 using Minio.DataModel.Args;
 using ResourceService.Models;
+using ResourceService.Models.Dtos;
 
 namespace ResourceService.Repositories;
 
@@ -11,7 +12,8 @@ public class DocRepo(IMinioClient minioClient, Context context)
     private readonly IMinioClient _minioClient = minioClient;
     private readonly Context _context = context;
     private readonly string bucketName = "docs";
-    public async Task<string> AddDoc(DocDTO dto)
+
+    public async Task<DocUploadResp> AddDoc(DocDTO dto)
     {
         try
         {
@@ -21,25 +23,41 @@ public class DocRepo(IMinioClient minioClient, Context context)
             {
                 await _minioClient.MakeBucketAsync(new MakeBucketArgs().WithBucket(bucketName));
             }
-            string fileName = Guid.NewGuid().ToString() + "/" + RemoveExtension(dto.FileName);
+            string objectKey = Guid.NewGuid().ToString();
             var url = await _minioClient.PresignedPutObjectAsync(
                             new PresignedPutObjectArgs()
                                 .WithBucket(bucketName)
-                                .WithObject(fileName)
+                                .WithObject(objectKey)
                                 .WithExpiry(3600));
 
             Document doc = new()
             {
                 Id = new Guid(),
-                FileName = fileName,
+                ObjectKey = objectKey,
                 UploaderId = dto.UploaderId,
-                // Title = dto.Title, 
+                Title = dto.Title,
                 DateUploaded = DateTime.UtcNow,
                 RoomId = dto.RoomId
             };
             await _context.Documents.AddAsync(doc);
+            Post post = new()
+            {
+                Id = Guid.NewGuid(),
+                RoomId = dto.RoomId,
+                SenderId = dto.UploaderId,
+                IsDoc = true,
+                DocKey = objectKey,
+                DocTitle = dto.Title,
+                CreatedAt = DateTime.UtcNow
+            };
+            await _context.Posts.AddAsync(post);
             await _context.SaveChangesAsync();
-            return url;
+            return new DocUploadResp
+            {
+                UploadUrl = url,
+                DocKey = objectKey,
+                DocTitle = dto.Title
+            };
         }
         catch (FileNotFoundException)
         {
@@ -50,9 +68,8 @@ public class DocRepo(IMinioClient minioClient, Context context)
             throw;
         }
     }
-    private async Task<string> GenerateDownloadLink(Document doc)
+    public async Task<string> GenerateDownloadLink(string key)
     {
-         
         //check if the file exists
         try
         {
@@ -61,11 +78,10 @@ public class DocRepo(IMinioClient minioClient, Context context)
             {
                 return "";
             }
-             
             string presignedUrl = await _minioClient.PresignedGetObjectAsync(
     new PresignedGetObjectArgs()
         .WithBucket(bucketName)
-        .WithObject(doc.FileName)
+        .WithObject(key)
         .WithExpiry(3600)
 );
             return presignedUrl;
@@ -78,7 +94,6 @@ public class DocRepo(IMinioClient minioClient, Context context)
             return "";
         }
     }
-
     public async Task<Document> ModifyDocMetadata(Guid id, DocDTO dto)
     {
         Document? doc = _context.Documents.Find(id) ?? throw new FileNotFoundException();
@@ -98,7 +113,7 @@ public class DocRepo(IMinioClient minioClient, Context context)
         try
         {
             //check if the file exists
-            StatObjectArgs statObjectArgs = new StatObjectArgs().WithBucket(bucketName).WithObject(doc.FileName);
+            StatObjectArgs statObjectArgs = new StatObjectArgs().WithBucket(bucketName).WithObject(doc.ObjectKey);
             var stat = await _minioClient.StatObjectAsync(statObjectArgs);
         }
         catch (Minio.Exceptions.ObjectNotFoundException)
@@ -106,7 +121,7 @@ public class DocRepo(IMinioClient minioClient, Context context)
             throw new FileNotFoundException();
         }
         //if it does, delete the file from minio
-        RemoveObjectArgs removeObjectArgs = new RemoveObjectArgs().WithBucket(bucketName).WithObject(doc.FileName);
+        RemoveObjectArgs removeObjectArgs = new RemoveObjectArgs().WithBucket(bucketName).WithObject(doc.ObjectKey);
         await _minioClient.RemoveObjectAsync(removeObjectArgs);
         //delete the file metadata from the database
         _context.Documents.Remove(doc);
@@ -116,7 +131,7 @@ public class DocRepo(IMinioClient minioClient, Context context)
 
     public async Task<List<DocResp>> GetDocsAsync(CourseCategory? category = null, int count = 0)
     {
-        List<DocResp> docSugges = [];
+        List<DocResp> docSugges = []; 
 
         //base case
         var documentsQuery = _context.Documents.Where(d => d.Room != null && d.Room.Topic != null).Include(d => d.Room).ThenInclude(r => r!.Topic)
@@ -131,20 +146,21 @@ public class DocRepo(IMinioClient minioClient, Context context)
             documentsQuery = documentsQuery.Take(count);
 
         }
-        var docList = await documentsQuery.ToListAsync(); 
+        var docList = await documentsQuery.ToListAsync();
 
         foreach (var doc in docList)
         {
-            var link = await GenerateDownloadLink(doc);
+            // var link = await GenerateDownloadLink(doc);
             docSugges.Add(new DocResp
             {
-                DocTitle = RemoveExtension(doc.FileName),
+                DocId = doc.Id,
+                DocTitle = RemoveExtension(doc.Title),
                 TopicName = doc.Room!.Topic!.Name,
                 UploadDate = doc.DateUploaded,
-                DownloadLink = link
+                DocKey = doc.ObjectKey
 
             });
-        } 
+        }
 
         return docSugges.OrderByDescending(x => x.UploadDate).ToList();
     }
@@ -166,13 +182,14 @@ public class DocRepo(IMinioClient minioClient, Context context)
         List<DocResp> docSugges = [];
         foreach (var doc in docs)
         {
-            var link = await GenerateDownloadLink(doc);
+            // var link = await GenerateDownloadLink(doc);
             docSugges.Add(new DocResp
             {
-                DocTitle = RemoveExtension(doc.FileName),
+                DocId = doc.Id,
+                DocTitle = RemoveExtension(doc.Title),
                 TopicName = doc.Room!.Topic!.Name,
                 UploadDate = doc.DateUploaded,
-                DownloadLink = link
+                DocKey = doc.ObjectKey
 
             });
         }
@@ -184,8 +201,8 @@ public class DocRepo(IMinioClient minioClient, Context context)
         if (lastDot == -1)
         {
             return fileName;
-        }   
-        return fileName[.. fileName.LastIndexOf('.')];
+        }
+        return fileName[..fileName.LastIndexOf('.')];
     }
 
     // public async Task<List<Document>> GetDocsByRoomId(Guid roomId)

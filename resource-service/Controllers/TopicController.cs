@@ -1,4 +1,5 @@
 using ResourceService.Models;
+using ResourceService.Models.Dtos;
 using ResourceService.Repositories;
 using Microsoft.AspNetCore.Mvc;
 namespace ResourceService.Controllers;
@@ -27,7 +28,11 @@ public class TopicController(TopicRepo topicRepo) : ControllerBase
             topic.CourseCode
         });
     }
-
+    [HttpGet("pattern")]
+    public async Task<IActionResult> GetTopicsByPattern([FromQuery]string pattern)
+    {
+        return Ok(await _topicRepo.GetTopicsByPattern(pattern));
+    }
     [HttpPost]
     public async Task<IActionResult> CreateTopic([FromBody] TopicDTO topic)
     {

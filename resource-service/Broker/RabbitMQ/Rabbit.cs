@@ -4,6 +4,7 @@ using RabbitMQ.Client.Events;
 using ResourceService.Broker.RabbitMQ;
 using ResourceService.Broker.RabbitMQ.Dtos;
 using ResourceService.Models;
+using ResourceService.Models.Dtos;
 using ResourceService.Repositories;
 using System.Text;
 using System.Text.Json;
@@ -29,7 +30,7 @@ public class Rabbit
             return;
         }
 
-        await _channel.ExchangeDeclareAsync(exchange: "Session_Exg", type: ExchangeType.Topic);
+        await _channel.ExchangeDeclareAsync(exchange: "Session_Exg", type: ExchangeType.Topic, durable: true);
 
         // we create queue with a generated name which we subscribe for listening to session creation:
         QueueDeclareOk queueDeclareResult = await _channel.QueueDeclareAsync();
@@ -111,12 +112,12 @@ public class Rabbit
         if (session != null)
         {
             Console.WriteLine($"Received SessionId={session.SessionId}, UserName={session.UserName}, TopicId={session.TopicId}");
-            string topicName = await topicRepo.GetTopicNameById(session.TopicId);
+            string topicName = await topicRepo.GetTopicNameById(Guid.Parse(session.TopicId));
             RoomDTO roomDto = new RoomDTO
             {
-                SessionId = session.SessionId,
+                SessionId =  session.SessionId,
                 Name = session.UserName.ToUpper() + "'s " + topicName,
-                TopicId = session.TopicId
+                TopicId = Guid.Parse(session.TopicId)
 
             };
             var room = await roomRepo.AddRoom(roomDto);
@@ -137,6 +138,8 @@ public class Rabbit
         var factory = new ConnectionFactory
         {
             HostName = _configuration["RabbitMQ:Host"]!,
+            UserName = _configuration["RabbitMQ:Username"]!,
+            Password = _configuration["RabbitMQ:Password"]!
         };
         _connection = await factory.CreateConnectionAsync();
         _channel = await _connection.CreateChannelAsync();

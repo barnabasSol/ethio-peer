@@ -1,6 +1,6 @@
-    using System.Text.Json.Serialization;
+using System.Text.Json.Serialization;
 
-namespace ResourceService.Models;
+namespace ResourceService.Models.Dtos;
 
 public class CourseDTO
 {
@@ -8,6 +8,6 @@ public class CourseDTO
     public required string Name { get; set; }
     public required string Description { get; set; }
     public int CreditHour { get; set; }
-    [field: JsonConverter(typeof(JsonStringEnumConverter))] public CourseCategory Category { get; set; } 
+    [field: JsonConverter(typeof(JsonStringEnumConverter))] public CourseCategory Category { get; set; }
 
 }

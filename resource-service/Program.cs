@@ -2,7 +2,7 @@ using ResourceService.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Minio;
 using ResourceService.Models;
-using ResourceService.Services;
+using ResourceService.Services; 
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,8 +20,14 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSignalR();
 builder.Services.AddGrpc();
+builder.Services.AddHealthChecks();
 Console.WriteLine("Minio endpoint: " + builder.Configuration["Minio:Endpoint"]);
 // Add CORS
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.Configure(builder.Configuration.GetSection("Kestrel"));
+});
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowVueClient",
@@ -49,7 +55,9 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 var rabbit = app.Services.GetRequiredService<Rabbit>();
 await rabbit.InitiateConsuming();
+
 app.UseSwagger();
+app.MapHealthChecks("/health");
 app.UseSwaggerUI(c =>
 {
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "Course Topic Service API V1");

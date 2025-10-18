@@ -1,7 +1,9 @@
 using ResourceService.Models;
 using ResourceService.Repositories;
 using Microsoft.AspNetCore.Mvc;
+using ResourceService.Models.Dtos;
 namespace ResourceService.Controllers;
+
 [ApiController]
 [Route("[controller]s")]
 public class CourseController(CourseRepo courseRepo) : ControllerBase
@@ -12,19 +14,12 @@ public class CourseController(CourseRepo courseRepo) : ControllerBase
     public async Task<IActionResult> GetCourses(CourseCategory? category)
     {
         return Ok(category == null ? await _courseRepo.GetAllCoursesAsync() : await _courseRepo.GetCoursesByCategoryAsync(category.Value));
-        // if (category != null)
-        // {
-        //     var courses = await _courseRepo.GetCoursesByCategoryAsync(category.Value);
-        //     return Ok(courses);
-        // }
-        //  courses = await _courseRepo.GetAllCoursesAsync();
-        // return Ok(course);
     }
 
     [HttpGet("{code}")]
     public async Task<IActionResult> GetCourse(string code)
     {
-        Course ?course = await _courseRepo.GetCourseAsync(code);
+        Course? course = await _courseRepo.GetCourseAsync(code);
         if (course == null)
         {
             return NotFound($"Course with code {code} not found");
@@ -37,8 +32,13 @@ public class CourseController(CourseRepo courseRepo) : ControllerBase
             course.CreditHour
         });
     }
+    [HttpGet("pattern")]
+    public async Task<IActionResult> GetCoursesByPattern([FromQuery] string pattern)
+    {
+        return Ok(await _courseRepo.GetCoursesByPattern(pattern));
+    }
 
-    
+
 
     [HttpPost]
     public async Task<IActionResult> CreateCourse([FromBody] CourseDTO course)
@@ -103,4 +103,4 @@ public class CourseController(CourseRepo courseRepo) : ControllerBase
         }
     }
 
-} 
+}

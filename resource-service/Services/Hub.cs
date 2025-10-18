@@ -3,22 +3,29 @@ using ResourceService.Repositories;
 
 namespace ResourceService.Services
 {
-    public class RoomHub(PostRepo postRepo):Hub
+    public class RoomHub(PostRepo postRepo) : Hub
     {
         private readonly PostRepo _postRepo = postRepo;
-        public async Task BroadcastToGroup(string roomId,string senderId,string message)
+        public async Task BroadcastToGroup(string roomId, string senderId, string? message, string? docUrl, string? docTitle)
         {
             try
             {
-                //persist to db
-                _postRepo.AddPostedMessage(Guid.Parse(roomId),Guid.Parse(senderId), message).Wait();
-                // Broadcast message to all clients in the specified group (room)
-                await Clients.Group(roomId).SendAsync("ReceivedRoomMsg", senderId, message);
+                if (string.IsNullOrEmpty(docTitle))
+                {
+                    _postRepo.AddPostedMessage(Guid.Parse(roomId), Guid.Parse(senderId), message!).Wait();
+                    // Broadcast message to all clients in the specified group (room)
+                    await Clients.Group(roomId).SendAsync("ReceivedRoomPost", senderId, message);
+                    return;
+                }
+                else
+                    await Clients.Group(roomId).SendAsync("ReceivedRoomDoc", senderId, docUrl, docTitle);
+                return;
 
             }
+
             catch (Exception e)
             {
-                Console.WriteLine("Error broadcasting message to group"+ e.Message);
+                Console.WriteLine("Error broadcasting message to group" + e.Message);
             }
         }
         public async Task JoinRoom(Guid roomId)
