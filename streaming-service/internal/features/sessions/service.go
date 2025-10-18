@@ -18,13 +18,17 @@ import (
 )
 
 type Service interface {
-	CreteSession(
+	CreateSession(
 		ctx context.Context,
 		username, user_id string,
 		session Create,
 	) (*common.Response[CreateResponse], error)
 	EndSession(ctx context.Context, session_id, owner_id string) error
-	UpdateSession(ctx context.Context, req Update, username string) error
+	UpdateSession(
+		ctx context.Context,
+		req Update,
+		username string,
+	) error
 	GetSessions(
 		ctx context.Context,
 		pagination pagination.Pagination,
@@ -78,7 +82,7 @@ func (s *service) UpdateSession(
 	return nil
 }
 
-func (s *service) CreteSession(
+func (s *service) CreateSession(
 	ctx context.Context,
 	username, user_id string,
 	session Create,
@@ -87,6 +91,7 @@ func (s *service) CreteSession(
 		ctx,
 		session,
 		username,
+		user_id,
 	)
 	if err != nil {
 		return nil, err
@@ -98,12 +103,38 @@ func (s *service) CreteSession(
 			EmptyTimeout: 120,
 		},
 	)
+
 	if err != nil {
 		return nil, echo.NewHTTPError(
 			http.StatusInternalServerError,
 			"failed to create stream session",
 		)
 	}
+	new_room := broker.NewSessionPayload{
+		OwnerId:   user_id,
+		SessionId: sid,
+		UserName:  username,
+		TopicId:   session.Topic.Id,
+	}
+
+	new_room_json, err := json.Marshal(new_room)
+	if err != nil {
+		return nil, echo.NewHTTPError(
+			http.StatusInternalServerError,
+			"failed to marshal session payload",
+		)
+	}
+
+	err = s.rmq.Publish(broker.Message{
+		Exchange: "Session_Exg",
+		Topic:    "session.created",
+		Data:     new_room_json,
+	})
+
+	if err != nil {
+		log.Println(err)
+	}
+
 	return &common.Response[CreateResponse]{
 		Message: "session created",
 		Data: CreateResponse{

@@ -3,6 +3,7 @@ package models
 import "time"
 
 type Participant struct {
+	UserId         string    `bson:"user_id"`
 	Username       string    `bson:"username"`
 	Name           string    `bson:"name"`
 	ProfilePicture string    `bson:"profile_picture"`
@@ -15,6 +16,7 @@ type Participant struct {
 
 type Owner struct {
 	Username       string `bson:"username"`
+	UserId         string `bson:"user_id"`
 	Name           string `bson:"name"`
 	ProfilePicture string `bson:"profile_picture"`
 }

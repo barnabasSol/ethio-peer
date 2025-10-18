@@ -30,6 +30,7 @@ func (s *Server) bootstrap() error {
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	sr := sessions.NewRepository(s.db)
 	ss := sessions.NewService(
 		sr,

@@ -30,11 +30,21 @@ func main() {
 
 	go gRPC.Run()
 
-	msgs, err := rmq.Subscribe("new_peer_que", "peer.*")
+	//this is for new peer
+	new_peer_msgs, err := rmq.SubscribeNewPeer("new_peer_que", "peer.*")
 	if err != nil {
 		log.Fatal(err)
 	}
-	go rmq.Listen(msgs)
+
+	go rmq.ListenNewPeer(new_peer_msgs)
+
+	//this is for new score
+	msgs, err := rmq.SubscribeNewScore("new_score_que", "score.*")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	go rmq.ListenNewScore(msgs)
 
 	http_port := os.Getenv("PORT")
 

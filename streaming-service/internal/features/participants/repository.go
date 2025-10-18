@@ -73,6 +73,7 @@ func (r *repository) Insert(
 	participant := models.Participant{
 		Username:       join.Username,
 		Name:           join.Name,
+		UserId:         join.UserId,
 		ProfilePicture: join.ProfilePicture,
 		IsAnonymous:    join.AsAnonymous,
 		IsMuted:        false,

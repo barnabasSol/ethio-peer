@@ -31,6 +31,7 @@ func InitHandler(
 
 func (h *Handler) Join(c echo.Context) error {
 	username := c.Request().Header.Get("X-Claim-Username")
+	user_id := c.Request().Header.Get("X-Claim-Sub")
 	sid := c.Param("session_id")
 	aa := c.QueryParam("as_anonymous")
 	as_anonymous, err := strconv.ParseBool(aa)
@@ -42,6 +43,7 @@ func (h *Handler) Join(c echo.Context) error {
 
 	req := Join{
 		Name:           name,
+		UserId:         user_id,
 		Username:       username,
 		ProfilePicture: profile_picture,
 		SessionId:      sid,

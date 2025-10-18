@@ -39,7 +39,7 @@ func (s *service) GetPeer(
 		Message: "",
 		Data: peer.GetPeerResponse{
 			UserId:       peer_res.UserId.Hex(),
-			OverallScore: uint32(peer_res.OverallScore),
+			OverallScore: peer_res.OverallScore,
 			ProfilePhoto: peer_res.ProfilePhoto,
 			OnlineStatus: peer_res.OnlineStatus,
 			Bio:          peer_res.Bio,

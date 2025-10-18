@@ -13,3 +13,8 @@ type PeerPayload struct {
 	Interests []string `json:"interests"`
 	Bio       string   `json:"bio"`
 }
+
+type ScorePayload struct {
+	UserId string  `json:"user_id"`
+	Score  float32 `json:"score"`
+}

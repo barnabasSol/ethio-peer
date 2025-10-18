@@ -15,8 +15,11 @@ import (
 )
 
 type Repository interface {
-	InsertScore(context.Context, Score, string) error
+	GetOwnerId(context.Context, bson.ObjectID) (string, error)
+	InsertScore(context.Context, Score, string, string) error
 	UpdateScore(context.Context, Score, string) error
+	UpdateComputedScore(context.Context, bson.ObjectID, string) error
+	GetAverageSessionScore(context.Context, string) (*float64, error)
 	GetScores(context.Context, bson.ObjectID) ([]float32, error)
 	IsScored(context.Context, bson.ObjectID, string) (bool, error)
 }
@@ -29,6 +32,104 @@ func NewRepository(db *mongo.Client) Repository {
 	return &repository{
 		db: db,
 	}
+}
+
+func (r *repository) UpdateComputedScore(
+	ctx context.Context,
+	oid bson.ObjectID,
+	score string,
+) error {
+	collection := r.db.Database(db.Name).Collection(models.SessionCollection)
+	filter := bson.D{
+		{Key: "_id", Value: oid},
+	}
+
+	update := bson.D{
+		{Key: "$set", Value: bson.D{
+			{Key: "computed_score", Value: score},
+		}},
+	}
+	_, err := collection.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+func (r *repository) GetAverageSessionScore(
+	ctx context.Context,
+	oid string,
+) (*float64, error) {
+	collection := r.db.Database(db.Name).Collection(models.SessionCollection)
+
+	pipeline := mongo.Pipeline{
+		{{Key: "$match", Value: bson.M{
+			"owner.user_id":  oid,
+			"computed_score": bson.M{"$ne": "0"},
+		}}},
+		{{Key: "$group", Value: bson.M{
+			"_id": nil,
+			"avgScore": bson.M{
+				"$avg": bson.M{
+					"$toDouble": "$computed_score",
+				},
+			},
+		}}},
+	}
+
+	cursor, err := collection.Aggregate(ctx, pipeline)
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+
+	var result []struct {
+		AvgScore float64 `bson:"avgScore"`
+	}
+	if err := cursor.All(ctx, &result); err != nil {
+		return nil, err
+	}
+
+	if len(result) == 0 {
+		return nil, echo.NewHTTPError(
+			http.StatusNotFound,
+			"no sessions found for this user",
+		)
+	}
+	return &result[0].AvgScore, nil
+}
+
+func (r *repository) GetOwnerId(
+	ctx context.Context,
+	sid bson.ObjectID,
+) (string, error) {
+	collection := r.db.Database(db.Name).Collection(models.SessionCollection)
+	filter := bson.D{
+		{Key: "_id", Value: sid},
+	}
+	projection := bson.D{
+		{Key: "owner.user_id", Value: 1},
+	}
+	var result struct {
+		Owner models.Owner `bson:"owner"`
+	}
+	err := collection.FindOne(
+		ctx,
+		filter,
+		options.FindOne().SetProjection(projection),
+	).Decode(&result)
+
+	if err != nil {
+		log.Println(err)
+		if err == mongo.ErrNoDocuments {
+			return "", echo.NewHTTPError(
+				http.StatusNotFound,
+				"session not found",
+			)
+		}
+		return "", err
+	}
+
+	return result.Owner.UserId, nil
 }
 
 func (r *repository) GetScores(
@@ -44,7 +145,6 @@ func (r *repository) GetScores(
 		{Key: "scores", Value: 1},
 		{Key: "_id", Value: 0},
 	}
-
 	var result struct {
 		Scores []models.SessionScore `bson:"scores"`
 	}
@@ -73,6 +173,7 @@ func (r *repository) IsScored(
 	session_id bson.ObjectID, user_id string,
 ) (bool, error) {
 	collection := r.db.Database(db.Name).Collection(models.SessionCollection)
+
 	count_filter := bson.D{
 		{Key: "_id", Value: session_id},
 		{Key: "scores.user_id", Value: user_id},
@@ -94,8 +195,8 @@ func (r *repository) UpdateScore(
 	req Score,
 	user_id string,
 ) error {
-
 	collection := r.db.Database(db.Name).Collection(models.SessionCollection)
+
 	soid, err := bson.ObjectIDFromHex(req.SessionId)
 	if err != nil {
 		return echo.NewHTTPError(
@@ -133,9 +234,11 @@ func (r *repository) UpdateScore(
 	}
 	return nil
 }
+
 func (r *repository) InsertScore(
 	ctx context.Context,
 	req Score,
+	username string,
 	user_id string,
 ) error {
 	collection := r.db.Database(db.Name).Collection(models.SessionCollection)
@@ -149,6 +252,7 @@ func (r *repository) InsertScore(
 
 	ss := models.SessionScore{
 		UserId:    user_id,
+		Username:  username,
 		Score:     req.Score,
 		Comment:   req.Comment,
 		CreatedAt: time.Now().UTC(),
@@ -161,6 +265,7 @@ func (r *repository) InsertScore(
 		"$push": bson.M{"scores": ss},
 		"$set":  bson.M{"updated_at": time.Now().UTC()},
 	}
+
 	_, err = collection.UpdateOne(ctx, filter, update)
 	if err != nil {
 		return echo.NewHTTPError(

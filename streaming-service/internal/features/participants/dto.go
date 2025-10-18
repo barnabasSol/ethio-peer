@@ -7,6 +7,7 @@ type KickOut struct {
 type Join struct {
 	Name           string `json:"name"`
 	Username       string `json:"username"`
+	UserId         string `json:"user_id"`
 	SessionId      string `json:"session_id"`
 	ProfilePicture string `json:"profile_picture"`
 	AsAnonymous    bool   `json:"as_anonymous"`

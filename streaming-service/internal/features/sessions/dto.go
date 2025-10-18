@@ -29,9 +29,6 @@ type Update struct {
 	IsEnded     *bool   `json:"is_ended"`
 }
 
-type End struct {
-}
-
 type CreateResponse struct {
 	RoomId string `json:"room_id"`
 }

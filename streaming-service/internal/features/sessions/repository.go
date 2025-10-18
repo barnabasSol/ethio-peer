@@ -30,6 +30,7 @@ type Repository interface {
 		ctx context.Context,
 		session Create,
 		username string,
+		user_id string,
 	) (string, error)
 }
 
@@ -173,7 +174,7 @@ func (r *repository) GetSessions(
 
 	if err != nil {
 		log.Println(err)
-		return nil, echo.NewHTTPError(
+		return &[]Session{}, echo.NewHTTPError(
 			http.StatusInternalServerError,
 			"failed fetching sessions",
 		)
@@ -184,10 +185,13 @@ func (r *repository) GetSessions(
 	var result []Session
 	if err := cursor.All(ctx, &result); err != nil {
 		log.Println(err)
-		return nil, echo.NewHTTPError(
+		return &[]Session{}, echo.NewHTTPError(
 			http.StatusInternalServerError,
 			"failed mapping session response",
 		)
+	}
+	if result == nil {
+		return &[]Session{}, nil
 	}
 	return &result, nil
 }
@@ -196,6 +200,7 @@ func (r *repository) InsertSession(
 	ctx context.Context,
 	session Create,
 	username string,
+	user_id string,
 ) (string, error) {
 
 	collection := r.db.Database(db.Name).Collection(models.SessionCollection)
@@ -209,9 +214,10 @@ func (r *repository) InsertSession(
 		Tags:          session.Tags,
 		Topic:         models.Topic(session.Topic),
 		Scores:        []models.SessionScore{},
-		ComputedScore: 0,
+		ComputedScore: "0",
 		Participants:  []models.Participant{},
 		Owner: models.Owner{
+			UserId:         user_id,
 			Username:       username,
 			Name:           session.OwnerName,
 			ProfilePicture: session.OwnerProfilePic,

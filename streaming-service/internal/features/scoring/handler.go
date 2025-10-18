@@ -29,6 +29,7 @@ func InitHandler(
 
 func (h *Handler) ScoreSession(c echo.Context) error {
 	user_id := c.Request().Header.Get("X-Claim-Sub")
+	username := c.Request().Header.Get("X-Claim-Username")
 	var req Score
 	if err := c.Bind(&req); err != nil {
 		return c.JSON(
@@ -36,7 +37,7 @@ func (h *Handler) ScoreSession(c echo.Context) error {
 			map[string]string{"error": "invalid request"},
 		)
 	}
-	err := h.s.ScoreSession(c.Request().Context(), req, user_id)
+	err := h.s.ScoreSession(c.Request().Context(), req, username, user_id)
 	if err != nil {
 		return err
 	}

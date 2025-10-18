@@ -22,3 +22,10 @@ type ScorePayload struct {
 	UserId string  `json:"user_id"`
 	Score  float32 `json:"score"`
 }
+
+type NewSessionPayload struct {
+	OwnerId   string `json:"OwnerId"`
+	SessionId string `json:"SessionId"`
+	UserName  string `json:"UserName"`
+	TopicId   string `json:"TopicId"`
+}

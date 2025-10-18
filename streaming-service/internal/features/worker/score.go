@@ -5,6 +5,7 @@ import (
 )
 
 type ScoreUpdateJob struct {
+	UserId    string
 	SessionId bson.ObjectID
 }
 

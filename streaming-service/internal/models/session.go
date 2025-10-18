@@ -14,7 +14,7 @@ type Session struct {
 	Description   string         `bson:"description"`
 	Owner         Owner          `bson:"owner"`
 	Topic         Topic          `bson:"topic"`
-	ComputedScore float32        `bson:"computed_score"`
+	ComputedScore string         `bson:"computed_score"`
 	Scores        []SessionScore `bson:"scores"`
 	Participants  []Participant  `bson:"participants"`
 	Tags          []string       `bson:"tags"`

@@ -72,7 +72,7 @@ func (h *Handler) CreateSession(c echo.Context) error {
 	if err := req.Validate(); err != nil {
 		return err
 	}
-	res, err := h.s.CreteSession(
+	res, err := h.s.CreateSession(
 		c.Request().Context(),
 		username,
 		user_id,

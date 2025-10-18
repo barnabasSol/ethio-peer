@@ -30,6 +30,11 @@ func InitRabbitMQ(db *mongo.Client) (*RabbitMQ, error) {
 		return nil, err
 	}
 
+	err = NewScoreExchange(ch)
+	if err != nil {
+		return nil, err
+	}
+
 	return &RabbitMQ{
 		conn: conn,
 		db:   db,

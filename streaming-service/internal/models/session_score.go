@@ -9,6 +9,7 @@ import (
 type SessionScore struct {
 	Id        bson.ObjectID `bson:"_id,omitempty"`
 	UserId    string        `bson:"user_id"`
+	Username  string        `bson:"username"`
 	Score     float32       `bson:"score"`
 	Comment   string        `bson:"comment"`
 	CreatedAt time.Time     `bson:"created_at"`
