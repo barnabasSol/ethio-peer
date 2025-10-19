@@ -25,6 +25,6 @@ type Session struct {
 }
 
 type Topic struct {
-	Id   string `json:"id"`
-	Name string `json:"name"`
+	Id   string `bson:"id" json:"id"`
+	Name string `bson:"name" json:"name"`
 }

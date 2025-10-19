@@ -2,7 +2,7 @@ package broker
 
 import amqp "github.com/rabbitmq/amqp091-go"
 
-func (r *RabbitMQ) Subscribe(que_name, binding_key string) (<-chan amqp.Delivery, error) {
+func (r *RabbitMQ) SubscribeMailingEvent(que_name, binding_key string) (<-chan amqp.Delivery, error) {
 	q, err := r.ch.QueueDeclare(
 		que_name,
 		true,  // durable

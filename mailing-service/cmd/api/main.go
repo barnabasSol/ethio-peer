@@ -24,7 +24,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	msgs, err := rmq.Subscribe("mailer_que", "email.*")
+	msgs, err := rmq.SubscribeMailingEvent("mailer_que", "email.*")
 
 	if err != nil {
 		log.Fatal("failed to subscribe:", err)

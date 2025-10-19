@@ -228,6 +228,7 @@ func (r *repository) InsertSession(
 		EndedAt:   nil,
 	})
 	if err != nil {
+		log.Println(err)
 		return "", echo.NewHTTPError(
 			http.StatusInternalServerError,
 			"failed to create session",

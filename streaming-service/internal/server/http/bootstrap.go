@@ -2,6 +2,7 @@ package server
 
 import (
 	broker "ep-streaming-service/internal/broker/rabbitmq"
+	"ep-streaming-service/internal/features/analytics"
 	"ep-streaming-service/internal/features/common/livekit"
 	"ep-streaming-service/internal/features/monitoring"
 	"ep-streaming-service/internal/features/participants"
@@ -64,6 +65,12 @@ func (s *Server) bootstrap() error {
 		*livekit_cfg,
 		s.echo.Group(""),
 		scs,
+	)
+	ar := analytics.NewRepository(s.db)
+	as := analytics.NewService(ar)
+	analytics.InitHandler(
+		as,
+		s.echo.Group("/analytics"),
 	)
 	return nil
 }
