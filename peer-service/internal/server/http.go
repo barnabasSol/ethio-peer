@@ -4,13 +4,13 @@ import (
 	"context"
 	broker "ep-peer-service/internal/broker/rabbitmq"
 	"ep-peer-service/internal/features/common"
+	"ep-peer-service/internal/features/peer"
 	"ep-peer-service/internal/features/profile"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
-	"strings"
 	"syscall"
 	"time"
 
@@ -47,14 +47,6 @@ func (s *server) Run() error {
 	s.echo.Use(middleware.Recover())
 
 	s.echo.GET("/health", func(c echo.Context) error {
-		log.Println("Request Headers:")
-		for name, values := range c.Request().Header {
-			for _, value := range values {
-				if strings.HasPrefix(name, "X-Claim") {
-					log.Printf("%s: %s\n", name, value)
-				}
-			}
-		}
 		return c.String(http.StatusOK, "OK")
 	})
 
@@ -84,6 +76,10 @@ func (s *server) Run() error {
 	pr := profile.NewRepository(s.db)
 	ps := profile.NewService(minio_client, pr)
 	profile.InitHandler(ps, s.echo.Group("/profile"))
+
+	peer_repo := peer.NewRepository(s.db)
+	peer_service := peer.NewService(peer_repo)
+	peer.NewHandler(peer_service, *s.echo.Group("top"))
 
 	if err != nil {
 		log.Fatalln(err)

@@ -8,7 +8,10 @@ import (
 )
 
 type Service interface {
-	GetSessionAnalytics(ctx context.Context, filter string) (*SessionAnalytics, error)
+	GetSessionAnalytics(
+		ctx context.Context,
+		filter string,
+	) (*SessionAnalytics, error)
 }
 
 type service struct {
@@ -28,8 +31,8 @@ func (s *service) GetSessionAnalytics(
 	switch filter {
 	case "weekly":
 		return s.repo.GetDailyAnalyticsAggregation(ctx)
-	case "yearly":
-		return s.repo.GetMonthlyAnalyticsAggregation(ctx)
+	case "hourly":
+		return s.repo.GetHourlyAnalyticsAggregation(ctx)
 	default:
 		return nil, echo.NewHTTPError(
 			http.StatusBadRequest,

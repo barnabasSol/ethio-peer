@@ -11,14 +11,13 @@ type Handler struct {
 	s     Service
 }
 
-func InitHandler(s Service, group *echo.Group) *Handler {
+func InitHandler(s Service, group *echo.Group) {
 	h := &Handler{
 		group: group,
 		s:     s,
 	}
 	h.group.PUT("/photo", h.UpdateProfilePicture)
 	h.group.DELETE("/photo", h.DeleteProfilePicture)
-	return h
 }
 
 func (h *Handler) UpdateProfilePicture(c echo.Context) error {

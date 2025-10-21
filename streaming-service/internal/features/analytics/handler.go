@@ -2,16 +2,15 @@ package analytics
 
 import (
 	"ep-streaming-service/internal/features/common"
-	"ep-streaming-service/internal/features/common/livekit"
+	"ep-streaming-service/internal/features/common/pagination"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
 )
 
 type Handler struct {
-	group  *echo.Group
-	lk_cfg livekit.Config
-	s      Service
+	group *echo.Group
+	s     Service
 }
 
 func InitHandler(
@@ -28,7 +27,20 @@ func InitHandler(
 
 func (h *Handler) GetSessionAnalytics(c echo.Context) error {
 	filter := c.QueryParam("filter")
-	res, err := h.s.GetSessionAnalytics(c.Request().Context(), filter)
+	page := c.QueryParam("page")
+	var p *pagination.Pagination
+	_ = p
+
+	if filter == "hourly" {
+		p = pagination.New(page, "1")
+	} else {
+		p = pagination.New(page, "7")
+	}
+
+	res, err := h.s.GetSessionAnalytics(
+		c.Request().Context(),
+		filter,
+	)
 	if err != nil {
 		return err
 	}

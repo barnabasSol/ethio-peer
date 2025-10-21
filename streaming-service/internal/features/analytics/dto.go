@@ -2,17 +2,23 @@ package analytics
 
 type SessionAnalytics struct {
 	Weekly *[]Weekly `json:"weekly,omitempty"`
+	Hourly *[]Hourly `json:"hourly,omitempty"`
+}
+
+type Hourly struct {
+	SessionCount     int    `json:"session_count" bson:"sessions_created"`
+	ParticipantCount int    `json:"participant_count" bson:"total_participants"`
+	Hour             string `json:"hour" bson:"hour"`
 }
 
 type Weekly struct {
-	TopTopicParticipantCount int    `json:"top_topic_participant_count" bson:"top_topic_participant_count"`
-	SessionCount             int    `json:"session_count" bson:"session_count"`
-	ParticipantCount         int    `json:"participant_count" bson:"participant_count"`
-	TopTopic                 Topic  `json:"top_topic" bson:"top_topic"`
-	CreatedAt                string `json:"created_at" bson:"created_at"`
+	SessionCount     int    `json:"session_count" bson:"sessions_created"`
+	ParticipantCount int    `json:"participant_count" bson:"total_particpants"`
+	Date             string `json:"created_at" bson:"date"`
 }
 
-type Topic struct {
-	Id   string `json:"id" bson:"id"`
-	Name string `json:"name" bson:"name"`
-}
+// {
+//   "date": "2025-10-19",
+//   "total_participants": 3,
+//   "sessions_created": 4
+// }

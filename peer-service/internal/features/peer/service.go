@@ -13,6 +13,9 @@ type Service interface {
 		ctx context.Context,
 		req *peer.GetPeerRequest,
 	) (*common.Response[peer.GetPeerResponse], error)
+	GetTopPeers(
+		ctx context.Context,
+	) (*[]TopPeer, error)
 }
 
 type service struct {
@@ -46,4 +49,8 @@ func (s *service) GetPeer(
 			Interests:    peer_res.Interests,
 		},
 	}, nil
+}
+
+func (s *service) GetTopPeers(ctx context.Context) (*[]TopPeer, error) {
+	return s.repo.GetTopPeers(ctx)
 }
