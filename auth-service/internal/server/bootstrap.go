@@ -7,6 +7,7 @@ import (
 	"ep-auth-service/internal/features/otp"
 	refreshtoken "ep-auth-service/internal/features/refresh-token"
 	"ep-auth-service/internal/features/signup"
+	"ep-auth-service/internal/features/user"
 	"log"
 )
 
@@ -52,5 +53,16 @@ func (s *Server) bootstrap() error {
 		token_gen,
 	)
 	refreshtoken.InitHandler(ref_service, s.echo.Group("/refresh"))
+
+	ur := user.NewRepository(s.db)
+	us := user.NewService(ur)
+	user.InitHandler(s.echo.Group("/admin"), us)
+
+	go func() {
+		if err := s.g.Run(us); err != nil {
+			log.Fatalf("%s", err.Error())
+		}
+	}()
+
 	return nil
 }

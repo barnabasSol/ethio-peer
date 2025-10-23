@@ -15,7 +15,7 @@ type gRPCServer struct {
 	db   *mongo.Client
 }
 
-func NewGrpcServer(
+func newGrpcServer(
 	addr string,
 	db *mongo.Client,
 ) *gRPCServer {
@@ -25,14 +25,12 @@ func NewGrpcServer(
 	}
 }
 
-func (g *gRPCServer) Run() error {
+func (g *gRPCServer) Run(us user.Service) error {
 	lis, err := net.Listen("tcp", g.addr)
 	if err != nil {
 		return err
 	}
 	gs := grpc.NewServer()
-	ur := user.NewRepository(g.db)
-	us := user.NewService(ur)
 	uh := user.NewGrpcHandler(us)
 	user_proto.RegisterUserServiceServer(gs, uh)
 

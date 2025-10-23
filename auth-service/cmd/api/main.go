@@ -33,14 +33,7 @@ func main() {
 	port := os.Getenv("PORT")
 	grpc_port := os.Getenv("GRPC_PORT")
 
-	grpc_srv := server.NewGrpcServer(grpc_port, mongo)
-	go func() {
-		if err := grpc_srv.Run(); err != nil {
-			log.Fatalf("%s", err.Error())
-		}
-	}()
-
-	app := server.New(port, mongo, rmq)
+	app := server.New(port, grpc_port, mongo, rmq)
 
 	if err := app.Run(); err != nil {
 		log.Fatalf("%s", err.Error())

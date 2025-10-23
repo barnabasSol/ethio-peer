@@ -21,7 +21,6 @@ func New(addr string, ttl time.Duration) (*Redis, error) {
 	})
 
 	ctx := context.Background()
-
 	var err error
 	maxRetries := 5
 	backoff := time.Second
@@ -43,7 +42,6 @@ func New(addr string, ttl time.Duration) (*Redis, error) {
 		time.Sleep(backoff)
 		backoff *= 2
 	}
-
 	return nil, err
 }
 

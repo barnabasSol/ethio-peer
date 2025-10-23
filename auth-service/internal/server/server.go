@@ -21,10 +21,12 @@ type Server struct {
 	echo   *echo.Echo
 	db     *mongo.Client
 	broker *broker.RabbitMQ
+	g      *gRPCServer
 }
 
 func New(
 	addr string,
+	grpc_addr string,
 	db *mongo.Client,
 	broker *broker.RabbitMQ,
 ) *Server {
@@ -33,6 +35,7 @@ func New(
 		echo:   echo.New(),
 		db:     db,
 		broker: broker,
+		g:      newGrpcServer(grpc_addr, db),
 	}
 }
 

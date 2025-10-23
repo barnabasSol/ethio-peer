@@ -13,21 +13,21 @@ public static class Routes
                 RouteId = "auth-public",
                 CorsPolicy = "WebOriginCorsPolicy",
                 ClusterId = "auth-cluster",
-                Match = new RouteMatch { Path = "/auth/{**catch-all}" },
-                Transforms = [new Dictionary<string, string> { { "PathRemovePrefix", "/auth" } }],
+                Match = new RouteMatch { Path = "/api/auth/{**catch-all}" },
+                Transforms = [new Dictionary<string, string> { { "PathRemovePrefix", "/api/auth" } }],
                 AuthorizationPolicy = "anonymous",
             },
             new RouteConfig
             {
-                RouteId = "auth-reset-password",
+                RouteId = "auth-admin",
                 CorsPolicy = "WebOriginCorsPolicy",
                 ClusterId = "auth-cluster",
-                Match = new RouteMatch { Path = "/api/auth/password/{**catch-all}" },
+                Match = new RouteMatch { Path = "/api/auth/admin/{**catch-all}" },
                 Transforms =
                 [
                     new Dictionary<string, string> { { "PathRemovePrefix", "/api/auth" } },
                 ],
-                AuthorizationPolicy = "authenticated",
+                AuthorizationPolicy = "admin-only",
             },
             new RouteConfig
             {
@@ -39,7 +39,7 @@ public static class Routes
                 [
                     new Dictionary<string, string> { { "PathRemovePrefix", "/api/bridge" } },
                 ],
-                AuthorizationPolicy = "authenticated",
+                AuthorizationPolicy = "admin-or-peer",
             },
             new RouteConfig
             {
@@ -51,7 +51,7 @@ public static class Routes
                 [
                     new Dictionary<string, string> { { "PathRemovePrefix", "/api/stream" } },
                 ],
-                AuthorizationPolicy = "authenticated",
+                AuthorizationPolicy = "admin-or-peer",
             },
             new RouteConfig
             {
@@ -63,7 +63,7 @@ public static class Routes
                 [
                     new Dictionary<string, string> { { "PathRemovePrefix", "/api/resource" } },
                 ],
-                AuthorizationPolicy = "authenticated",
+                AuthorizationPolicy = "admin-or-peer",
             },
             new RouteConfig
             {
@@ -87,7 +87,7 @@ public static class Routes
                 [
                     new Dictionary<string, string> { { "PathRemovePrefix", "/api/peer" } },
                 ],
-                AuthorizationPolicy = "authenticated",
+                AuthorizationPolicy = "admin-or-peer",
             },
         ];
     }

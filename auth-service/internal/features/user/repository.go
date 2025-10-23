@@ -11,6 +11,7 @@ import (
 )
 
 type Repository interface {
+	GetUserCount(ctx context.Context) (int64, error)
 	GetUser(
 		ctx context.Context,
 		user_id bson.ObjectID,
@@ -33,11 +34,20 @@ func (r *repository) GetUser(
 ) (*models.User, error) {
 	user_collection := r.db.Database(db.Name).Collection(models.UserCollection)
 	filter := bson.M{"_id": user_id}
-	var user models.User
 
+	var user models.User
 	err := user_collection.FindOne(ctx, filter).Decode(&user)
 	if err != nil {
 		return nil, errors.New("user not found")
 	}
 	return &user, nil
+}
+
+func (r *repository) GetUserCount(ctx context.Context) (int64, error) {
+	user_collection := r.db.Database(db.Name).Collection(models.UserCollection)
+	count, err := user_collection.CountDocuments(ctx, bson.M{})
+	if err != nil {
+		return 0, err
+	}
+	return count, nil
 }

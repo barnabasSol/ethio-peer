@@ -37,7 +37,7 @@ public class DocumentController(DocRepo docRepo) : ControllerBase
         try
         {
             var docUrl = await _docRepo.AddDoc(dto);
-            return Ok(new {uploadUrl= docUrl});
+            return Ok(new { uploadUrl = docUrl });
         }
         catch (FileNotFoundException)
         {

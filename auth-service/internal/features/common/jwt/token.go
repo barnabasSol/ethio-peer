@@ -47,7 +47,6 @@ func NewTokenGenerator() (Generator, error) {
 }
 
 func (g generator) GenerateAccessToken(user models.User) (string, error) {
-
 	expiry, err := strconv.Atoi(os.Getenv("JWT_EXPIRY_MINS"))
 	if err != nil {
 		return "", err

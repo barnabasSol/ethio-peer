@@ -11,6 +11,7 @@ import (
 )
 
 type Service interface {
+	GetUserCount(ctx context.Context) (int64, error)
 	GetUser(
 		ctx context.Context,
 		req *user.GetUserRequest,
@@ -38,7 +39,7 @@ func (s *service) GetUser(
 	}
 
 	return &common.Response[user.GetUserResponse]{
-		Message: "",
+		Message: "success",
 		Data: user.GetUserResponse{
 			UserId:         user_res.Id.Hex(),
 			Username:       user_res.Username,
@@ -49,4 +50,8 @@ func (s *service) GetUser(
 			CreatedAt:      timestamppb.New(user_res.CreatedAt),
 		},
 	}, nil
+}
+
+func (s *service) GetUserCount(ctx context.Context) (int64, error) {
+	return s.repo.GetUserCount(ctx)
 }

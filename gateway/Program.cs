@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using gateway.Service;
 using gateway.YarpUtils;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -20,6 +21,21 @@ builder
     .AddJwtBearer();
 
 builder.Services.AddCustomJwtAuthentication(jwtSettings);
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("admin-or-peer", policy =>
+            policy.RequireRole("admin", "peer"));
+
+    options.AddPolicy("admin-only", policy =>
+        policy.RequireClaim(ClaimTypes.Role, "admin"));
+
+    options.AddPolicy("peer-only", policy =>
+        policy.RequireClaim(ClaimTypes.Role, "peer"));
+
+    options.AddPolicy("Authenticated", policy =>
+        policy.RequireAuthenticatedUser());
+});
 
 builder
     .Services.AddAuthorizationBuilder()
