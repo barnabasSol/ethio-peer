@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>MinIO File Upload</title>
+</head>
+<body>
+  <h2>Upload Document to MinIO</h2>
+  <input type="file" id="fileInput" />
+  <button onclick="uploadFile()">Upload</button>
+
+  <script>
+    async function uploadFile() {
+      const fileInput = document.getElementById('fileInput');
+      const file = fileInput.files[0];
+      if (!file) {
+        alert("Please select a file first.");
+        return;
+      }
+
+      try {
+        // Step 1: Call your backend to get a presigned PUT URL
+        const response = await fetch('http://localhost:5102/api/documents/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ fileName: file.name,uploaderId:"2f667ad6-1fa5-4f01-b226-86d1d9a1b7da",
+          roomId:"0b8d5d93-7480-46ac-a052-37561e37ebc4" })
+        });
+
+        const { uploadUrl } = await response.json();
+          console.log(uploadUrl);
+
+        // Step 2: Upload the file directly to MinIO using the presigned URL
+        const uploadResponse = await fetch(uploadUrl, {
+          method: 'PUT',
+          body: file
+        });
+
+        if (uploadResponse.ok) {
+          alert("File uploaded successfully!");
+        } else {
+          alert("Upload failed.");
+        }
+      } catch (error) {
+        console.error("Error:", error);
+        alert("Something went wrong.");
+      }
+    }
+  </script>
+</body>
+</html>

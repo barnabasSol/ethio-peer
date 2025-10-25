@@ -33,10 +33,27 @@ public class TopicRepo
     public async Task<IEnumerable<Topic>> GetAllTopicsAsync()
     {
         return await _context.Topics.ToListAsync();
-    } 
-    public async Task<List<Topic>> GetTopicsByPattern(string pattern)
+    }
+    public async Task<List<TopicMin>> GetTopicsByPattern(string pattern)
     {
-        return await _context.Topics.Where(t => EF.Functions.ILike(t.Name, $"{pattern}%")).ToListAsync();
+        return await _context.Topics.Where(t => EF.Functions.ILike(t.Name, $"{pattern}%")).Select(t => new TopicMin
+        {
+            TopicId = t.TopicId,
+            TopicName = t.Name
+        }).ToListAsync();
+    }
+    public async Task<List<TopicDocRes>> GetTopicDocCount()
+    {
+        var query = from d in _context.Documents
+                    join r in _context.Rooms on d.RoomId equals r.Id
+                    join t in _context.Topics on r.TopicId equals t.TopicId
+                    group d by new { t.TopicId, t.Name } into g
+                    select new TopicDocRes
+                    {
+                        TopicName = g.Key.Name,
+                        DocCount = g.Count()
+                    };
+        return await query.ToListAsync();
     }
 
     public async Task<Topic> AddTopicAsync(TopicDTO topic)

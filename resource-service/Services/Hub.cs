@@ -6,19 +6,19 @@ namespace ResourceService.Services
     public class RoomHub(PostRepo postRepo) : Hub
     {
         private readonly PostRepo _postRepo = postRepo;
-        public async Task BroadcastToGroup(string roomId, string senderId, string? message, string? docUrl, string? docTitle)
+        public async Task BroadcastToGroup(string roomId, string senderId,string userName, string? message, string? docKey, string? docTitle)
         {
             try
             {
                 if (string.IsNullOrEmpty(docTitle))
                 {
-                    _postRepo.AddPostedMessage(Guid.Parse(roomId), Guid.Parse(senderId), message!).Wait();
+                    _postRepo.AddPostedMessage(Guid.Parse(roomId), senderId, message!).Wait();
                     // Broadcast message to all clients in the specified group (room)
-                    await Clients.Group(roomId).SendAsync("ReceivedRoomPost", senderId, message);
+                    await Clients.Group(roomId).SendAsync("ReceivedRoomPost",senderId,userName, message);
                     return;
                 }
                 else
-                    await Clients.Group(roomId).SendAsync("ReceivedRoomDoc", senderId, docUrl, docTitle);
+                    await Clients.Group(roomId).SendAsync("ReceivedRoomDoc",senderId, userName, docKey, docTitle);
                 return;
 
             }
@@ -29,11 +29,8 @@ namespace ResourceService.Services
             }
         }
         public async Task JoinRoom(Guid roomId)
-        {
-            //sample Guid roomId = Guid.Parse("d290f1ee-6c54-4b01-90e6-d701748f0851");  
+        {  
             await Groups.AddToGroupAsync(Context.ConnectionId, roomId.ToString());
         }
     }
-}
-//# UOW Pattern
-//# translation of user id to its name
+} 

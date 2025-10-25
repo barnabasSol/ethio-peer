@@ -54,12 +54,12 @@ public class DocumentController(DocRepo docRepo) : ControllerBase
         }
     }
     //download doc
-    [HttpGet("{id}")]
+    [HttpGet("{key}")]
     public async Task<IActionResult> DocumentDownload(string key)
     {
         try
         {
-            return Ok(_docRepo.GenerateDownloadLink(key));
+            return Ok(new { url=_docRepo.GenerateDownloadLink(key) });
             // var stream = await _docRepo.DownloadDoc(id);
             // return File(stream, "application/octet-stream", id);
         }

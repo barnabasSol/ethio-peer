@@ -5,12 +5,12 @@ using ResourceService.Models.Dtos;
 
 namespace ResourceService.Repositories
 {
-    public class PostRepo(Context cxt)
+    public class PostRepo(Context cxt, GeminiCaller geminiCaller)
     {
-        private readonly Context _context = cxt;  
-
+        private readonly Context _context = cxt;
+        private readonly GeminiCaller _geminiCaller = geminiCaller;
         //Add Post
-        public async Task AddPostedMessage(Guid roomId, Guid senderId, string message)
+        public async Task AddPostedMessage(Guid roomId, string senderId, string message)
         {
             //check if the room exists
             Room room = await _context.Rooms.FindAsync(roomId) ?? throw new ArgumentNullException("Room not found");
@@ -29,30 +29,11 @@ namespace ResourceService.Repositories
 
         //Get Posts by RoomId
         public async Task<PagedList<Post>> GetPostsByRoomId(Guid roomId, PagedQuery pq)
-        {   var room = await _context.Rooms.Where(r => r.Id == roomId).FirstOrDefaultAsync() ?? throw new ArgumentNullException(nameof(roomId), "Room not found");
+        {
+            var room = await _context.Rooms.Where(r => r.Id == roomId).FirstOrDefaultAsync() ?? throw new ArgumentNullException(nameof(roomId), "Room not found");
             var postsQuery = _context.Posts.Where(p => p.RoomId == roomId).OrderByDescending(p => p.CreatedAt).AsQueryable();
-        //     var pagedPosts = await PagedList<Post>.CreateAsync(postsQuery, pq.PageSize, pq.PageNumber);
-        //     var projectedPosts = pagedPosts.Items.Select(async p =>
-        //    {
-        //        var resp = new PostResp
-        //        {
-        //            Id = p.Id,
-        //            SenderId = p.SenderId,
-        //            Content = p.Content,
-        //            IsDoc = p.IsDoc,
-        //            DocTitle = p.DocTitle,
-        //            RoomId = p.RoomId,
-        //            CreatedAt = p.CreatedAt
-        //        };
-        //        if (p.IsDoc && p.DocKey != "")
-        //        {
-        //            resp.DocUrl = await _minio.GenerateDownloadLink(p.DocKey);
-        //        }
-        //        return resp;
-        //    });
-        //     var postResps = await Task.WhenAll(projectedPosts);
 
-            return await PagedList<Post>.CreateAsync(postsQuery,pq.PageSize,pq.PageNumber);
+            return await PagedList<Post>.CreateAsync(postsQuery, pq.PageSize, pq.PageNumber);
         }
 
         public async Task<string> GetWeeklyPosts()
@@ -85,7 +66,7 @@ namespace ResourceService.Repositories
                     formattedQuery += $"User: '{post.Content}' -";
                 }
             }
-            return formattedQuery;
+            return await _geminiCaller.CallGeminiApiAsync(formattedQuery);
 
         }
     }

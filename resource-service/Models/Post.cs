@@ -5,7 +5,7 @@ namespace ResourceService.Models
     public class Post
     {
         public Guid Id { get; set; }
-        public Guid SenderId { get; set; }
+        public string SenderId { get; set; } = "";
         public string Content { get; set; } = "";
         public bool IsDoc { get; set; } = false;
         public string DocKey { get; set; } = "";

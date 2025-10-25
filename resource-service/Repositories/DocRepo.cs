@@ -154,7 +154,7 @@ public class DocRepo(IMinioClient minioClient, Context context)
             docSugges.Add(new DocResp
             {
                 DocId = doc.Id,
-                DocTitle = RemoveExtension(doc.Title),
+                DocTitle = doc.Title,
                 TopicName = doc.Room!.Topic!.Name,
                 UploadDate = doc.DateUploaded,
                 DocKey = doc.ObjectKey
@@ -186,7 +186,7 @@ public class DocRepo(IMinioClient minioClient, Context context)
             docSugges.Add(new DocResp
             {
                 DocId = doc.Id,
-                DocTitle = RemoveExtension(doc.Title),
+                DocTitle = doc.Title,
                 TopicName = doc.Room!.Topic!.Name,
                 UploadDate = doc.DateUploaded,
                 DocKey = doc.ObjectKey

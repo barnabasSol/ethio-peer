@@ -15,7 +15,7 @@ public class TopicController(TopicRepo topicRepo) : ControllerBase
         var topics = await _topicRepo.GetAllTopicsAsync();
         return Ok(topics);
     }
-
+    
     [HttpGet("{id}")]
     public async Task<IActionResult> GetTopic(Guid id)
     {
@@ -29,10 +29,17 @@ public class TopicController(TopicRepo topicRepo) : ControllerBase
         });
     }
     [HttpGet("pattern")]
-    public async Task<IActionResult> GetTopicsByPattern([FromQuery]string pattern)
+    public async Task<IActionResult> GetTopicsByPattern([FromQuery] string pattern = "")
     {
         return Ok(await _topicRepo.GetTopicsByPattern(pattern));
     }
+    [HttpGet("chart")]
+    public async Task<IActionResult> GetTopicVsDocument()
+    {
+        return Ok(new { items=await _topicRepo.GetTopicDocCount() });
+    }
+
+    
     [HttpPost]
     public async Task<IActionResult> CreateTopic([FromBody] TopicDTO topic)
     {

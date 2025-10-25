@@ -31,7 +31,14 @@ public class PostController(PostRepo postRepo) : ControllerBase
     [HttpGet("weekly")]
     public async Task<IActionResult> GetWeeklyPosts()
     {
-        return Ok(await _postRepo.GetWeeklyPosts());
+        try
+        {
+            return Ok(new { summary = await _postRepo.GetWeeklyPosts() });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ex.Message);
+        }
     }
 
 }

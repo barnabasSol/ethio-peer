@@ -23,6 +23,7 @@ public class Rabbit
 
     public async Task InitiateConsuming()
     {
+        string exchangeName = "Session_Exg";
         await ConnectRabbit();
         if (_channel == null)
         {   //what if throwing exception mm
@@ -30,19 +31,18 @@ public class Rabbit
             return;
         }
 
-        await _channel.ExchangeDeclareAsync(exchange: "Session_Exg", type: ExchangeType.Topic, durable: true);
+        await _channel.ExchangeDeclareAsync(exchange: exchangeName, type: ExchangeType.Topic, durable: true);
 
         // we create queue with a generated name which we subscribe for listening to session creation:
         QueueDeclareOk queueDeclareResult = await _channel.QueueDeclareAsync();
         string queueName = queueDeclareResult.QueueName;
-        await _channel.QueueBindAsync(queue: queueName, exchange: "Session_Exg", routingKey: "session.#");
+        await _channel.QueueBindAsync(queue: queueName, exchange: exchangeName, routingKey: "session.#");
 
 
         var consumer = new AsyncEventingBasicConsumer(_channel);
         consumer.ReceivedAsync += async (model, ea) =>
         {
-            var routingKey = ea.RoutingKey;
-            //your code to handle the message goes here 
+            var routingKey = ea.RoutingKey; 
             var byteArray = ea.Body.ToArray();
             var message = Encoding.UTF8.GetString(byteArray);
             try
@@ -78,7 +78,7 @@ public class Rabbit
         var scope = _serviceProvider.CreateScope();
         var roomRepo = scope.ServiceProvider.GetRequiredService<RoomRepository>();
         var opts = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-        var member = JsonSerializer.Deserialize<MemberData>(message, opts);
+        var member = JsonSerializer.Deserialize<MemberData>(message, opts); 
         if (member != null)
         {
             Console.WriteLine($"Received SessionId={member.SessionId}, MemberId={member.MemberId}");

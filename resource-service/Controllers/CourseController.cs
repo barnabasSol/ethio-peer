@@ -15,7 +15,11 @@ public class CourseController(CourseRepo courseRepo) : ControllerBase
     {
         return Ok(category == null ? await _courseRepo.GetAllCoursesAsync() : await _courseRepo.GetCoursesByCategoryAsync(category.Value));
     }
-
+    [HttpGet("count")] 
+    public async Task<IActionResult> CourseCount()
+    {
+        return Ok(new { count=await _courseRepo.GetCourseCountAsync() });
+    }
     [HttpGet("{code}")]
     public async Task<IActionResult> GetCourse(string code)
     {
@@ -33,7 +37,7 @@ public class CourseController(CourseRepo courseRepo) : ControllerBase
         });
     }
     [HttpGet("pattern")]
-    public async Task<IActionResult> GetCoursesByPattern([FromQuery] string pattern)
+    public async Task<IActionResult> GetCoursesByPattern([FromQuery] string pattern = "")
     {
         return Ok(await _courseRepo.GetCoursesByPattern(pattern));
     }

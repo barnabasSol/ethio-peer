@@ -10,7 +10,7 @@ public class RoomRepository(Context context)
     //Add Room
     public async Task<Room> AddRoom(RoomDTO room)
     {
-        var duplicateRoom = _context.Rooms.Where(r => r.SessionId.ToString() == room.SessionId.ToString()).FirstOrDefault();
+        var duplicateRoom = _context.Rooms.Where(r => r.SessionId == room.SessionId).FirstOrDefault();
         if (room == null) throw new ArgumentNullException(nameof(room), "Please provide a valid room");
         else if (duplicateRoom != null) throw new ArgumentException("Room with the same SessionId already exists");
         var newRoom = new Room
@@ -74,26 +74,36 @@ public class RoomRepository(Context context)
     {
         var roomsQuery = _context.Rooms
       .AsNoTracking()
-      .Where(r => r.Topic != null).AsQueryable();
+      .Where(r => r.Topic != null);
         if (explore)
         {
             roomsQuery = roomsQuery.Where(r => !_context.RoomMembers.Any(m => m.RoomId == r.Id && m.UserId == memberId));
         }
         else
             roomsQuery = roomsQuery.Where(r => _context.RoomMembers.Any(m => m.RoomId == r.Id && m.UserId == memberId));
-        if (roomsQuery.Count() == 0) return [];
         if (count > 0)
         {
             roomsQuery = roomsQuery.Take(count);
         }
         var rooms = await roomsQuery.Include(r => r.Topic).ToListAsync();
-        
+        if (rooms.Count == 0) return [];
+        var roomIds = rooms.Select(r => r.Id);
+        var memberCounts = await _context.RoomMembers
+    .AsNoTracking()
+    .Where(m => roomIds.Contains(m.RoomId))
+    .GroupBy(m => m.RoomId)
+    .Select(g => new { RoomId = g.Key, Count = g.Count() })
+    .ToListAsync();
+
+        var roomMap = memberCounts.ToDictionary(x => x.RoomId, x => x.Count);
+
+
         return rooms.Select(r => new RoomResp
         {
             RoomId = r.Id,
             RoomName = r!.Name,
             TopicName = r.Topic!.Name,
-            MemberCount = _context.RoomMembers.AsNoTracking().Count(m => m.RoomId == r.Id),
+            MemberCount = roomMap.TryGetValue(r.Id, out count) ? count : 0,
             CourseCode = r.Topic.CourseCode
         }).OrderByDescending(x => x.MemberCount)
                 .ThenBy(x => x.RoomName)
@@ -120,13 +130,13 @@ public class RoomRepository(Context context)
     public async Task<List<string>> GetMembers(Guid roomId)
     {
         var room = _context.Rooms.Where(r => r.Id == roomId).FirstOrDefault() ?? throw new ArgumentNullException(nameof(roomId), "There is no Room with the given id");
-        List<string> members = await _context.RoomMembers.Where(r => r.RoomId == roomId).Select(r => r.UserId).ToListAsync();
+        List<string> members = await _context.RoomMembers.AsNoTracking().Where(r => r.RoomId == roomId).Select(r => r.UserId).ToListAsync();
         return members;
     }
 
     public async Task<Guid> GetRoomIdBySessionId(string sessionId)
     {
-        var roomId = await _context.Rooms.Where(r => r.SessionId == sessionId).Select(r => r.Id).FirstOrDefaultAsync();
+        var roomId = await _context.Rooms.AsNoTracking().Where(r => r.SessionId == sessionId).Select(r => r.Id).FirstOrDefaultAsync();
         if (roomId == Guid.Empty) throw new ArgumentNullException(nameof(sessionId), "Room not found for the given sessionId");
         return roomId;
 
@@ -149,6 +159,15 @@ public class RoomRepository(Context context)
         if (roomList == null || roomList.Count == 0)
             return await GetRoomsByMemberId(memberId, explore: true, count: 3);
 
+        var roomIds = roomList.Select(r => r.Id);
+        var memberCounts = await _context.RoomMembers
+            .AsNoTracking()
+            .Where(m => roomIds.Contains(m.RoomId))
+            .GroupBy(m => m.RoomId)
+            .Select(g => new { RoomId = g.Key, Count = g.Count() })
+            .ToListAsync();
+
+        var roomMap = memberCounts.ToDictionary(x => x.RoomId, x => x.Count);
 
         var rooms = roomList
             .Select(r => new RoomResp
@@ -156,7 +175,7 @@ public class RoomRepository(Context context)
                 RoomId = r.Id,
                 TopicName = r.Topic!.Name,
                 RoomName = r.Name,
-                MemberCount = _context.RoomMembers.AsNoTracking().Count(m => m.RoomId == r.Id),
+                MemberCount = roomMap.TryGetValue(r.Id,out int count)?count:0,
                 CourseCode = r.Topic.CourseCode
             })
             .OrderByDescending(x => x.MemberCount)

@@ -17,6 +17,10 @@ public class CourseRepo
     {
         return await _context.Courses.FindAsync(courseCode);
     }
+    public async Task<int> GetCourseCountAsync()
+    {   
+        return await _context.Courses.CountAsync();
+    }
 
     public async Task<IEnumerable<Course>> GetAllCoursesAsync()
     {
@@ -79,9 +83,13 @@ public class CourseRepo
         }
 
     }
-    public async Task<List<Course>> GetCoursesByPattern(string pattern)
+    public async Task<List<CourseMin>> GetCoursesByPattern(string pattern)
     {
-        return await _context.Courses.Where(t => EF.Functions.ILike(t.Name, $"{pattern}%")).ToListAsync();
+        return await _context.Courses.Where(c => EF.Functions.ILike(c.Name, $"{pattern}%")).Select(c => new CourseMin
+        {
+            CourseCode = c.CourseCode,
+            CourseName = c.Name
+        }).ToListAsync();
     }
     public async Task DeleteCourseAsync(string courseCode)
     {
@@ -107,5 +115,5 @@ public class CourseRepo
         return courses;
 
     }
- 
+
 }
