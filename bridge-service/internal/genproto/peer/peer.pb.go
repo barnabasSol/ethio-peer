@@ -21,6 +21,154 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+type TopPeer struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	ProfilePhoto  string                 `protobuf:"bytes,3,opt,name=profile_photo,json=profilePhoto,proto3" json:"profile_photo,omitempty"`
+	OverallScore  string                 `protobuf:"bytes,4,opt,name=overall_score,json=overallScore,proto3" json:"overall_score,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *TopPeer) Reset() {
+	*x = TopPeer{}
+	mi := &file_peer_proto_msgTypes[0]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *TopPeer) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*TopPeer) ProtoMessage() {}
+
+func (x *TopPeer) ProtoReflect() protoreflect.Message {
+	mi := &file_peer_proto_msgTypes[0]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use TopPeer.ProtoReflect.Descriptor instead.
+func (*TopPeer) Descriptor() ([]byte, []int) {
+	return file_peer_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *TopPeer) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *TopPeer) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *TopPeer) GetProfilePhoto() string {
+	if x != nil {
+		return x.ProfilePhoto
+	}
+	return ""
+}
+
+func (x *TopPeer) GetOverallScore() string {
+	if x != nil {
+		return x.OverallScore
+	}
+	return ""
+}
+
+type TopPeersResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	TopPeers      []*TopPeer             `protobuf:"bytes,1,rep,name=top_peers,json=topPeers,proto3" json:"top_peers,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *TopPeersResponse) Reset() {
+	*x = TopPeersResponse{}
+	mi := &file_peer_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *TopPeersResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*TopPeersResponse) ProtoMessage() {}
+
+func (x *TopPeersResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_peer_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use TopPeersResponse.ProtoReflect.Descriptor instead.
+func (*TopPeersResponse) Descriptor() ([]byte, []int) {
+	return file_peer_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *TopPeersResponse) GetTopPeers() []*TopPeer {
+	if x != nil {
+		return x.TopPeers
+	}
+	return nil
+}
+
+type Empty struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Empty) Reset() {
+	*x = Empty{}
+	mi := &file_peer_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Empty) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Empty) ProtoMessage() {}
+
+func (x *Empty) ProtoReflect() protoreflect.Message {
+	mi := &file_peer_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Empty.ProtoReflect.Descriptor instead.
+func (*Empty) Descriptor() ([]byte, []int) {
+	return file_peer_proto_rawDescGZIP(), []int{2}
+}
+
 type GetPeerRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
@@ -30,7 +178,7 @@ type GetPeerRequest struct {
 
 func (x *GetPeerRequest) Reset() {
 	*x = GetPeerRequest{}
-	mi := &file_peer_proto_msgTypes[0]
+	mi := &file_peer_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -42,7 +190,7 @@ func (x *GetPeerRequest) String() string {
 func (*GetPeerRequest) ProtoMessage() {}
 
 func (x *GetPeerRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_peer_proto_msgTypes[0]
+	mi := &file_peer_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -55,7 +203,7 @@ func (x *GetPeerRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetPeerRequest.ProtoReflect.Descriptor instead.
 func (*GetPeerRequest) Descriptor() ([]byte, []int) {
-	return file_peer_proto_rawDescGZIP(), []int{0}
+	return file_peer_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *GetPeerRequest) GetUserId() string {
@@ -79,7 +227,7 @@ type GetPeerResponse struct {
 
 func (x *GetPeerResponse) Reset() {
 	*x = GetPeerResponse{}
-	mi := &file_peer_proto_msgTypes[1]
+	mi := &file_peer_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -91,7 +239,7 @@ func (x *GetPeerResponse) String() string {
 func (*GetPeerResponse) ProtoMessage() {}
 
 func (x *GetPeerResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_peer_proto_msgTypes[1]
+	mi := &file_peer_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -104,7 +252,7 @@ func (x *GetPeerResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetPeerResponse.ProtoReflect.Descriptor instead.
 func (*GetPeerResponse) Descriptor() ([]byte, []int) {
-	return file_peer_proto_rawDescGZIP(), []int{1}
+	return file_peer_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *GetPeerResponse) GetUserId() string {
@@ -154,7 +302,15 @@ var File_peer_proto protoreflect.FileDescriptor
 const file_peer_proto_rawDesc = "" +
 	"\n" +
 	"\n" +
-	"peer.proto\")\n" +
+	"peer.proto\"\x80\x01\n" +
+	"\aTopPeer\x12\x17\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12#\n" +
+	"\rprofile_photo\x18\x03 \x01(\tR\fprofilePhoto\x12#\n" +
+	"\roverall_score\x18\x04 \x01(\tR\foverallScore\"9\n" +
+	"\x10TopPeersResponse\x12%\n" +
+	"\ttop_peers\x18\x01 \x03(\v2\b.TopPeerR\btopPeers\"\a\n" +
+	"\x05Empty\")\n" +
 	"\x0eGetPeerRequest\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\tR\x06userId\"\xc9\x01\n" +
 	"\x0fGetPeerResponse\x12\x17\n" +
@@ -163,9 +319,10 @@ const file_peer_proto_rawDesc = "" +
 	"\ronline_status\x18\x03 \x01(\bR\fonlineStatus\x12\x10\n" +
 	"\x03bio\x18\x04 \x01(\tR\x03bio\x12#\n" +
 	"\roverall_score\x18\x05 \x01(\tR\foverallScore\x12\x1c\n" +
-	"\tinterests\x18\x06 \x03(\tR\tinterests2=\n" +
+	"\tinterests\x18\x06 \x03(\tR\tinterests2i\n" +
 	"\vPeerService\x12.\n" +
-	"\aGetPeer\x12\x0f.GetPeerRequest\x1a\x10.GetPeerResponse\"\x00B*Z(ep-bridge-service/internal/genproto/peerb\x06proto3"
+	"\aGetPeer\x12\x0f.GetPeerRequest\x1a\x10.GetPeerResponse\"\x00\x12*\n" +
+	"\vGetTopPeers\x12\x06.Empty\x1a\x11.TopPeersResponse\"\x00B*Z(ep-bridge-service/internal/genproto/peerb\x06proto3"
 
 var (
 	file_peer_proto_rawDescOnce sync.Once
@@ -179,19 +336,25 @@ func file_peer_proto_rawDescGZIP() []byte {
 	return file_peer_proto_rawDescData
 }
 
-var file_peer_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_peer_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
 var file_peer_proto_goTypes = []any{
-	(*GetPeerRequest)(nil),  // 0: GetPeerRequest
-	(*GetPeerResponse)(nil), // 1: GetPeerResponse
+	(*TopPeer)(nil),          // 0: TopPeer
+	(*TopPeersResponse)(nil), // 1: TopPeersResponse
+	(*Empty)(nil),            // 2: Empty
+	(*GetPeerRequest)(nil),   // 3: GetPeerRequest
+	(*GetPeerResponse)(nil),  // 4: GetPeerResponse
 }
 var file_peer_proto_depIdxs = []int32{
-	0, // 0: PeerService.GetPeer:input_type -> GetPeerRequest
-	1, // 1: PeerService.GetPeer:output_type -> GetPeerResponse
-	1, // [1:2] is the sub-list for method output_type
-	0, // [0:1] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	0, // 0: TopPeersResponse.top_peers:type_name -> TopPeer
+	3, // 1: PeerService.GetPeer:input_type -> GetPeerRequest
+	2, // 2: PeerService.GetTopPeers:input_type -> Empty
+	4, // 3: PeerService.GetPeer:output_type -> GetPeerResponse
+	1, // 4: PeerService.GetTopPeers:output_type -> TopPeersResponse
+	3, // [3:5] is the sub-list for method output_type
+	1, // [1:3] is the sub-list for method input_type
+	1, // [1:1] is the sub-list for extension type_name
+	1, // [1:1] is the sub-list for extension extendee
+	0, // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_peer_proto_init() }
@@ -205,7 +368,7 @@ func file_peer_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_peer_proto_rawDesc), len(file_peer_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   2,
+			NumMessages:   5,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

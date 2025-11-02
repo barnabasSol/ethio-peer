@@ -38,11 +38,11 @@ func (s *service) calculate_and_que(
 	}
 
 	peer_score, err := s.repo.GetAverageSessionScore(ctx, owner)
-
 	if err != nil {
 		log.Println(err)
 		return
 	}
+
 	if peer_score == nil {
 		log.Println("Peer score is nil")
 		return

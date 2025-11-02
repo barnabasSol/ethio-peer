@@ -14,9 +14,3 @@ type LoginResponse struct {
 	AccessToken          *string `json:"access_token,omitempty"`
 	RefreshToken         *string `json:"refresh_token,omitempty"`
 }
-
-type AdminLogin struct {
-	InstituteEmail *string `json:"institute_email,omitempty"`
-	Email          *string `json:"email,omitempty"`
-	Password       string  `json:"password"`
-}

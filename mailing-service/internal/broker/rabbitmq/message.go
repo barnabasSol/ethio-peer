@@ -17,3 +17,7 @@ type WelcomePayload struct {
 	Email string `json:"email"`
 	Name  string `json:"name"`
 }
+
+type PasswordResetPayload struct {
+	Email string `json:""`
+}

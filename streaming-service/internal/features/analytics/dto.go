@@ -16,9 +16,3 @@ type Weekly struct {
 	ParticipantCount int    `json:"participant_count" bson:"total_particpants"`
 	Date             string `json:"created_at" bson:"date"`
 }
-
-// {
-//   "date": "2025-10-19",
-//   "total_participants": 3,
-//   "sessions_created": 4
-// }

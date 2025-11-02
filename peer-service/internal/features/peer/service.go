@@ -15,7 +15,7 @@ type Service interface {
 	) (*common.Response[peer.GetPeerResponse], error)
 	GetTopPeers(
 		ctx context.Context,
-	) (*[]TopPeer, error)
+	) (*common.Response[*[]TopPeer], error)
 }
 
 type service struct {
@@ -51,6 +51,14 @@ func (s *service) GetPeer(
 	}, nil
 }
 
-func (s *service) GetTopPeers(ctx context.Context) (*[]TopPeer, error) {
-	return s.repo.GetTopPeers(ctx)
+func (s *service) GetTopPeers(ctx context.Context) (*common.Response[*[]TopPeer], error) {
+	top_peers, err := s.repo.GetTopPeers(ctx)
+	if err != nil && top_peers != nil {
+		return nil, err
+	}
+
+	return &common.Response[*[]TopPeer]{
+		Message: "sucess",
+		Data:    top_peers,
+	}, nil
 }

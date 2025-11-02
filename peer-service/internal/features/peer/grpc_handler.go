@@ -26,3 +26,28 @@ func (g *GrpcHandler) GetPeer(
 	}
 	return &result.Data, nil
 }
+
+func (g *GrpcHandler) GetTopPeers(
+	ctx context.Context,
+	req *peer.Empty,
+) (*peer.TopPeersResponse, error) {
+	result, err := g.s.GetTopPeers(ctx)
+	if err != nil {
+		return nil, err
+	}
+	var top_peers []*peer.TopPeer
+	for _, p := range *result.Data {
+		top_peers = append(
+			top_peers,
+			&peer.TopPeer{
+				UserId:       p.Id,
+				Name:         "",
+				ProfilePhoto: p.Photo,
+				OverallScore: p.Rating,
+			},
+		)
+	}
+	return &peer.TopPeersResponse{
+		TopPeers: top_peers,
+	}, nil
+}

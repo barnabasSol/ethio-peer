@@ -18,6 +18,7 @@ func InitHandler(s Service, group *echo.Group) *Handler {
 		s:     s,
 	}
 	h.group.GET("/peer/:user_id", h.GetPeer)
+	h.group.GET("/peer/top", h.GetTopPeers)
 	return h
 }
 
@@ -34,5 +35,18 @@ func (h *Handler) GetPeer(ctx echo.Context) error {
 		)
 	}
 	return ctx.JSON(http.StatusOK, peer)
+}
 
+func (h *Handler) GetTopPeers(c echo.Context) error {
+	topPeers, err := h.s.GetTopPeers(c.Request().Context())
+	if err != nil {
+		log.Println(err)
+		return c.JSON(
+			http.StatusInternalServerError,
+			map[string]string{
+				"error": err.Error(),
+			},
+		)
+	}
+	return c.JSON(http.StatusOK, topPeers)
 }

@@ -3,7 +3,7 @@ package scoring
 import (
 	"context"
 	broker "ep-streaming-service/internal/broker/rabbitmq"
-	"ep-streaming-service/internal/features/worker"
+	"ep-streaming-service/internal/worker"
 	"log"
 	"net/http"
 
@@ -62,6 +62,7 @@ func (s *service) ScoreSession(
 	if err != nil {
 		return err
 	}
+
 	if !is_scored {
 		err := s.repo.InsertScore(ctx, sc, username, user_id)
 		if err != nil {

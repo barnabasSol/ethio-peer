@@ -106,13 +106,13 @@ func generateOTP() (string, error) {
 
 func (m *OTPManager) exists(userID string) bool {
 	m.mu.RLock()
-	defer m.mu.RUnlock()
 	_, exists := m.pending_users[userID]
+	m.mu.RUnlock()
 	return exists
 }
 
 func (m *OTPManager) add_to_pending(userID string) {
 	m.mu.Lock()
-	defer m.mu.Unlock()
 	m.pending_users[userID] = struct{}{}
+	m.mu.Unlock()
 }

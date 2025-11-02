@@ -22,6 +22,8 @@ services:
       context: auth-service
       dockerfile: dockerfile
     restart: always
+    depends_on:
+      - rabbitmq
     env_file:
       - auth-service/.env
     deploy:
@@ -48,6 +50,8 @@ services:
       context: peer-service
       dockerfile: dockerfile
     restart: always
+    depends_on:
+      - rabbitmq
     env_file:
       - peer-service/.env
     deploy:
@@ -61,6 +65,8 @@ services:
       context: mailing-service
       dockerfile: dockerfile
     restart: always
+    depends_on:
+      - rabbitmq
     env_file:
       - ./mailing-service/.env
     deploy:
@@ -74,6 +80,8 @@ services:
       context: streaming-service
       dockerfile: dockerfile
     restart: always
+    depends_on:
+      - rabbitmq
     env_file:
       - streaming-service/.env
     deploy:
@@ -83,7 +91,7 @@ services:
       - back-tier
 
   resource-service:
-    image: dagm123/resource-service:1.4.4
+    image: dagm123/resource-service:1.7.1
     environment:
       ASPNETCORE_URLS: "http://0.0.0.0:8090;http://0.0.0.0:7027;"
     depends_on:

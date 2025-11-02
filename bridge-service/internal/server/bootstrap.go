@@ -16,11 +16,12 @@ func (s *Server) bootstrap() error {
 
 	peer_port := os.Getenv("PEER_SERVICE_GRPC_PORT")
 	s.peerClient = transport.NewGrpcClient("peer-service" + peer_port)
-	ps := peer.NewService(s.peerClient)
-	peer.InitHandler(ps, aggr_group)
 
 	auth_port := os.Getenv("AUTH_SERVICE_GRPC_PORT")
 	s.userClient = transport.NewGrpcClient("auth-service" + auth_port)
+
+	ps := peer.NewService(s.userClient, s.peerClient)
+	peer.InitHandler(ps, aggr_group)
 
 	resource_port := os.Getenv("RESOURCE_SERVICE_GRPC_PORT")
 	s.resourceClient = transport.NewGrpcClient("resource-service" + resource_port)

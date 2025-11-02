@@ -19,7 +19,8 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	PeerService_GetPeer_FullMethodName = "/PeerService/GetPeer"
+	PeerService_GetPeer_FullMethodName     = "/PeerService/GetPeer"
+	PeerService_GetTopPeers_FullMethodName = "/PeerService/GetTopPeers"
 )
 
 // PeerServiceClient is the client API for PeerService service.
@@ -27,6 +28,7 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type PeerServiceClient interface {
 	GetPeer(ctx context.Context, in *GetPeerRequest, opts ...grpc.CallOption) (*GetPeerResponse, error)
+	GetTopPeers(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*TopPeersResponse, error)
 }
 
 type peerServiceClient struct {
@@ -47,11 +49,22 @@ func (c *peerServiceClient) GetPeer(ctx context.Context, in *GetPeerRequest, opt
 	return out, nil
 }
 
+func (c *peerServiceClient) GetTopPeers(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*TopPeersResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(TopPeersResponse)
+	err := c.cc.Invoke(ctx, PeerService_GetTopPeers_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // PeerServiceServer is the server API for PeerService service.
 // All implementations must embed UnimplementedPeerServiceServer
 // for forward compatibility.
 type PeerServiceServer interface {
 	GetPeer(context.Context, *GetPeerRequest) (*GetPeerResponse, error)
+	GetTopPeers(context.Context, *Empty) (*TopPeersResponse, error)
 	mustEmbedUnimplementedPeerServiceServer()
 }
 
@@ -64,6 +77,9 @@ type UnimplementedPeerServiceServer struct{}
 
 func (UnimplementedPeerServiceServer) GetPeer(context.Context, *GetPeerRequest) (*GetPeerResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetPeer not implemented")
+}
+func (UnimplementedPeerServiceServer) GetTopPeers(context.Context, *Empty) (*TopPeersResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetTopPeers not implemented")
 }
 func (UnimplementedPeerServiceServer) mustEmbedUnimplementedPeerServiceServer() {}
 func (UnimplementedPeerServiceServer) testEmbeddedByValue()                     {}
@@ -104,6 +120,24 @@ func _PeerService_GetPeer_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
+func _PeerService_GetTopPeers_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PeerServiceServer).GetTopPeers(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PeerService_GetTopPeers_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PeerServiceServer).GetTopPeers(ctx, req.(*Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // PeerService_ServiceDesc is the grpc.ServiceDesc for PeerService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -114,6 +148,10 @@ var PeerService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetPeer",
 			Handler:    _PeerService_GetPeer_Handler,
+		},
+		{
+			MethodName: "GetTopPeers",
+			Handler:    _PeerService_GetTopPeers_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

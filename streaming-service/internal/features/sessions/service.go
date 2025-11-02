@@ -23,7 +23,10 @@ type Service interface {
 		username, user_id string,
 		session Create,
 	) (*common.Response[CreateResponse], error)
-	EndSession(ctx context.Context, session_id, owner_id string) error
+	EndSession(
+		ctx context.Context,
+		session_id, owner_username string,
+	) error
 	UpdateSession(
 		ctx context.Context,
 		req Update,
@@ -120,6 +123,7 @@ func (s *service) CreateSession(
 	new_room_json, err := json.Marshal(new_room)
 
 	if err != nil {
+		log.Println(err)
 		return nil, echo.NewHTTPError(
 			http.StatusInternalServerError,
 			"failed to marshal session payload",
@@ -221,7 +225,7 @@ func (s *service) GetSessions(
 
 func (s *service) EndSession(
 	ctx context.Context,
-	owner_username, session_id string,
+	session_id, owner_username string,
 ) error {
 	ok, err := s.repo.IsOwner(
 		ctx,

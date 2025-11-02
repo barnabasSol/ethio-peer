@@ -31,6 +31,7 @@ func InitHandler(
 	h.group.PATCH("", h.UpdateSession)
 	h.group.POST("/livekit/webhook", h.HandleLiveKitWebhook)
 	h.group.GET("", h.GetSessions)
+	h.group.PATCH("/end/:session_id", h.EndSession)
 	return h
 }
 
@@ -142,4 +143,23 @@ func (h *Handler) GetSessions(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, res)
+}
+
+func (h *Handler) EndSession(c echo.Context) error {
+	username := c.Request().Header.Get("X-Claim-Username")
+	sess_id := c.Param("session_id")
+	err := h.s.EndSession(
+		c.Request().Context(),
+		sess_id,
+		username,
+	)
+
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(
+		http.StatusOK,
+		map[string]string{"result": "successfully ended"},
+	)
 }

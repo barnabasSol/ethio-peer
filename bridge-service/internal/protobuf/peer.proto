@@ -4,7 +4,21 @@ option go_package = "ep-bridge-service/internal/genproto/peer";
 
 service PeerService {
   rpc GetPeer(GetPeerRequest) returns (GetPeerResponse) {}
+  rpc GetTopPeers(Empty) returns (TopPeersResponse) {}
 }
+
+message TopPeer {
+  string user_id = 1;
+  string name = 2;
+  string profile_photo = 3;
+  string overall_score = 4;
+}
+
+message TopPeersResponse {
+  repeated TopPeer top_peers = 1;
+}
+
+message Empty {}
 
 message GetPeerRequest {
   string user_id = 1;

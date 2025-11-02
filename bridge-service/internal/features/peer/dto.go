@@ -8,3 +8,11 @@ type PeerResponse struct {
 	Bio          string   `json:"bio"`
 	Interests    []string `json:"interests"`
 }
+
+type TopPeer struct {
+	Id       string `json:"id"`
+	Name     string `json:"name"`
+	Username string `json:"username"`
+	Rating   string `json:"rating"`
+	Photo    string `json:"photo"`
+}

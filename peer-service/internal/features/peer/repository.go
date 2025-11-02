@@ -5,6 +5,7 @@ import (
 	"ep-peer-service/internal/db"
 	"ep-peer-service/internal/features/common"
 	"ep-peer-service/internal/models"
+	"errors"
 	"log"
 	"net/http"
 
@@ -58,34 +59,41 @@ func (r *repository) GetTopPeers(
 ) (*[]TopPeer, error) {
 	peer_collection := r.db.Database(db.Name).Collection(models.PeerCollection)
 	var top_peers []TopPeer
-	sort := bson.M{"$sort": bson.M{"overall_score": -1}}
-	find_options := options.Find().SetSort(sort).SetLimit(3).SetProjection(bson.D{
-		{Key: "_id", Value: 1},
-		{Key: "name", Value: 1},
-		{Key: "overall_score", Value: 1},
-		{Key: "profile_picture", Value: 1},
-	})
 
-	cursor, err := peer_collection.Find(ctx, find_options)
+	find_options := options.Find().
+		SetSort(bson.D{{Key: "overall_score", Value: -1}}).
+		SetLimit(3).
+		SetProjection(bson.D{
+			{Key: "_id", Value: 1},
+			{Key: "overall_score", Value: 1},
+			{Key: "profile_photo", Value: 1},
+		})
+
+	cursor, err := peer_collection.Find(ctx, bson.M{}, find_options)
 	if err != nil {
-		if err == mongo.ErrNoDocuments {
+		if errors.Is(err, mongo.ErrNoDocuments) {
 			return nil, common.ErrPeerNotFound
 		}
 		log.Println(err)
 		return nil, err
 	}
 	defer cursor.Close(ctx)
+
 	for cursor.Next(ctx) {
 		var top_peer TopPeer
 		if err := cursor.Decode(&top_peer); err != nil {
+			log.Println(err)
 			return nil, echo.NewHTTPError(
 				http.StatusInternalServerError,
 				"transformation failure",
 			)
 		}
+		top_peer.Id = top_peer.OID.Hex()
 		top_peers = append(top_peers, top_peer)
 	}
+
 	if err := cursor.Err(); err != nil {
+		log.Println(err)
 		return nil, echo.NewHTTPError(
 			http.StatusInternalServerError,
 			"failed mapping top peers",
@@ -99,5 +107,4 @@ func (r *repository) GetTopPeers(
 	}
 
 	return &top_peers, nil
-
 }

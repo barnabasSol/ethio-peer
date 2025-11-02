@@ -40,7 +40,6 @@ func New(
 }
 
 func (s *Server) Run() error {
-
 	s.echo.Use(middleware.Logger())
 	s.echo.Use(middleware.Recover())
 	s.echo.Use(middleware.ContextTimeout(7 * time.Second))

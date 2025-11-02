@@ -1,5 +1,7 @@
 package peer
 
+import "go.mongodb.org/mongo-driver/v2/bson"
+
 type PeerResponse struct {
 	UserId       string   `json:"user_id"`
 	OverallScore byte     `json:"overall_score"`
@@ -10,8 +12,8 @@ type PeerResponse struct {
 }
 
 type TopPeer struct {
-	Id     string `json:"id" bson:"_id"`
-	Name   string `json:"name" bson:"name"`
-	Photo  string `json:"photo" bson:"profile_picture"`
-	Rating string `json:"rating" bson:"overall_score"`
+	OID    bson.ObjectID `json:"-" bson:"_id"`
+	Id     string        `json:"id"`
+	Rating string        `json:"rating" bson:"overall_score"`
+	Photo  string        `json:"photo" bson:"profile_photo"`
 }

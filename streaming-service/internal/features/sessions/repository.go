@@ -54,13 +54,13 @@ func (r *repository) IsOwner(
 	if err != nil {
 		return false, echo.NewHTTPError(
 			http.StatusBadRequest,
-			"invalid user id",
+			"invalid session id",
 		)
 	}
 	var sess models.Session
 	err = collection.FindOne(ctx, bson.M{
-		"owner.username": username,
 		"_id":            oid,
+		"owner.username": username,
 	}).Decode(&sess)
 
 	if err != nil {

@@ -131,14 +131,14 @@ func (s *service) Join(
 	ctx context.Context,
 	req Join,
 ) (*common.Response[string], error) {
-	sess_obj_id, err := bson.ObjectIDFromHex(req.SessionId)
+	soid, err := bson.ObjectIDFromHex(req.SessionId)
 	if err != nil {
 		return nil, echo.NewHTTPError(
 			http.StatusBadRequest,
 			"invalid id",
 		)
 	}
-	session, err := s.repo.GetSession(ctx, sess_obj_id)
+	session, err := s.repo.GetSession(ctx, soid)
 	if err != nil {
 		return nil, err
 	}
@@ -146,6 +146,13 @@ func (s *service) Join(
 		return nil, echo.NewHTTPError(
 			http.StatusConflict,
 			"session isn't on schedule yet",
+		)
+	}
+
+	if session.EndedAt != nil {
+		return nil, echo.NewHTTPError(
+			http.StatusConflict,
+			"session has ended",
 		)
 	}
 
@@ -238,7 +245,8 @@ func (s *service) Join(
 	})
 
 	return &common.Response[string]{
-		Data: token,
+		Message: "success",
+		Data:    token,
 	}, nil
 }
 

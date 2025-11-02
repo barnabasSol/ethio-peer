@@ -73,6 +73,9 @@ func (s *Server) Run() error {
 	if s.peerClient != nil && s.peerClient.Conn != nil {
 		s.peerClient.Conn.Close()
 	}
+	if s.userClient != nil && s.peerClient.Conn != nil {
+		s.userClient.Conn.Close()
+	}
 	return s.echo.Shutdown(ctx)
 
 }
