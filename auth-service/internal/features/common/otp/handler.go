@@ -12,16 +12,20 @@ type Handler struct {
 	s     Service
 }
 
-func InitHandler(s Service, group *echo.Group) *Handler {
+func InitHandler(
+	s Service,
+	group *echo.Group,
+) *Handler {
 	h := &Handler{
 		group: group,
 		s:     s,
 	}
-	h.group.POST("/verify", h.VerifyOTP)
+	h.group.POST("/verify", h.VerifyAuthOTP)
+	h.group.POST("/verify/password-reset", h.VerifyPasswordResetOTP)
 	return h
 }
 
-func (h *Handler) VerifyOTP(ctx echo.Context) error {
+func (h *Handler) VerifyAuthOTP(ctx echo.Context) error {
 	with_cookie := ctx.QueryParam("with_cookie")
 	var req OtpVerification
 	if err := ctx.Bind(&req); err != nil {
@@ -35,7 +39,7 @@ func (h *Handler) VerifyOTP(ctx echo.Context) error {
 		return err
 	}
 
-	result, err := h.s.VerifyOTP(ctx.Request().Context(), req)
+	result, err := h.s.VerifyAuthOTP(ctx.Request().Context(), req)
 
 	if err != nil {
 		return err
@@ -67,4 +71,29 @@ func (h *Handler) VerifyOTP(ctx echo.Context) error {
 	}
 
 	return ctx.JSON(http.StatusOK, result)
+}
+
+func (h *Handler) VerifyPasswordResetOTP(ctx echo.Context) error {
+	var req PasswordOTPVerification
+	if err := ctx.Bind(&req); err != nil {
+		return ctx.JSON(
+			http.StatusBadRequest,
+			map[string]string{"error": "invalid request"},
+		)
+	}
+	if req.Code == "" {
+		return ctx.JSON(
+			http.StatusBadRequest,
+			map[string]string{"error": "code is required"},
+		)
+	}
+	err := h.s.VerifyPasswordResetOTP(ctx.Request().Context(), req)
+	if err != nil {
+		return err
+	}
+
+	return ctx.JSON(
+		http.StatusOK,
+		"feel free to change your password",
+	)
 }

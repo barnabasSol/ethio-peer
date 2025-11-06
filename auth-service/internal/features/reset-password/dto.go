@@ -5,6 +5,6 @@ type VerifyRequest struct {
 }
 
 type ChangePasswordRequest struct {
-	SessionId   string `json:"session_id"`
-	NewPassword string `json:"new_password"`
+	InstituteEmail string `json:"institute_email"`
+	NewPassword    string `json:"new_password"`
 }

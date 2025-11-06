@@ -6,7 +6,7 @@ import (
 	broker "ep-auth-service/internal/broker/rabbitmq"
 	"ep-auth-service/internal/features/common"
 	"ep-auth-service/internal/features/common/jwt"
-	"ep-auth-service/internal/features/otp"
+	"ep-auth-service/internal/features/common/otp"
 	"log"
 	"net/http"
 

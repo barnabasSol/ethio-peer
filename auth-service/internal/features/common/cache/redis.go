@@ -3,6 +3,7 @@ package cache
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"log"
 	"time"
 
@@ -45,14 +46,12 @@ func New(addr string, ttl time.Duration) (*Redis, error) {
 	return nil, err
 }
 
-func (c *Redis) Get(
-	ctx context.Context,
-	key string,
-	dest any,
-) error {
+var ErrCacheMiss = errors.New("cache miss")
+
+func (c *Redis) Get(ctx context.Context, key string, dest any) error {
 	val, err := c.client.Get(ctx, key).Result()
 	if err == redis.Nil {
-		return nil
+		return ErrCacheMiss
 	}
 	if err != nil {
 		return err
@@ -88,6 +87,10 @@ func (c *Redis) SetWithTTL(
 func (c *Redis) Delete(
 	ctx context.Context,
 	key string,
-) error {
-	return c.client.Del(ctx, key).Err()
+) (bool, error) {
+	n, err := c.client.Del(ctx, key).Result()
+	if err != nil {
+		return false, err
+	}
+	return n > 0, nil
 }

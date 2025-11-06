@@ -1,6 +1,9 @@
 package logout
 
 import (
+	"ep-auth-service/internal/features/common"
+	"net/http"
+
 	"github.com/labstack/echo/v4"
 )
 
@@ -22,5 +25,15 @@ func InitHandler(
 }
 
 func (h *Handler) Logout(ctx echo.Context) error {
-	return nil
+
+	cleared_at := common.ClearCookie("access_token")
+	cleared_rt := common.ClearCookie("refresh_token")
+
+	ctx.SetCookie(cleared_at)
+	ctx.SetCookie(cleared_rt)
+
+	return ctx.JSON(
+		http.StatusNoContent,
+		"successfully logged out",
+	)
 }

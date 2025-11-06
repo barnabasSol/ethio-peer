@@ -45,7 +45,7 @@ func SetCookie(
 	cookie.Path = "/"
 	cookie.HttpOnly = true
 	cookie.Secure = true
-	cookie.SameSite = http.SameSiteLaxMode
+	cookie.SameSite = http.SameSiteNoneMode
 	cookie.Expires = time.Now().Add(time.Minute * time.Duration(exp_mins))
 	return cookie
 }
@@ -58,7 +58,7 @@ func ClearCookie(key string) *http.Cookie {
 		MaxAge:   -1,
 		HttpOnly: true,
 		Secure:   true,
-		SameSite: http.SameSiteLaxMode,
+		SameSite: http.SameSiteNoneMode,
 		Expires:  time.Unix(0, 0),
 	}
 }

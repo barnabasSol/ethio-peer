@@ -1,13 +1,17 @@
 package logout
 
-import "context"
+import (
+	"context"
+	"ep-auth-service/internal/features/common/cache"
+)
 
 type Service interface {
 	LogoutUser(ctx context.Context, user_id string)
 }
 
 type service struct {
-	r Repository
+	redis cache.Redis
+	r     Repository
 }
 
 func NewService() Service {

@@ -11,6 +11,10 @@ type OtpVerification struct {
 	Code      string `json:"code"`
 }
 
+type PasswordOTPVerification struct {
+	Code string `json:"code"`
+}
+
 type OtpSuccess struct {
 	UserId       string  `json:"user_id"`
 	AccessToken  *string `json:"access_token,omitempty"`

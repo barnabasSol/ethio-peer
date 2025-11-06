@@ -8,6 +8,7 @@ import (
 	"ep-bridge-service/internal/genproto/user"
 	"errors"
 	"log"
+	"strings"
 	"time"
 
 	"golang.org/x/sync/errgroup"
@@ -17,6 +18,7 @@ type Service interface {
 	GetCurrentUser(
 		ctx context.Context,
 		user_id string,
+		roles string,
 	) (*CurrentUser, error)
 }
 
@@ -41,6 +43,7 @@ func NewService(
 func (s *service) GetCurrentUser(
 	ctx context.Context,
 	user_id string,
+	roles string,
 ) (*CurrentUser, error) {
 	cache_key := "user:" + user_id
 	var cached_user CurrentUser
@@ -56,12 +59,12 @@ func (s *service) GetCurrentUser(
 		return &cached_user, nil
 	}
 
-	c := peer.NewPeerServiceClient(s.peerGrpcClient.Conn)
-	u := user.NewUserServiceClient(s.userGrpcClient.Conn)
+	is_admin := strings.Contains(roles, "admin")
 
 	peer_req := &peer.GetPeerRequest{
 		UserId: user_id,
 	}
+
 	user_req := &user.GetUserRequest{
 		UserId: user_id,
 	}
@@ -71,6 +74,7 @@ func (s *service) GetCurrentUser(
 		peer_resp *peer.GetPeerResponse
 	)
 
+	u := user.NewUserServiceClient(s.userGrpcClient.Conn)
 	g, ctx := errgroup.WithContext(ctx)
 
 	g.Go(func() error {
@@ -83,18 +87,38 @@ func (s *service) GetCurrentUser(
 		return nil
 	})
 
-	g.Go(func() error {
-		resp, err := c.GetPeer(ctx, peer_req)
-		if err != nil {
-			log.Println(err)
-			return errors.New("failed to fetch peer")
-		}
-		peer_resp = resp
-		return nil
-	})
+	if !is_admin {
+		c := peer.NewPeerServiceClient(s.peerGrpcClient.Conn)
+		g.Go(func() error {
+			resp, err := c.GetPeer(ctx, peer_req)
+			if err != nil {
+				log.Println(err)
+				return errors.New("failed to fetch peer")
+			}
+			peer_resp = resp
+			return nil
+		})
+	}
 
 	if err := g.Wait(); err != nil {
 		return nil, err
+	}
+
+	if is_admin {
+		return &CurrentUser{
+			UserId:         user_id,
+			Username:       user_resp.Username,
+			Name:           user_resp.Name,
+			InstituteEmail: user_resp.InstituteEmail,
+			Email:          user_resp.Email,
+			OverallScore:   "",
+			ProfilePhoto:   "",
+			OnlineStatus:   true,
+			Bio:            "",
+			Roles:          user_resp.Roles,
+			Interests:      []string{},
+			CreatedAt:      user_resp.CreatedAt.AsTime(),
+		}, nil
 	}
 
 	result := &CurrentUser{
@@ -117,6 +141,7 @@ func (s *service) GetCurrentUser(
 			context.Background(),
 			1*time.Second,
 		)
+
 		defer cancel()
 
 		if err := s.cache.SetWithTTL(

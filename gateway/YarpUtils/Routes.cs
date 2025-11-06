@@ -70,12 +70,24 @@ public static class Routes
                 RouteId = "resource2",
                 ClusterId = "resource-cluster",
                 CorsPolicy = "WebOriginCorsPolicy",
-                Match = new RouteMatch { Path = "/api/resource/courses" },
+                Match = new RouteMatch { Path = "/api/resource/{**catch-all}" },
                 Transforms =
                 [
                     new Dictionary<string, string> { { "PathRemovePrefix", "/api/resource" } },
                 ],
-                AuthorizationPolicy = "anonymous",
+                AuthorizationPolicy = "admin-or-peer",
+            },
+            new RouteConfig
+            {
+                RouteId = "resource3",
+                ClusterId = "resource-cluster",
+                CorsPolicy = "WebOriginCorsPolicy",
+                Match = new RouteMatch { Path = "/api/resource/admin" },
+                Transforms =
+                [
+                    new Dictionary<string, string> { { "PathRemovePrefix", "/api/resource" } },
+                ],
+                AuthorizationPolicy = "admin-only",
             },
             new RouteConfig
             {

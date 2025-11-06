@@ -23,7 +23,8 @@ func InitHandler(s Service, group *echo.Group) *Handler {
 
 func (h *Handler) GetUser(ctx echo.Context) error {
 	user_id := ctx.Request().Header.Get("X-Claim-Sub")
-	peer, err := h.s.GetCurrentUser(ctx.Request().Context(), user_id)
+	roles := ctx.Request().Header.Get("X-Claim-Roles")
+	peer, err := h.s.GetCurrentUser(ctx.Request().Context(), user_id, roles)
 	if err != nil {
 		log.Println(err)
 		return ctx.JSON(

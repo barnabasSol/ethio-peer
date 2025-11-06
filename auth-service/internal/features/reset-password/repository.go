@@ -1,39 +1,66 @@
 package resetpassword
 
 import (
-	broker "ep-auth-service/internal/broker/rabbitmq"
+	"context"
+	"ep-auth-service/internal/db"
 	"ep-auth-service/internal/models"
+	"net/http"
+	"time"
 
+	"github.com/labstack/echo/v4"
+	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 )
 
 type Repository interface {
-	UpdatePassword(user_id, password_hash string) error
-	GetUser(VerifyRequest) (*models.User, error)
+	UpdatePassword(
+		ctx context.Context,
+		institute_email string,
+		password_hash string,
+	) error
 }
 
 type repository struct {
-	broker *broker.RabbitMQ
-	db     *mongo.Client
+	db *mongo.Client
 }
 
 func NewRepository(
 	db *mongo.Client,
-	br *broker.RabbitMQ,
 ) Repository {
 	return &repository{
-		db:     db,
-		broker: br,
+		db: db,
 	}
 }
 
-func (r *repository) GetUser(req VerifyRequest) (*models.User, error) {
-	panic("unimplemented")
-}
-
 func (r *repository) UpdatePassword(
-	user_id string,
+	ctx context.Context,
+	institute_email string,
 	password_hash string,
 ) error {
-	panic("unimplemented")
+
+	user_collection := r.db.Database(db.Name).Collection(models.UserCollection)
+	filter := bson.D{{Key: "institute_email", Value: institute_email}}
+	update := bson.D{
+		{Key: "$set", Value: bson.D{
+			{Key: "password_hash", Value: password_hash},
+			{Key: "updated_at", Value: time.Now().UTC()},
+		}},
+	}
+
+	result, err := user_collection.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return echo.NewHTTPError(
+			http.StatusInternalServerError,
+			"failed to update profile picture",
+		)
+	}
+
+	if result.MatchedCount == 0 {
+		return echo.NewHTTPError(
+			http.StatusNotFound,
+			"user not found",
+		)
+	}
+
+	return nil
 }

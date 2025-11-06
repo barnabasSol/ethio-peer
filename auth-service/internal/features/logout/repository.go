@@ -1,6 +1,8 @@
 package logout
 
-import "go.mongodb.org/mongo-driver/v2/mongo"
+import (
+	"go.mongodb.org/mongo-driver/v2/mongo"
+)
 
 type Repository interface {
 	UpdateEmailVerified(user_id string) bool

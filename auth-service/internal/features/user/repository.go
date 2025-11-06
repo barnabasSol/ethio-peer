@@ -16,6 +16,10 @@ type Repository interface {
 		ctx context.Context,
 		user_id bson.ObjectID,
 	) (*models.User, error)
+	GetUserByInstitueEmail(
+		ctx context.Context,
+		email string,
+	) (*models.User, error)
 }
 
 type repository struct {
@@ -26,6 +30,20 @@ func NewRepository(db *mongo.Client) Repository {
 	return &repository{
 		db: db,
 	}
+}
+
+func (r *repository) GetUserByInstitueEmail(
+	ctx context.Context,
+	email string,
+) (*models.User, error) {
+	user_collection := r.db.Database(db.Name).Collection(models.UserCollection)
+	filter := bson.M{"institute_email": email}
+	var user models.User
+	err := user_collection.FindOne(ctx, filter).Decode(&user)
+	if err != nil {
+		return nil, errors.New("user not found")
+	}
+	return &user, nil
 }
 
 func (r *repository) GetUser(

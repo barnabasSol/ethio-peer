@@ -26,7 +26,10 @@ func NewRepository(db *mongo.Client) Repository {
 	}
 }
 
-func (r *repository) Insert(ctx context.Context, user models.User) (bson.ObjectID, error) {
+func (r *repository) Insert(
+	ctx context.Context,
+	user models.User,
+) (bson.ObjectID, error) {
 	collection := r.db.Database(db.Name).Collection(models.UserCollection)
 
 	result, err := collection.InsertOne(ctx, user)
