@@ -28,7 +28,7 @@ public class PostController(PostRepo postRepo) : ControllerBase
             return StatusCode(500, ex.Message);
         }
     }
-    [HttpGet("weekly")]
+    [HttpGet("/admin/posts/weekly")]
     public async Task<IActionResult> GetWeeklyPosts()
     {
         try

@@ -2,11 +2,9 @@ using ResourceService.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Minio;
 using ResourceService.Models;
-using ResourceService.Services; 
+using ResourceService.Services;
 
 var builder = WebApplication.CreateBuilder(args);
-
-// Add services to the container.
 builder.Services.AddDbContext<Context>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")!));
 builder.Services.AddSingleton<Rabbit>();
@@ -15,7 +13,8 @@ builder.Services.AddScoped<TopicRepo, TopicRepo>();
 builder.Services.AddScoped<DocRepo, DocRepo>();
 builder.Services.AddScoped<RoomRepository, RoomRepository>();
 builder.Services.AddScoped<PostRepo, PostRepo>();
-builder.Services.AddControllers(); 
+builder.Services.AddScoped<GeminiCaller, GeminiCaller>();
+builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSignalR();
@@ -36,7 +35,7 @@ builder.Services.AddCors(options =>
             policy.WithOrigins("http://localhost:5173", "http://localhost:5174", "http://127.0.0.1:5500")
                   .AllowAnyHeader()
                   .AllowAnyMethod()
-                  .AllowCredentials(); // needed for SignalR
+                  .AllowCredentials();
         });
 });
 
@@ -51,8 +50,7 @@ var app = builder.Build();
 //     var db = scope.ServiceProvider.GetRequiredService<Context>();
 //     db.Database.Migrate();
 // }
-
-// Configure the HTTP request pipeline.
+ 
 var rabbit = app.Services.GetRequiredService<Rabbit>();
 await rabbit.InitiateConsuming();
 
@@ -61,8 +59,8 @@ app.MapHealthChecks("/health");
 app.UseSwaggerUI(c =>
 {
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "Course Topic Service API V1");
-    c.RoutePrefix = string.Empty; // Set Swagger UI at the app's root
-}); 
+    c.RoutePrefix = string.Empty;
+});
 app.MapHub<RoomHub>("/roomHub");
 app.UseCors("AllowVueClient");
 

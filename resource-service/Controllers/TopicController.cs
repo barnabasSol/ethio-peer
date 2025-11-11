@@ -33,14 +33,14 @@ public class TopicController(TopicRepo topicRepo) : ControllerBase
     {
         return Ok(await _topicRepo.GetTopicsByPattern(pattern));
     }
-    [HttpGet("chart")]
+    [HttpGet("/admin/topics/chart")]
     public async Task<IActionResult> GetTopicVsDocument()
     {
         return Ok(new { items=await _topicRepo.GetTopicDocCount() });
     }
 
     
-    [HttpPost]
+    [HttpPost("/admin/topics")]
     public async Task<IActionResult> CreateTopic([FromBody] TopicDTO topic)
     {
         try
@@ -57,7 +57,7 @@ public class TopicController(TopicRepo topicRepo) : ControllerBase
             throw;
         }
     }
-    [HttpPut("{id}")]
+    [HttpPut("/admin/topics/{id}")]
     public async Task<IActionResult> UpdateTopic(Guid id, [FromBody] TopicDTO topic)
     {
         try
@@ -86,7 +86,7 @@ public class TopicController(TopicRepo topicRepo) : ControllerBase
         }
     }
 
-    [HttpDelete("{id}")]
+    [HttpDelete("/admin/topics/{id}")]
     public async Task<IActionResult> DeleteTopic(Guid id)
     {
         try

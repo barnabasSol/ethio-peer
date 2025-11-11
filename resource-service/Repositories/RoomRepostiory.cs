@@ -47,18 +47,20 @@ public class RoomRepository(Context context)
         {
             roomsQuery = roomsQuery.Take(count);
         }
-        var roomsList = await roomsQuery.ToListAsync();
-
-        return roomsList.Select(r => new RoomResp
+        
+        var roomsList = roomsQuery
+        .Select(r => new RoomResp
         {
             RoomId = r.Id,
             RoomName = r.Name,
             TopicName = r.Topic!.Name,
             MemberCount = _context.RoomMembers.AsNoTracking().Count(m => m.RoomId == r.Id),
             CourseCode = r.Topic.CourseCode
-        }).OrderByDescending(x => x.MemberCount)
-            .ThenBy(x => x.RoomName)
-            .ToList();
+        })
+        .OrderByDescending(x => x.MemberCount)
+        .ThenBy(x => x.RoomName);
+
+        return [.. roomsList];
     }
 
     //Get Room by Id
@@ -89,11 +91,11 @@ public class RoomRepository(Context context)
         if (rooms.Count == 0) return [];
         var roomIds = rooms.Select(r => r.Id);
         var memberCounts = await _context.RoomMembers
-    .AsNoTracking()
-    .Where(m => roomIds.Contains(m.RoomId))
-    .GroupBy(m => m.RoomId)
-    .Select(g => new { RoomId = g.Key, Count = g.Count() })
-    .ToListAsync();
+                            .AsNoTracking()
+                            .Where(m => roomIds.Contains(m.RoomId))
+                            .GroupBy(m => m.RoomId)
+                            .Select(g => new { RoomId = g.Key, Count = g.Count() })
+                            .ToListAsync();
 
         var roomMap = memberCounts.ToDictionary(x => x.RoomId, x => x.Count);
 
@@ -149,12 +151,16 @@ public class RoomRepository(Context context)
             return await GetRoomsByMemberId(memberId, explore: true, count: 3);
         }
 
-        var roomList = await _context.Rooms.AsNoTracking()
-      .Where(r => r.Topic != null && r.Topic.Course != null && courses.Contains(r.Topic.Course.Name)
-      && !_context.RoomMembers.Any(m => m.RoomId == r.Id && m.UserId == memberId))
-      .Include(r => r.Topic)
-      .Take(3)
-      .ToListAsync();
+        var roomList = await _context
+        .Rooms
+        .AsNoTracking()
+        .Where(r => r.Topic != null 
+        && r.Topic.Course != null 
+        && courses.Contains(r.Topic.Course.Name)
+        && !_context.RoomMembers.Any(m => m.RoomId == r.Id && m.UserId == memberId))
+        .Include(r => r.Topic)
+        .Take(3)
+        .ToListAsync();
 
         if (roomList == null || roomList.Count == 0)
             return await GetRoomsByMemberId(memberId, explore: true, count: 3);
@@ -175,7 +181,7 @@ public class RoomRepository(Context context)
                 RoomId = r.Id,
                 TopicName = r.Topic!.Name,
                 RoomName = r.Name,
-                MemberCount = roomMap.TryGetValue(r.Id,out int count)?count:0,
+                MemberCount = roomMap.TryGetValue(r.Id, out int count) ? count : 0,
                 CourseCode = r.Topic.CourseCode
             })
             .OrderByDescending(x => x.MemberCount)

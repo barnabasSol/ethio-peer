@@ -95,6 +95,7 @@ public class CourseRepo
     {
         try
         {
+            Console.WriteLine("Asked me to delete this " + courseCode);
             var course = await _context.Courses.FindAsync(courseCode);
             if (course == null)
             {

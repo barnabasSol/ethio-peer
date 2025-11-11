@@ -45,6 +45,7 @@ public class DocRepo(IMinioClient minioClient, Context context)
                 Id = Guid.NewGuid(),
                 RoomId = dto.RoomId,
                 SenderId = dto.UploaderId,
+                SenderName = dto.SenderName,
                 IsDoc = true,
                 DocKey = objectKey,
                 DocTitle = dto.Title,
@@ -63,8 +64,9 @@ public class DocRepo(IMinioClient minioClient, Context context)
         {
             throw;
         }
-        catch (Exception)
+        catch (Exception e)
         {
+            Console.WriteLine($"The exception source is {e.Source} and the message \n {e.Message}");
             throw;
         }
     }
@@ -83,7 +85,7 @@ public class DocRepo(IMinioClient minioClient, Context context)
         .WithBucket(bucketName)
         .WithObject(key)
         .WithExpiry(3600)
-);
+            );
             return presignedUrl;
 
 
@@ -99,6 +101,7 @@ public class DocRepo(IMinioClient minioClient, Context context)
         Document? doc = _context.Documents.Find(id) ?? throw new FileNotFoundException();
         ArgumentNullException.ThrowIfNull(dto);
         doc.RoomId = dto.RoomId;
+        doc.Title = dto.Title;
         _context.Documents.Update(doc);
         await _context.SaveChangesAsync();
         return doc;
@@ -131,7 +134,7 @@ public class DocRepo(IMinioClient minioClient, Context context)
 
     public async Task<List<DocResp>> GetDocsAsync(CourseCategory? category = null, int count = 0)
     {
-        List<DocResp> docSugges = []; 
+        List<DocResp> docSugges = [];
 
         //base case
         var documentsQuery = _context.Documents.Where(d => d.Room != null && d.Room.Topic != null).Include(d => d.Room).ThenInclude(r => r!.Topic)
@@ -146,7 +149,7 @@ public class DocRepo(IMinioClient minioClient, Context context)
             documentsQuery = documentsQuery.Take(count);
 
         }
-        var docList = await documentsQuery.ToListAsync();
+        var docList = await documentsQuery.OrderByDescending(x => x.DateUploaded).ToListAsync();
 
         foreach (var doc in docList)
         {
@@ -162,7 +165,7 @@ public class DocRepo(IMinioClient minioClient, Context context)
             });
         }
 
-        return docSugges.OrderByDescending(x => x.UploadDate).ToList();
+        return [.. docSugges];
     }
 
 
@@ -173,27 +176,28 @@ public class DocRepo(IMinioClient minioClient, Context context)
             return await GetDocsAsync(count: 3);
 
         }
-        var docs = _context.Documents.Where(d => d.Room != null
-        && d.Room.Topic != null && d.Room.Topic.Course != null &&
-         courses.Contains(d.Room.Topic.Course.Name)).Include(d => d.Room).ThenInclude(r => r!.Topic).Take(3).ToList();
-        if (docs == null || docs.Count() == 0)
+        var docs = await _context
+                    .Documents
+                    .AsNoTracking()
+                    .Where(d =>
+                     d.Room != null
+                     && d.Room.Topic != null
+                     && d.Room.Topic.Course != null
+                     && courses.Contains(d.Room.Topic.Course.Name))
+                    .OrderByDescending(d => d.DateUploaded)
+                    .Take(3)
+                    .Select(d => new DocResp
+                    {
+                        DocId = d.Id,
+                        DocTitle = d.Title,
+                        TopicName = d.Room!.Topic!.Name,
+                        UploadDate = d.DateUploaded,
+                        DocKey = d.ObjectKey
+                    })
+                    .ToListAsync();
+        if (docs == null || docs.Count == 0)
             return await GetDocsAsync(count: 3);
-
-        List<DocResp> docSugges = [];
-        foreach (var doc in docs)
-        {
-            // var link = await GenerateDownloadLink(doc);
-            docSugges.Add(new DocResp
-            {
-                DocId = doc.Id,
-                DocTitle = doc.Title,
-                TopicName = doc.Room!.Topic!.Name,
-                UploadDate = doc.DateUploaded,
-                DocKey = doc.ObjectKey
-
-            });
-        }
-        return docSugges;
+        return docs;
     }
     private string RemoveExtension(string fileName)
     {

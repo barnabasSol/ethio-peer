@@ -15,7 +15,7 @@ public class CourseController(CourseRepo courseRepo) : ControllerBase
     {
         return Ok(category == null ? await _courseRepo.GetAllCoursesAsync() : await _courseRepo.GetCoursesByCategoryAsync(category.Value));
     }
-    [HttpGet("count")] 
+    [HttpGet("/admin/courses/count")] 
     public async Task<IActionResult> CourseCount()
     {
         return Ok(new { count=await _courseRepo.GetCourseCountAsync() });
@@ -44,7 +44,7 @@ public class CourseController(CourseRepo courseRepo) : ControllerBase
 
 
 
-    [HttpPost]
+    [HttpPost("/admin/courses")]
     public async Task<IActionResult> CreateCourse([FromBody] CourseDTO course)
     {
         try
@@ -61,7 +61,7 @@ public class CourseController(CourseRepo courseRepo) : ControllerBase
             return StatusCode(500, $"Internal server error: {ex.Message}");
         }
     }
-    [HttpPut("{code}")]
+    [HttpPut("/admin/courses/{code}")]
     public async Task<IActionResult> UpdateCourse(string code, [FromBody] CourseDTO course)
     {
         try
@@ -89,7 +89,7 @@ public class CourseController(CourseRepo courseRepo) : ControllerBase
         }
     }
 
-    [HttpDelete("{code}")]
+    [HttpDelete("/admin/courses/{code}")]
     public async Task<IActionResult> DeleteCourse(string code)
     {
         try

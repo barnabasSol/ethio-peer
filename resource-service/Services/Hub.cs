@@ -12,7 +12,7 @@ namespace ResourceService.Services
             {
                 if (string.IsNullOrEmpty(docTitle))
                 {
-                    _postRepo.AddPostedMessage(Guid.Parse(roomId), senderId, message!).Wait();
+                    _postRepo.AddPostedMessage(Guid.Parse(roomId),userName, senderId, message!).Wait();
                     // Broadcast message to all clients in the specified group (room)
                     await Clients.Group(roomId).SendAsync("ReceivedRoomPost",senderId,userName, message);
                     return;
