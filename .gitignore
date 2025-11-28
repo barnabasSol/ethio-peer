@@ -7,3 +7,6 @@
 *.vs
 *.vscode
 *.user
+resource-service/appsettings.json
+resource-service/appsettings.Development.json
+ 
